@@ -1,7 +1,7 @@
 import { Placeholder } from "@/components/placeholder";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 
-const images = ["/media/process-1.jpg", "/media/process-2.jpg", "/media/process-3.jpg", "/media/process-4.jpg"];
+const images = ["/media/process-1.jpg", "/media/process-2.jpg", "/media/process-3.jpg", "/media/process-sent.jpg"];
 
 /**
  * The process as a strip of photographs on a linen ground, one per step. On

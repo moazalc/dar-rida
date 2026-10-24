@@ -12,8 +12,8 @@ export function Spotlight({ dict }: { dict: Dictionary }) {
       <div className="relative">
         <Placeholder
           label={t.imageAlt}
-          src="/media/collection.jpg"
-          objectPosition="50% 8%"
+          src="/media/rida-01.jpg"
+          objectPosition="50% 30%"
           sizes="(min-width: 768px) 50vw, 100vw"
           className="aspect-[4/5] w-full"
         />
