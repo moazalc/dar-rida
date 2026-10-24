@@ -1,26 +1,85 @@
 @import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-champagne: var(--champagne);
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-display), ui-serif, Georgia, serif;
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  color-scheme: light;
+  /* Dar Rida palette (from the design handoff): warm ivory canvas, charcoal
+     text and primary CTA, warm taupe secondary text, muted champagne lines.
+     Light only — the brand has no dark theme. */
+  /* System defaults; app/layout.tsx overrides both on <html> with the brand
+     faces. They only show where the layout isn't rendered (global-error). */
+  --font-body: ui-sans-serif, system-ui, sans-serif;
+  --font-display: ui-serif, Georgia, serif;
+
+  --ivory: #f7f2e9;
+  --charcoal: #24211f;
+  --taupe: #766f67;
+  --champagne: #c7b49a;
+
+  --background: var(--ivory);
+  --foreground: var(--charcoal);
+  --card: #fbf8f2;
+  --card-foreground: var(--charcoal);
+  --popover: #fbf8f2;
+  --popover-foreground: var(--charcoal);
+  --primary: var(--charcoal);
+  --primary-foreground: var(--ivory);
+  --secondary: var(--ivory);
+  --secondary-foreground: var(--charcoal);
+  --muted: #efe8dc;
+  --muted-foreground: var(--taupe);
+  --accent: #efe8dc;
+  --accent-foreground: var(--charcoal);
+  --destructive: #9b2c2c;
+  --border: var(--champagne);
+  --input: var(--champagne);
+  --ring: var(--taupe);
+  --radius: 0.375rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+    /* Cormorant defaults to old-style figures ("Rida 01" reads as "o1"). */
+    font-variant-numeric: lining-nums;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Arabic is a joined script: letter-spacing pulls connected letters apart.
+   Drop any tracking-* utility on Arabic text (lang="en" children keep it).
+   Unlayered on purpose — anything inside a layer loses to the utilities. */
+[class*="tracking-"]:lang(ar) {
+  letter-spacing: 0;
 }
