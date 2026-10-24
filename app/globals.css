@@ -22,6 +22,8 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-champagne: var(--champagne);
+  --color-linen: var(--linen);
+  --color-espresso: var(--espresso);
   --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
   --font-heading: var(--font-display), ui-serif, Georgia, serif;
   --radius-sm: calc(var(--radius) * 0.6);
@@ -44,6 +46,9 @@
   --charcoal: #24211f;
   --taupe: #766f67;
   --champagne: #c7b49a;
+  /* Section grounds, so the page moves between rooms instead of one long ivory. */
+  --linen: #e6dccb;
+  --espresso: #1a1715;
 
   --background: var(--ivory);
   --foreground: var(--charcoal);
@@ -82,4 +87,9 @@
    Unlayered on purpose — anything inside a layer loses to the utilities. */
 [class*="tracking-"]:lang(ar) {
   letter-spacing: 0;
+}
+
+/* Arabic faces have no italic, and a synthesized slant looks broken. */
+.italic:lang(ar) {
+  font-style: normal;
 }
