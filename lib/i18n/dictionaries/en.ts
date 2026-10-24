@@ -46,12 +46,13 @@ const en = {
       cta: "Our story",
     },
     howItWorks: {
+      eyebrow: "From fabric to your door",
       title: "How it works",
       steps: [
-        { title: "Choose or design", body: "Pick a design from the collection, or build your own." },
-        { title: "Made for you", body: "Cut and sewn by hand to your size or measurements." },
-        { title: "Checked with care", body: "Every seam and detail is inspected before shipping." },
-        { title: "Delivered worldwide", body: "Tracked shipping to your door, wherever you are." },
+        { title: "Choose", body: "Pick a design, or choose your own fabric, lace and finishing." },
+        { title: "Cut", body: "Cut by hand to your size or measurements." },
+        { title: "Sew", body: "Sewn and detailed piece by piece in our workshop." },
+        { title: "Finish & ship", body: "Checked seam by seam, then shipped to you, wherever you are." },
       ],
     },
   },
@@ -59,7 +60,14 @@ const en = {
     tagline: "Made-to-order abayas, crafted by hand and shipped worldwide.",
     shop: "Shop",
     help: "Help",
-    about: "Dar Rida",
+    house: "The House",
+    newsletter: {
+      title: "First to see new designs.",
+      label: "Email address",
+      placeholder: "Email address",
+      submit: "Join",
+      soon: "Sign-ups open soon — thank you for your interest.",
+    },
     links: {
       collection: "Collection",
       designYourAbaya: "Design Your Abaya",

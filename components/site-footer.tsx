@@ -1,8 +1,12 @@
 import Link from "next/link";
-import { Logo } from "@/components/logo";
 import { LanguageToggle } from "@/components/language-toggle";
+import { NewsletterForm } from "@/components/newsletter-form";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 
+/**
+ * Link columns and the sign-up up top; underneath, DAR RIDA set edge to edge
+ * in light Cormorant and cut off by the bottom of the page.
+ */
 export function SiteFooter({ dict }: { dict: Dictionary }) {
   const l = dict.footer.links;
   const columns = [
@@ -25,7 +29,7 @@ export function SiteFooter({ dict }: { dict: Dictionary }) {
       ],
     },
     {
-      title: dict.footer.about,
+      title: dict.footer.house,
       links: [
         { href: "/our-story", label: l.story },
         { href: "/terms", label: l.terms },
@@ -35,24 +39,15 @@ export function SiteFooter({ dict }: { dict: Dictionary }) {
   ];
 
   return (
-    <footer className="bg-primary text-primary-foreground">
-      <div className="mx-auto grid max-w-7xl gap-12 px-4 py-16 md:grid-cols-[1.5fr_1fr_1fr_1fr] md:px-10">
-        <div className="flex flex-col items-start gap-5">
-          <Logo label={dict.common.home} className="items-start" />
-          <p className="max-w-xs text-base leading-relaxed text-primary-foreground/75">
-            {dict.footer.tagline}
-          </p>
-        </div>
+    <footer className="overflow-hidden border-t border-border bg-background">
+      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-x-6 gap-y-12 px-4 pt-16 sm:grid-cols-3 md:px-10 md:pt-20 lg:grid-cols-[1fr_1fr_1fr_1.6fr]">
         {columns.map((col) => (
           <div key={col.title} className="flex flex-col gap-4">
-            <h2 className="text-sm tracking-[0.3em] text-champagne uppercase">{col.title}</h2>
+            <h2 className="text-sm tracking-[0.3em] text-muted-foreground uppercase">{col.title}</h2>
             <ul className="flex flex-col gap-3 text-base">
               {col.links.map((link) => (
                 <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-primary-foreground/80 transition-colors hover:text-primary-foreground"
-                  >
+                  <Link href={link.href} className="transition-opacity hover:opacity-60">
                     {link.label}
                   </Link>
                 </li>
@@ -60,15 +55,29 @@ export function SiteFooter({ dict }: { dict: Dictionary }) {
             </ul>
           </div>
         ))}
-      </div>
-      <div className="border-t border-primary-foreground/15">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-6 text-sm text-primary-foreground/60 md:px-10">
-          <p>
-            © {new Date().getFullYear()} {dict.common.brandName}. {dict.footer.rights}
-          </p>
-          <LanguageToggle className="text-primary-foreground/80 hover:bg-primary-foreground/10 hover:text-primary-foreground" />
+        <div className="col-span-2 sm:col-span-3 lg:col-span-1">
+          <NewsletterForm />
         </div>
       </div>
+
+      <div className="mx-auto mt-14 flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 text-sm text-muted-foreground md:mt-20 md:px-10">
+        <p>
+          © {new Date().getFullYear()} {dict.common.brandName}. {dict.footer.rights}
+        </p>
+        <LanguageToggle className="-me-2" />
+      </div>
+
+      {/* The sign-off. Latin in both locales: it is the wordmark, not copy.
+          The negative bottom margin crops it at the page edge on purpose. */}
+      <Link
+        href="/"
+        aria-label={dict.common.home}
+        dir="ltr"
+        lang="en"
+        className="mt-6 -mb-[0.14em] block text-center font-heading text-[19.5vw] leading-[0.75] font-light tracking-[0.02em] whitespace-nowrap select-none"
+      >
+        DAR RIDA
+      </Link>
     </footer>
   );
 }

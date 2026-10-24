@@ -13,7 +13,7 @@ import { getDirection } from "@/lib/i18n/config";
 // Arabic: El Messiri (display) + Almarai (body).
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["300", "400", "500", "600"],
 });
 
 const jost = Jost({

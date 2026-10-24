@@ -15,7 +15,7 @@ export function Paths({ dict }: { dict: Dictionary }) {
     src?: string;
     objectPosition?: string;
   }[] = [
-    { href: "/collection", ...t.collection, tone: "warm" },
+    { href: "/collection", ...t.collection, tone: "warm", src: "/media/collection.jpg", objectPosition: "50% 20%" },
     { href: "/design", ...t.design, tone: "dark", src: "/media/fabric-lace.jpg", objectPosition: "30% 50%" },
   ];
 
