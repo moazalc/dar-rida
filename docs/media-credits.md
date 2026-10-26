@@ -22,3 +22,24 @@ AI-image mark. Fine for local development only.
 | `rida-01.jpg` | Black cape-sleeve abaya on a dress form, arched niche |
 | `design-stand.jpg` | White and black embroidered abayas on a form and a stand |
 | `process-sent.jpg` | Folded scarves in a kraft box with tissue paper |
+
+## 3D models (`public/models/`)
+
+Used in the Design Your Abaya studio. Downloaded at 1k texture resolution and
+compressed to GLB (meshopt geometry, WebP textures) with `@gltf-transform/cli optimize`.
+
+| File | Source | License |
+|---|---|---|
+| `potted_plant_01.glb` | Poly Haven — Potted Plant 01 | CC0 |
+| `potted_plant_02.glb` | Poly Haven — Potted Plant 02 | CC0 |
+| `ceramic_vase_02.glb` | Poly Haven — Ceramic Vase 02 | CC0 |
+| `ceramic_vase_04.glb` | Poly Haven — Ceramic Vase 04 | CC0 |
+
+The backdrop, floor lamp, garment rack and dress form are built in code
+(`components/design/studio.tsx`, `components/design/placeholder-abaya.tsx`).
+
+## Lighting (`public/hdri/`)
+
+| File | Source | License |
+|---|---|---|
+| `studio_london_hall_1k.hdr` | Poly Haven — Photo Studio London Hall (1k) | CC0 |
