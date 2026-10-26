@@ -2,11 +2,11 @@
 
 import { Suspense, useEffect, useRef } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
-import { AccumulativeShadows, CameraControls, Environment, RandomizedLight } from "@react-three/drei";
+import { CameraControls, Environment } from "@react-three/drei";
 import * as THREE from "three";
 import type { ChoiceStep, Config, Step } from "@/lib/configurator/options";
 import { PlaceholderAbaya } from "./placeholder-abaya";
-import { LAMP, Studio } from "./studio";
+import { LAMP_BULB, Studio } from "./studio";
 
 type Shot = [number, number, number, number, number, number];
 
@@ -62,8 +62,7 @@ function CameraRig({ step, resetKey }: { step: Step; resetKey: number }) {
     // Turn and zoom only: no panning the mannequin out of frame.
     c.mouseButtons.right = NONE;
     c.mouseButtons.middle = NONE;
-    c.touches.three = NONE;
-  }, []);
+    c.touches.three = NONE;  }, []);
 
   // The first framing jumps straight there; an animated move started while
   // the canvas is still sizing itself gets lost. Later ones glide.
@@ -130,16 +129,18 @@ export default function AbayaScene({
         <Environment files="/hdri/studio_london_hall_1k.hdr" environmentIntensity={0.55} />
       </Suspense>
 
-      {/* Key: a big soft window, front right */}
+      {/* Key: a big soft window, high front right. Its shadows are the only
+          ones on the floor: each falls from its own object, kept faint and soft. */}
       <directionalLight
-        position={[3.2, 5, 3.6]}
+        position={[2.6, 6, 3.4]}
         intensity={1.6}
         color="#fff4e6"
         castShadow
         shadow-mapSize={[2048, 2048]}
+        shadow-intensity={0.45}
         shadow-bias={-0.0004}
         shadow-normalBias={0.02}
-        shadow-radius={8}
+        shadow-radius={10}
         shadow-camera-left={-3}
         shadow-camera-right={3}
         shadow-camera-top={3}
@@ -152,7 +153,7 @@ export default function AbayaScene({
       <spotLight position={[-2.4, 3.4, -3]} angle={0.6} penumbra={1} intensity={28} color="#fff8ef" />
       {/* The floor lamp's warm pool */}
       <pointLight
-        position={[LAMP.x + 0.05, LAMP.height - 0.05, LAMP.z + 0.05]}
+        position={LAMP_BULB}
         color="#ffc77a"
         intensity={1.6}
         distance={2.2}
@@ -163,20 +164,6 @@ export default function AbayaScene({
         <Studio />
       </Suspense>
       <PlaceholderAbaya config={config} onPartSelect={onPartSelect} />
-
-      {/* Soft contact shadows on the floor, re-gathered when the design changes */}
-      <AccumulativeShadows
-        key={`${config.cut}-${config.sleeve}-${config.finishing}`}
-        temporal
-        frames={60}
-        alphaTest={0.8}
-        opacity={0.75}
-        scale={7}
-        color="#4a3d30"
-        position={[0, 0.002, 0]}
-      >
-        <RandomizedLight amount={8} radius={3} ambient={0.55} intensity={1.2} position={[2.5, 5, 3]} bias={0.001} />
-      </AccumulativeShadows>
 
       <CameraRig step={step} resetKey={resetKey} />
       <Capture onReady={onCaptureReady} />

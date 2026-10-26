@@ -1,41 +1,74 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useMemo } from "react";
-import { Billboard, useGLTF } from "@react-three/drei";
+import { Billboard, RoundedBox, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
+import { CallaLilies, Tulips } from "./flowers";
 
 /**
  * The atelier the mannequin stands in, after the "Design your own" photo:
  * a seamless ivory backdrop, a brass floor lamp glowing warm beside the
- * mannequin, a black arched garment rack, ceramics and plants.
+ * mannequin, a black arched garment rack, and white flowers in ceramics.
  *
- * Plants and vases are CC0 models from Poly Haven (see docs/media-credits.md),
- * compressed into public/models. The backdrop, lamp and rack are built here.
+ * Vases are CC0 models from Poly Haven (see docs/media-credits.md), compressed
+ * into public/models. The backdrop, lamp, rack and flowers are built in code.
  */
 
 const MODELS = {
-  tree: "/models/potted_plant_01.glb",
-  plant: "/models/potted_plant_02.glb",
-  vaseTall: "/models/ceramic_vase_04.glb",
-  vaseRound: "/models/ceramic_vase_02.glb",
+  bottle: "/models/ceramic_vase_01.glb",
+  bowl: "/models/ceramic_vase_02.glb",
+  jug: "/models/ceramic_vase_04.glb",
 } as const;
-
-/** Exported for the lamp's light, which the scene places. */
-export const LAMP = { x: -1.35, z: -0.8, height: 1.5 };
 
 const WALL = "#ebe5da";
 const BLACK_METAL = "#1c1a19";
+const BRASS = "#b8ab90";
+
+/** The lamp stands left of the mannequin; its arm and shade turn toward her. */
+const LAMP_AT = { x: -1.35, z: -0.8, height: 1.75, turn: -0.6, arm: 0.16, tilt: 0.95 };
+
+/** Where the lamp's bulb sits, for the warm light the scene places there. */
+export const LAMP_BULB = new THREE.Vector3(0, -0.11, 0)
+  .applyEuler(new THREE.Euler(0, 0, LAMP_AT.tilt))
+  .add(new THREE.Vector3(LAMP_AT.arm, LAMP_AT.height, 0))
+  .applyEuler(new THREE.Euler(0, LAMP_AT.turn, 0))
+  .add(new THREE.Vector3(LAMP_AT.x, 0, LAMP_AT.z))
+  .toArray();
+
+/** Ceramic Vase 01 is a 40 cm bottle; shown at floor-vase size. */
+const BOTTLE_SCALE = 1.8;
+const PLINTH = { width: 0.36, height: 0.52 };
 
 export function Studio() {
   return (
     <group>
       <Cyclorama />
       <FloorLamp />
-      <GarmentRack position={[1.3, 0, -0.95]} rotation={[0, -0.3, 0]} />
-      <Prop url={MODELS.tree} position={[-1.95, 0, -0.95]} rotation={0.6} />
-      <Prop url={MODELS.plant} position={[2.15, 0, -0.75]} rotation={-0.9} />
-      <Prop url={MODELS.vaseTall} position={[1.85, 0, 0.05]} rotation={2.2} />
-      <Prop url={MODELS.vaseRound} position={[2.1, 0, 0.18]} rotation={0.4} />
+      <GarmentRack position={[1.1, 0, -1.05]} rotation={[0, -0.3, 0]} />
+
+      {/* Calla lilies in a tall white bottle, back left */}
+      <group position={[-1.8, 0, -1.25]}>
+        <Prop url={MODELS.bottle} scale={BOTTLE_SCALE} rotation={0.6} />
+        <CallaLilies neck={0.3 * BOTTLE_SCALE} rim={0.4 * BOTTLE_SCALE} opening={0.035 * BOTTLE_SCALE} />
+      </group>
+
+      {/* White tulips in a round vase on a stone plinth, right */}
+      <group position={[1.85, 0, -0.8]} rotation={[0, -0.4, 0]}>
+        <RoundedBox
+          args={[PLINTH.width, PLINTH.height, PLINTH.width]}
+          radius={0.008}
+          position={[0, PLINTH.height / 2, 0]}
+          castShadow
+          receiveShadow
+        >
+          <meshStandardMaterial color="#ddd3c4" roughness={0.85} />
+        </RoundedBox>
+        <group position={[0, PLINTH.height, 0]}>
+          <Prop url={MODELS.bowl} rotation={0.4} />
+          <Tulips neck={0.22} rim={0.31} opening={0.06} />
+        </group>
+      </group>
+      <Prop url={MODELS.jug} position={[1.5, 0, -0.05]} rotation={2.2} />
     </group>
   );
 }
@@ -64,15 +97,19 @@ function Cyclorama() {
   }, []);
 
   return (
-    <mesh geometry={geometry}>
+    <mesh geometry={geometry} receiveShadow>
       <meshStandardMaterial color={WALL} roughness={0.95} side={THREE.DoubleSide} />
     </mesh>
   );
 }
 
-/** A slim brushed-brass floor lamp with a cone shade tipped toward the mannequin. */
+/**
+ * A slim brushed-brass floor lamp: a short arm off the top of the stem holds
+ * a cone shade by its closed end, tipped down toward the mannequin, so the
+ * stem stays clear of the shade.
+ */
 function FloorLamp() {
-  const { x, z, height } = LAMP;
+  const { x, z, height, turn, arm, tilt } = LAMP_AT;
   // A soft radial glow round the bulb, drawn once into a small texture.
   const glow = useMemo(() => {
     const size = 128;
@@ -90,31 +127,45 @@ function FloorLamp() {
   useEffect(() => () => glow.dispose(), [glow]);
 
   return (
-    <group position={[x, 0, z]}>
+    <group position={[x, 0, z]} rotation={[0, turn, 0]}>
       <mesh position={[0, 0.012, 0]} castShadow receiveShadow>
         <cylinderGeometry args={[0.15, 0.16, 0.024, 48]} />
-        <meshStandardMaterial color="#b8ab90" metalness={0.85} roughness={0.32} />
+        <meshStandardMaterial color={BRASS} metalness={0.85} roughness={0.32} />
       </mesh>
       <mesh position={[0, height / 2, 0]} castShadow>
         <cylinderGeometry args={[0.011, 0.011, height, 16]} />
-        <meshStandardMaterial color="#b8ab90" metalness={0.85} roughness={0.3} />
+        <meshStandardMaterial color={BRASS} metalness={0.85} roughness={0.3} />
       </mesh>
 
-      {/* Shade on a short knuckle, tipped down and toward the centre */}
-      <group position={[0, height, 0]} rotation={[0, -0.6, 0.95]}>
-        <mesh position={[0, 0.06, 0]} castShadow>
-          <cylinderGeometry args={[0.035, 0.11, 0.2, 40, 1, true]} />
-          <meshStandardMaterial color="#b8ab90" metalness={0.85} roughness={0.28} side={THREE.DoubleSide} />
+      {/* Knuckle at the top of the stem, a short arm, and a pivot at its end */}
+      <mesh position={[0, height, 0]}>
+        <sphereGeometry args={[0.017, 20, 12]} />
+        <meshStandardMaterial color={BRASS} metalness={0.85} roughness={0.3} />
+      </mesh>
+      <mesh position={[arm / 2, height, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
+        <cylinderGeometry args={[0.008, 0.008, arm, 12]} />
+        <meshStandardMaterial color={BRASS} metalness={0.85} roughness={0.3} />
+      </mesh>
+
+      {/* The shade hangs from the pivot by its domed back, mouth toward her */}
+      <group position={[arm, height, 0]} rotation={[0, 0, tilt]}>
+        <mesh>
+          <sphereGeometry args={[0.015, 20, 12]} />
+          <meshStandardMaterial color={BRASS} metalness={0.85} roughness={0.3} />
         </mesh>
-        <mesh position={[0, 0.16, 0]}>
-          <sphereGeometry args={[0.036, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2]} />
-          <meshStandardMaterial color="#b8ab90" metalness={0.85} roughness={0.28} />
+        <mesh position={[0, -0.03, 0]} castShadow>
+          <sphereGeometry args={[0.036, 28, 12, 0, Math.PI * 2, 0, Math.PI / 2]} />
+          <meshStandardMaterial color={BRASS} metalness={0.85} roughness={0.28} />
         </mesh>
-        <mesh position={[0, 0.0, 0]}>
-          <sphereGeometry args={[0.04, 24, 16]} />
+        <mesh position={[0, -0.13, 0]} castShadow>
+          <cylinderGeometry args={[0.036, 0.11, 0.2, 40, 1, true]} />
+          <meshStandardMaterial color={BRASS} metalness={0.85} roughness={0.28} side={THREE.DoubleSide} />
+        </mesh>
+        <mesh position={[0, -0.11, 0]}>
+          <sphereGeometry args={[0.032, 24, 16]} />
           <meshStandardMaterial color="#fff1d6" emissive="#ffd08a" emissiveIntensity={4} toneMapped={false} />
         </mesh>
-        <Billboard position={[0, -0.02, 0]}>
+        <Billboard position={[0, -0.2, 0]}>
           <mesh>
             <planeGeometry args={[0.32, 0.32]} />
             <meshBasicMaterial
@@ -136,65 +187,102 @@ function line(a: THREE.Vector3, b: THREE.Vector3, steps: number) {
   return Array.from({ length: steps }, (_, i) => a.clone().lerp(b, i / steps));
 }
 
-/** Black arched garment rack with an oak hanger. */
+/**
+ * Black arched garment rack with an oak hanger. The posts stand in two floor
+ * bars, and the hanger's hook curls over the top of the arch and rests on it.
+ */
 function GarmentRack(props: { position: [number, number, number]; rotation: [number, number, number] }) {
   const width = 0.78;
   const postTop = 1.42;
   const half = width / 2;
+  const tube = 0.013;
+  const foot = 0.014;
+  /** Centre of the rail at the crown of the arch, where the hook rests. */
+  const crown = postTop + half;
 
-  const frame = useMemo(() => {
-    const pts = [
-      ...line(new THREE.Vector3(-half, 0.05, 0), new THREE.Vector3(-half, postTop, 0), 12),
-      ...Array.from({ length: 33 }, (_, i) => {
-        const a = Math.PI - (i / 32) * Math.PI;
-        return new THREE.Vector3(Math.cos(a) * half, postTop + Math.sin(a) * half, 0);
-      }),
-      ...line(new THREE.Vector3(half, postTop, 0), new THREE.Vector3(half, 0.05, 0), 12).slice(1),
-      new THREE.Vector3(half, 0.05, 0),
-    ];
-    return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, false, "catmullrom", 0.1), 220, 0.013, 10);
-  }, [half]);
+  const geo = useMemo(() => {
+    const frame = new THREE.TubeGeometry(
+      new THREE.CatmullRomCurve3(
+        [
+          ...line(new THREE.Vector3(-half, foot, 0), new THREE.Vector3(-half, postTop, 0), 12),
+          ...Array.from({ length: 33 }, (_, i) => {
+            const a = Math.PI - (i / 32) * Math.PI;
+            return new THREE.Vector3(Math.cos(a) * half, postTop + Math.sin(a) * half, 0);
+          }),
+          ...line(new THREE.Vector3(half, postTop, 0), new THREE.Vector3(half, foot, 0), 12).slice(1),
+          new THREE.Vector3(half, foot, 0),
+        ],
+        false,
+        "catmullrom",
+        0.1,
+      ),
+      220,
+      tube,
+      10,
+    );
 
-  const hanger = useMemo(() => {
-    const top = postTop + half - 0.07;
-    const pts = [
-      new THREE.Vector3(-0.21, top - 0.17, 0),
-      new THREE.Vector3(-0.1, top - 0.12, 0),
-      new THREE.Vector3(0, top - 0.09, 0),
-      new THREE.Vector3(0.1, top - 0.12, 0),
-      new THREE.Vector3(0.21, top - 0.17, 0),
-    ];
-    return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 40, 0.012, 8);
-  }, [half]);
+    // The hook wire: up from the hanger's neck, round over the rail (which
+    // runs along X here) and down the far side.
+    const wire = 0.0035;
+    const over = tube + wire; // wire centre when touching the rail
+    const neckTop = crown - 0.075;
+    const hook = new THREE.TubeGeometry(
+      new THREE.CatmullRomCurve3([
+        new THREE.Vector3(0, neckTop, 0),
+        new THREE.Vector3(0, crown - 0.035, -0.006),
+        new THREE.Vector3(0, crown - 0.008, -over),
+        new THREE.Vector3(0, crown + over * 0.75, -over * 0.7),
+        new THREE.Vector3(0, crown + over, 0),
+        new THREE.Vector3(0, crown + over * 0.7, over * 0.75),
+        new THREE.Vector3(0, crown - 0.006, over),
+        new THREE.Vector3(0, crown - 0.02, over * 0.75),
+      ]),
+      48,
+      wire,
+      8,
+    );
 
-  const hook = useMemo(() => {
-    const top = postTop + half - 0.01;
-    const pts = [
-      new THREE.Vector3(0, top - 0.09, 0),
-      new THREE.Vector3(0, top - 0.03, 0),
-      new THREE.Vector3(0.018, top + 0.005, 0),
-      new THREE.Vector3(0.04, top - 0.012, 0),
-    ];
-    return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 20, 0.003, 6);
-  }, [half]);
+    // Classic shoulder hanger: a curved oak bar with a fine bar below.
+    const shoulderTop = neckTop - 0.008;
+    const hanger = new THREE.TubeGeometry(
+      new THREE.CatmullRomCurve3([
+        new THREE.Vector3(-0.21, shoulderTop - 0.08, 0),
+        new THREE.Vector3(-0.1, shoulderTop - 0.03, 0),
+        new THREE.Vector3(0, shoulderTop, 0),
+        new THREE.Vector3(0.1, shoulderTop - 0.03, 0),
+        new THREE.Vector3(0.21, shoulderTop - 0.08, 0),
+      ]),
+      48,
+      0.012,
+      10,
+    );
+    const bar = new THREE.CylinderGeometry(0.004, 0.004, 0.4, 8)
+      .rotateZ(Math.PI / 2)
+      .translate(0, shoulderTop - 0.076, 0);
+    return { frame, hook, hanger, bar };
+  }, [half, crown]);
+  useEffect(() => () => Object.values(geo).forEach((g) => g.dispose()), [geo]);
 
   return (
     <group {...props}>
-      <mesh geometry={frame} castShadow>
+      <mesh geometry={geo.frame} castShadow>
         <meshStandardMaterial color={BLACK_METAL} metalness={0.6} roughness={0.45} />
       </mesh>
-      {/* Feet: a short bar under each post */}
+      {/* Feet: a bar on the floor under each post */}
       {[-half, half].map((px) => (
-        <mesh key={px} position={[px, 0.02, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
-          <cylinderGeometry args={[0.014, 0.014, 0.42, 12]} />
+        <mesh key={px} position={[px, foot, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+          <cylinderGeometry args={[foot, foot, 0.42, 12]} />
           <meshStandardMaterial color={BLACK_METAL} metalness={0.6} roughness={0.45} />
         </mesh>
       ))}
-      <mesh geometry={hook}>
+      <mesh geometry={geo.hook} castShadow>
         <meshStandardMaterial color="#9a958d" metalness={0.9} roughness={0.3} />
       </mesh>
-      <mesh geometry={hanger} castShadow>
+      <mesh geometry={geo.hanger} castShadow>
         <meshStandardMaterial color="#b88c5e" roughness={0.55} />
+      </mesh>
+      <mesh geometry={geo.bar}>
+        <meshStandardMaterial color="#9a958d" metalness={0.9} roughness={0.3} />
       </mesh>
     </group>
   );
@@ -205,10 +293,12 @@ function Prop({
   url,
   position,
   rotation,
+  scale = 1,
 }: {
   url: string;
-  position: [number, number, number];
+  position?: [number, number, number];
   rotation: number;
+  scale?: number;
 }) {
   const { scene } = useGLTF(url);
   useLayoutEffect(() => {
@@ -219,7 +309,7 @@ function Prop({
       }
     });
   }, [scene]);
-  return <primitive object={scene} position={position} rotation={[0, rotation, 0]} />;
+  return <primitive object={scene} position={position} rotation={[0, rotation, 0]} scale={scale} />;
 }
 
 for (const url of Object.values(MODELS)) useGLTF.preload(url);

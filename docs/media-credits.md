@@ -30,13 +30,13 @@ compressed to GLB (meshopt geometry, WebP textures) with `@gltf-transform/cli op
 
 | File | Source | License |
 |---|---|---|
-| `potted_plant_01.glb` | Poly Haven — Potted Plant 01 | CC0 |
-| `potted_plant_02.glb` | Poly Haven — Potted Plant 02 | CC0 |
+| `ceramic_vase_01.glb` | Poly Haven — Ceramic Vase 01 | CC0 |
 | `ceramic_vase_02.glb` | Poly Haven — Ceramic Vase 02 | CC0 |
 | `ceramic_vase_04.glb` | Poly Haven — Ceramic Vase 04 | CC0 |
 
-The backdrop, floor lamp, garment rack and dress form are built in code
-(`components/design/studio.tsx`, `components/design/placeholder-abaya.tsx`).
+The backdrop, floor lamp, garment rack, plinth, flowers (white calla lilies and
+tulips) and dress form are built in code (`components/design/studio.tsx`,
+`components/design/flowers.tsx`, `components/design/placeholder-abaya.tsx`).
 
 ## Lighting (`public/hdri/`)
 
