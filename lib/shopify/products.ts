@@ -109,6 +109,19 @@ export async function getCollectionProducts(locale: Locale): Promise<ProductCard
   return data.products.nodes.filter((p) => !p.tags.includes(HIDDEN_TAG)).map(toCard);
 }
 
+/** Products whose title, description or tags match the shopper's words. */
+export async function searchProducts(q: string, locale: Locale): Promise<ProductCard[] | null> {
+  if (!isShopifyConfigured()) return null;
+  const data = await storefront<{ products: { nodes: CardNode[] } }>(
+    `query Search($q: String!) ${context(locale)} {
+      products(first: 48, query: $q, sortKey: RELEVANCE) { nodes { ${CARD_FIELDS} } }
+    }`,
+    { q: q.slice(0, 100) },
+    { revalidate: REVALIDATE },
+  );
+  return data.products.nodes.filter((p) => !p.tags.includes(HIDDEN_TAG)).map(toCard);
+}
+
 type ProductNode = CardNode & {
   description: string;
   descriptionHtml: string;

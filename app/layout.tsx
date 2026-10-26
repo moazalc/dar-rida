@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { Almarai, Cormorant_Garamond, El_Messiri, Jost } from "next/font/google";
 import "./globals.css";
 import { DirectionProvider } from "@/components/ui/direction";
@@ -8,6 +9,7 @@ import { SiteHeader } from "@/components/site-header";
 import { getLocale } from "@/lib/i18n/locale";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getDirection } from "@/lib/i18n/config";
+import { CART_COUNT_COOKIE, parseCartCount } from "@/lib/shopify/cart-count";
 
 // Latin: Cormorant Garamond (display) + Jost (body).
 // Arabic: El Messiri (display) + Almarai (body).
@@ -62,13 +64,14 @@ export default async function RootLayout({
   const locale = await getLocale();
   const dir = getDirection(locale);
   const dict = await getDictionary(locale);
+  const cartCount = parseCartCount((await cookies()).get(CART_COUNT_COOKIE)?.value);
 
   return (
     <html lang={locale} dir={dir} style={fontVars} className="h-full antialiased">
       <body className="min-h-full flex flex-col">
         <DirectionProvider direction={dir}>
           <I18nProvider value={{ locale, dir, dict }}>
-            <SiteHeader />
+            <SiteHeader cartCount={cartCount} />
             <main id="main" className="flex-1">
               {children}
             </main>

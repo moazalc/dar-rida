@@ -49,6 +49,26 @@ function range(from: number, to: number, step: number): string[] {
 
 export const standardSizes = ["XS", "S", "M", "L", "XL", "XXL"] as const;
 
+/** Body measurements per standard size, in inches, for the size guide. */
+export const sizeChart: Record<(typeof standardSizes)[number], { bust: string; hips: string; shoulder: string }> = {
+  XS: { bust: "31–32", hips: "34–35", shoulder: "14" },
+  S: { bust: "33–34", hips: "36–37", shoulder: "14.5" },
+  M: { bust: "35–37", hips: "38–40", shoulder: "15" },
+  L: { bust: "38–40", hips: "41–43", shoulder: "15.5" },
+  XL: { bust: "41–43", hips: "44–46", shoulder: "16" },
+  XXL: { bust: "44–47", hips: "47–50", shoulder: "16.5" },
+};
+
+/** Suggested abaya length (inches) from height (cm), when she cannot measure. */
+export const lengthByHeight: { height: string; length: string }[] = [
+  { height: "< 155", length: "52–53" },
+  { height: "155–160", length: "54–55" },
+  { height: "160–165", length: "56–57" },
+  { height: "165–170", length: "58–59" },
+  { height: "170–175", length: "60–61" },
+  { height: "175 +", length: "62" },
+];
+
 /** Each measurement's dropdown values and unit. */
 export const measurements = {
   length: { unit: "in", values: range(50, 62, 1) },

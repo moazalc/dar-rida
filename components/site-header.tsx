@@ -34,8 +34,8 @@ function usePastHero() {
   return useSyncExternalStore(subscribe, pastHeroSnapshot, () => false);
 }
 
-export function SiteHeader() {
-  const { dict, dir } = useI18n();
+export function SiteHeader({ cartCount }: { cartCount: number }) {
+  const { dict, dir, locale } = useI18n();
   const overlay = OVERLAY_PATHS.has(usePathname());
   const pastHero = usePastHero();
   const solid = !overlay || pastHero;
@@ -125,9 +125,23 @@ export function SiteHeader() {
             <Search className="size-6" strokeWidth={1.5} />
             <span className="sr-only">{dict.nav.search}</span>
           </Link>
-          <Link href="/cart" className={cn(iconButton, "-me-2")}>
+          <Link href="/cart" className={cn(iconButton, "relative -me-2")}>
             <ShoppingBag className="size-6" strokeWidth={1.5} />
-            <span className="sr-only">{dict.nav.cart}</span>
+            <span className="sr-only">
+              {dict.nav.cart}
+              {cartCount > 0 && ` (${cartCount.toLocaleString(locale)})`}
+            </span>
+            {cartCount > 0 && (
+              <span
+                aria-hidden
+                className={cn(
+                  "absolute end-1 top-1.5 flex size-[1.1rem] items-center justify-center rounded-full text-[0.65rem] leading-none font-medium",
+                  solid ? "bg-primary text-primary-foreground" : "bg-primary-foreground text-primary",
+                )}
+              >
+                {cartCount.toLocaleString(locale)}
+              </span>
+            )}
           </Link>
         </div>
       </div>
