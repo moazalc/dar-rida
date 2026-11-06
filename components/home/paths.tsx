@@ -15,7 +15,7 @@ export function Paths({ dict }: { dict: Dictionary }) {
       ...t.collection,
       src: "/media/collection-rail.jpg",
       objectPosition: "50% 30%",
-      box: "md:col-span-7",
+      box: "",
       image: "aspect-[4/5]",
     },
     {
@@ -23,13 +23,13 @@ export function Paths({ dict }: { dict: Dictionary }) {
       ...t.design,
       src: "/media/design-stand.jpg",
       objectPosition: "50% 60%",
-      box: "md:col-span-5 md:pt-56",
+      box: "md:pt-56",
       image: "aspect-[3/4]",
     },
   ];
 
   return (
-    <section className="mx-auto grid max-w-[90rem] gap-16 px-4 py-24 md:grid-cols-12 md:gap-x-16 md:px-10 md:py-36 lg:gap-x-24 xl:px-18">
+    <section className="mx-auto grid max-w-[90rem] gap-16 px-4 py-24 md:grid-cols-[7fr_5fr] md:gap-x-16 md:px-10 md:py-36 lg:gap-x-24 xl:px-18">
       {paths.map((p) => (
         <Link key={p.href} href={p.href} className={cn("group flex flex-col gap-7", p.box)}>
           <div className="overflow-hidden">

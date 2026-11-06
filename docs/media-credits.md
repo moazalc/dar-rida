@@ -10,6 +10,15 @@ with real Dar Rida photography/footage before launch.
 | `craft.jpg` | Pexels photo 4935559 by Brett Jordan (resized) | Pexels License |
 | `lace.jpg` | Unsplash photo `Y3Oh8fF0st8` by Art Institute of Chicago (resized) | Unsplash License |
 
+## Illustration and pattern
+
+| Asset | Source | License |
+|---|---|---|
+| Leaf pattern behind the home page's Design Your Abaya band (`components/drawings/leaf-pattern.tsx`) | "Leaves 9" from Pattern Monster, https://pattern.monster (repo `catchspider2002/svelte-svg-patterns`) | MIT — keep this credit |
+| Abaya drawings (`components/drawings/*`) and process icons (`components/home/process-icons.tsx`) | Drawn for Dar Rida | Own work |
+
+`process-1.jpg` … `process-3.jpg` and `process-sent.jpg` are no longer used on the home page (the process strip now uses icons).
+
 ## Not licensed — must be replaced before launch
 
 Saved from Pinterest as layout references; the owners and terms are unknown.
