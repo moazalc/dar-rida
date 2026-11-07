@@ -2,7 +2,7 @@ import type { Order } from "@/cms/payload-types";
 import { describeConfig } from "@/lib/configurator/describe";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { measurementKeys, measurementSpec } from "@/lib/measurements";
-import { formatUsd } from "@/lib/money";
+import { formatMinorUnits, formatUsd } from "@/lib/money";
 
 // Plain, well-typeset order emails: inline styles and simple tables, which is
 // what email clients render reliably, with a text version alongside.
@@ -64,13 +64,7 @@ export function customerEmail(order: Order, dict: Dictionary, leadTime: string |
 
   const paid =
     order.presentmentCurrency && order.presentmentCurrency !== "usd" && order.presentmentAmount
-      ? t.paidIn.replace(
-          "{amount}",
-          new Intl.NumberFormat(locale === "ar" ? "ar-u-nu-latn" : "en", {
-            style: "currency",
-            currency: order.presentmentCurrency.toUpperCase(),
-          }).format(order.presentmentAmount / 100),
-        )
+      ? t.paidIn.replace("{amount}", formatMinorUnits(order.presentmentAmount, order.presentmentCurrency, locale))
       : null;
 
   const html = shell(

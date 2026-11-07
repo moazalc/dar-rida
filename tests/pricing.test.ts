@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { isValidQuantity, unitPrice, type PricedDesign } from "@/lib/cart/pricing";
-import { dollarsToCents, formatUsd } from "@/lib/money";
+import { dollarsToCents, formatMinorUnits, formatUsd } from "@/lib/money";
 
 const designs = new Map<number, PricedDesign>([
   [1, { id: 1, price: 400, active: true }],
@@ -35,6 +35,13 @@ describe("money", () => {
   it("rounds dollars to whole cents", () => {
     expect(dollarsToCents(19.999)).toBe(2000);
     expect(dollarsToCents(Number.NaN)).toBe(0);
+  });
+
+  it("reads Stripe's minor units with each currency's own decimals", () => {
+    const plain = (s: string) => s.replace(/\s/g, " ");
+    expect(plain(formatMinorUnits(422000, "aed", "en"))).toBe("AED 4,220.00");
+    expect(plain(formatMinorUnits(123450, "kwd", "en"))).toBe("KWD 123.450");
+    expect(formatMinorUnits(60000, "jpy", "en")).toBe("¥60,000");
   });
 
   it("formats USD, hiding .00", () => {

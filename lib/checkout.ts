@@ -3,9 +3,9 @@ import "server-only";
 import type Stripe from "stripe";
 import { findCart, priceCart } from "@/lib/cart";
 import type { Locale } from "@/lib/i18n/config";
-import { getDictionary } from "@/lib/i18n/dictionaries";
+import { getDictionary, type Dictionary } from "@/lib/i18n/dictionaries";
 import { handlePaidSession } from "@/lib/orders/paid";
-import { snapshotLine } from "@/lib/orders/snapshot";
+import { snapshotLine, type OrderLine } from "@/lib/orders/snapshot";
 import { payloadClient } from "@/lib/payload";
 import { shippingCountries } from "@/lib/shipping-countries";
 import { siteUrl, stripeClient } from "@/lib/stripe";
@@ -64,35 +64,14 @@ export async function startCheckout(locale: Locale): Promise<CheckoutResult> {
       },
     });
 
-    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = lines.map((l) => ({
-      quantity: l.quantity,
-      price_data: {
-        currency: "usd",
-        unit_amount: l.unitPrice,
-        product_data: {
-          name: locale === "ar" && l.nameAr ? l.nameAr : l.kind === "custom" ? dict.cart.customName : l.name,
-          description: dict.checkout.madeToMeasure,
-        },
-      },
-    }));
-
-    const session = await stripe.checkout.sessions.create(
-      {
-        mode: "payment",
-        line_items: lineItems,
-        client_reference_id: String(order.id),
-        metadata: { orderId: String(order.id), orderNumber: order.number ?? "" },
-        payment_intent_data: { metadata: { orderId: String(order.id), orderNumber: order.number ?? "" } },
-        shipping_address_collection: { allowed_countries: [...shippingCountries] },
-        phone_number_collection: { enabled: true },
-        adaptive_pricing: { enabled: true },
-        locale: locale === "ar" ? "ar" : "en",
-        expires_at: Math.floor(Date.now() / 1000) + 60 * 60 * 2,
-        success_url: `${siteUrl()}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${siteUrl()}/cart`,
-      },
-      { idempotencyKey: `order-${order.id}` },
-    );
+    let session: Stripe.Checkout.Session;
+    try {
+      session = await createSession(stripe, order, lines, locale, dict);
+    } catch (error) {
+      // Never leave an order behind that has no way to be paid or expire.
+      await payload.delete({ collection: "orders", id: order.id }).catch(() => undefined);
+      throw error;
+    }
 
     await Promise.all([
       payload.update({ collection: "orders", id: order.id, data: { stripeCheckoutSessionId: session.id } }),
@@ -126,4 +105,44 @@ async function closeSession(stripe: Stripe, sessionId: string): Promise<"closed"
     // Complete but still unpaid (a delayed payment method) or still open: leave it alone.
     return "open";
   }
+}
+
+async function createSession(
+  stripe: Stripe,
+  order: { id: number; number?: string | null },
+  lines: OrderLine[],
+  locale: Locale,
+  dict: Dictionary,
+): Promise<Stripe.Checkout.Session> {
+  const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = lines.map((l) => ({
+    quantity: l.quantity,
+    price_data: {
+      currency: "usd",
+      unit_amount: l.unitPrice,
+      product_data: {
+        name: locale === "ar" && l.nameAr ? l.nameAr : l.kind === "custom" ? dict.cart.customName : l.name,
+        description: dict.checkout.madeToMeasure,
+      },
+    },
+  }));
+
+  const session = await stripe.checkout.sessions.create(
+    {
+      mode: "payment",
+      line_items: lineItems,
+      client_reference_id: String(order.id),
+      metadata: { orderId: String(order.id), orderNumber: order.number ?? "" },
+      payment_intent_data: { metadata: { orderId: String(order.id), orderNumber: order.number ?? "" } },
+      shipping_address_collection: { allowed_countries: [...shippingCountries] },
+      phone_number_collection: { enabled: true },
+      adaptive_pricing: { enabled: true },
+      // Stripe Checkout has no Arabic; "auto" follows the browser, falling back to English.
+      locale: locale === "ar" ? "auto" : "en",
+      expires_at: Math.floor(Date.now() / 1000) + 60 * 60 * 2,
+      success_url: `${siteUrl()}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${siteUrl()}/cart`,
+    },
+    { idempotencyKey: `order-${order.id}` },
+  );
+  return session;
 }

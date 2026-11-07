@@ -8,6 +8,7 @@ import type { Config } from "@/lib/configurator/options";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Measurements } from "@/lib/measurements";
+import { mediaPath } from "@/lib/media";
 import { payloadClient } from "@/lib/payload";
 import { unitPrice, type PricedDesign } from "./pricing";
 
@@ -204,7 +205,7 @@ export async function priceCart(cart: Cart, locale: Locale, dict: Dictionary, di
       drawing: design?.drawing ?? null,
       image:
         photo?.url && photo.width && photo.height
-          ? { url: photo.url, alt: photo.alt ?? design?.name ?? "", width: photo.width, height: photo.height }
+          ? { url: mediaPath(photo.url), alt: photo.alt ?? design?.name ?? "", width: photo.width, height: photo.height }
           : null,
       config: null,
       choices: [],

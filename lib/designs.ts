@@ -2,6 +2,7 @@ import "server-only";
 
 import type { Design, Media } from "@/cms/payload-types";
 import type { Locale } from "@/lib/i18n/config";
+import { mediaPath } from "@/lib/media";
 import { dollarsToCents } from "@/lib/money";
 import { payloadClient } from "@/lib/payload";
 
@@ -32,7 +33,7 @@ function toShop(d: Design): ShopDesign {
     drawing: d.drawing,
     images: (d.images ?? [])
       .filter((m): m is Media => typeof m === "object" && m !== null && Boolean(m.url))
-      .map((m) => ({ url: m.url!, alt: m.alt ?? d.name, width: m.width ?? 1200, height: m.height ?? 1500 })),
+      .map((m) => ({ url: mediaPath(m.url!), alt: m.alt ?? d.name, width: m.width ?? 1200, height: m.height ?? 1500 })),
   };
 }
 
