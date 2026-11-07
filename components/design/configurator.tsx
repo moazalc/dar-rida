@@ -4,28 +4,13 @@ import { useCallback, useEffect, useId, useRef, useState, useTransition } from "
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Check, ChevronRight, Download, RotateCcw } from "lucide-react";
-import { addCustomAbayaToBag, type AddToBagResult } from "@/app/design/actions";
+import { addCustomAbayaToBag, type AddToBagResult } from "@/app/(frontend)/cart/actions";
 import type { CaptureFn } from "@/components/design/abaya-scene";
 import { composeDesignImage, downloadBlob } from "@/components/design/design-image";
 import { useI18n } from "@/components/providers/i18n-provider";
-import {
-  colourHex,
-  emptySizing,
-  isChoiceStep,
-  isSizingComplete,
-  measurements,
-  NOTES_MAX,
-  options,
-  sizingFields,
-  standardSizes,
-  steps,
-  type ChoiceStep,
-  type Config,
-  type Measurement,
-  type Sizing,
-  type SizingMode,
-  type Step,
-} from "@/lib/configurator/options";
+import { MeasurementsFields } from "@/components/measurements-fields";
+import { colourHex, isChoiceStep, options, steps, type ChoiceStep, type Config, type Step } from "@/lib/configurator/options";
+import { emptyMeasurements, isMeasurementsComplete, NOTES_MAX, type MeasurementsInput } from "@/lib/measurements";
 import { cn } from "@/lib/utils";
 
 // WebGL only exists in the browser, and three.js is heavy: load the scene
@@ -52,7 +37,7 @@ export function Configurator({ initialConfig }: { initialConfig: Config }) {
   const num = (n: number) => n.toLocaleString(locale);
 
   const [config, setConfig] = useState<Config>(initialConfig);
-  const [sizing, setSizing] = useState<Sizing>(emptySizing);
+  const [sizing, setSizing] = useState<MeasurementsInput>(emptyMeasurements);
   const [stepIndex, setStepIndex] = useState(0);
   const [resetKey, setResetKey] = useState(0);
   const step = steps[stepIndex];
@@ -140,7 +125,7 @@ export function Configurator({ initialConfig }: { initialConfig: Config }) {
         <div className="flex-1 px-4 pt-8 pb-6 md:px-10 lg:overflow-y-auto">
           <p className="text-sm tracking-[0.3em] text-muted-foreground uppercase">{t.eyebrow}</p>
 
-          <StepTrail current={stepIndex} onSelect={setStepIndex} sizingDone={isSizingComplete(sizing)} />
+          <StepTrail current={stepIndex} onSelect={setStepIndex} sizingDone={isMeasurementsComplete(sizing)} />
 
           <div className="mt-10">
             <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
@@ -154,7 +139,7 @@ export function Configurator({ initialConfig }: { initialConfig: Config }) {
             {step === "review" ? (
               <Review config={config} sizing={sizing} optionCopy={optionCopy} onEdit={goTo} />
             ) : step === "size" ? (
-              <SizeStep sizing={sizing} onChange={setSizing} />
+              <MeasurementsFields value={sizing} onChange={setSizing} className="grid gap-x-4 gap-y-6 sm:grid-cols-2 lg:grid-cols-1" />
             ) : step === "colour" ? (
               <ColourPicker value={config.colour} onChange={(v) => choose("colour", v)} optionCopy={optionCopy} />
             ) : (
@@ -340,91 +325,6 @@ function ColourPicker({
   );
 }
 
-const selectClass = "h-12 w-full border border-border/70 bg-background px-3 text-base";
-
-function SizeStep({ sizing, onChange }: { sizing: Sizing; onChange: (sizing: Sizing) => void }) {
-  const { dict, locale } = useI18n();
-  const t = dict.design.sizing;
-  const id = useId();
-  const set = (patch: Partial<Sizing>) => onChange({ ...sizing, ...patch });
-
-  return (
-    <div className="flex flex-col gap-7">
-      {/* Standard size / my measurements */}
-      <div role="radiogroup" className="grid grid-cols-2 border border-border/70">
-        {(Object.keys(sizingFields) as SizingMode[]).map((mode) => (
-          <button
-            key={mode}
-            type="button"
-            role="radio"
-            aria-checked={sizing.mode === mode}
-            onClick={() => set({ mode })}
-            className={cn(
-              "h-12 text-sm tracking-[0.08em] transition-colors",
-              sizing.mode === mode ? "bg-primary text-primary-foreground" : "hover:bg-muted",
-            )}
-          >
-            {t.modes[mode]}
-          </button>
-        ))}
-      </div>
-
-      {sizing.mode === "standard" && (
-        <div className="flex flex-col gap-2">
-          <label htmlFor={`${id}-size`} className="text-sm">
-            {t.size}
-          </label>
-          <select
-            id={`${id}-size`}
-            value={sizing.size}
-            onChange={(e) => set({ size: e.target.value })}
-            className={selectClass}
-          >
-            <option value="" disabled>
-              {t.choose}
-            </option>
-            {standardSizes.map((s) => (
-              <option key={s} value={s}>
-                {s} — {t.sizeHints[s]}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
-
-      <div className="grid gap-x-4 gap-y-6 sm:grid-cols-2 lg:grid-cols-1">
-        {(sizingFields[sizing.mode] as readonly Measurement[]).map((m) => (
-          <div key={m} className="flex flex-col gap-2">
-            <label htmlFor={`${id}-${m}`} className="text-sm">
-              {t.fields[m].label}
-            </label>
-            <select
-              id={`${id}-${m}`}
-              value={sizing[m]}
-              onChange={(e) => set({ [m]: e.target.value })}
-              className={selectClass}
-            >
-              <option value="" disabled>
-                {t.choose}
-              </option>
-              {measurements[m].values.map((v) => (
-                <option key={v} value={v}>
-                  {Number(v).toLocaleString(locale)} {t.units[measurements[m].unit]}
-                </option>
-              ))}
-            </select>
-            <p className="text-sm text-muted-foreground">{t.fields[m].hint}</p>
-          </div>
-        ))}
-      </div>
-
-      <Link href="/size-guide" className="text-sm underline underline-offset-4 hover:text-muted-foreground">
-        {t.howToMeasure}
-      </Link>
-    </div>
-  );
-}
-
 function Review({
   config,
   sizing,
@@ -432,7 +332,7 @@ function Review({
   onEdit,
 }: {
   config: Config;
-  sizing: Sizing;
+  sizing: MeasurementsInput;
   optionCopy: (s: ChoiceStep, value: string) => OptionCopy;
   onEdit: (step: Step) => void;
 }) {
@@ -442,10 +342,10 @@ function Review({
   const [result, setResult] = useState<AddToBagResult | null>(null);
   const [pending, startTransition] = useTransition();
   const notesId = useId();
-  const sizeDone = isSizingComplete(sizing);
+  const sizeDone = isMeasurementsComplete(sizing);
 
   const sizeSummary = sizeDone
-    ? `${sizing.mode === "standard" ? sizing.size : t.sizing.custom} · ${Number(sizing.length).toLocaleString(locale)} ${t.sizing.units.in}`
+    ? `${t.sizing.custom} · ${Number(sizing.length).toLocaleString(locale)} ${t.sizing.units.in}`
     : t.sizing.incomplete;
 
   const rows: { step: Step; label: string; value: string }[] = [
@@ -491,7 +391,7 @@ function Review({
         onSubmit={(e) => {
           e.preventDefault();
           startTransition(async () => {
-            setResult(await addCustomAbayaToBag({ config, sizing, notes }));
+            setResult(await addCustomAbayaToBag({ config, measurements: sizing, notes }));
           });
         }}
       >
@@ -523,12 +423,11 @@ function Review({
           {result?.status === "added" && (
             <p>
               {t.review.added}{" "}
-              <a href={result.checkoutUrl} className="underline underline-offset-4">
+              <Link href="/cart" className="underline underline-offset-4">
                 {t.review.checkout}
-              </a>
+              </Link>
             </p>
           )}
-          {result?.status === "not-configured" && <p className="text-muted-foreground">{t.review.notConnected}</p>}
           {(result?.status === "error" || result?.status === "invalid") && (
             <p className="text-destructive">{t.review.error}</p>
           )}
