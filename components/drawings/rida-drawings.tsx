@@ -3,7 +3,8 @@
  * Design Your Abaya preview. Each follows the developer brief:
  * RIDA 01 A-line + cascade on the sleeves, RIDA 02 straight + two crystal lines
  * per sleeve ending at different heights, RIDA 03 wrap + one-sided cluster near
- * the hem, RIDA 04 bisht + crystals along the box-pleat edges.
+ * the hem, RIDA 04 open bisht over an inner abaya, box pleats fanning down
+ * wide sleeves, crystals along the pleat edges and the front opening.
  * Shapes are styled by the `.abaya-drawing` rules in globals.css.
  * Crystal positions were generated once (seeded) and are fixed here.
  */
@@ -364,14 +365,17 @@ const Rida03 = (
 
 const Rida04 = (
   <>
-      <path className="g" d="M138,40 Q160,30 182,40 L264,80 L278,522 Q160,538 42,522 L56,80 Z"/>
-      <path className="n" d="M148,44 L150,530 M172,44 L170,530"/>
-      <path className="s" d="M150,46 L151,528 M170,46 L169,528" strokeOpacity={0.35} strokeWidth={3}/>
-      <path className="g" d="M56,80 Q66,200 50,330 L118,334 Q112,200 124,96 Z"/>
-      <path className="g" d="M264,80 Q254,200 270,330 L202,334 Q208,200 196,96 Z"/>
-      <path className="n" d="M68,112 L62,326 M82,108 L78,328 M96,104 L94,330 M110,100 L108,332 M252,112 L258,326 M238,108 L242,328 M224,104 L226,330 M210,100 L212,332 "/>
-      <path className="pleat" d="M71,152 L65,320 M85,148 L81,322 M99,144 L97,324 M113,140 L111,326 M255,152 L261,320 M241,148 L245,322 M227,144 L229,324 M213,140 L215,326 "/>
-      <path className="s" d="M100,360 Q96,440 92,520 M220,360 Q224,440 228,520"/>
+      <path className="g" d="M140,44 Q160,36 180,44 L194,150 L212,530 Q160,538 108,530 L126,150 Z"/>
+      <path className="s" d="M160,60 L160,532"/>
+      <path className="g" d="M138,40 L104,58 Q84,250 50,526 Q92,536 136,533 Q144,300 147,46 Z"/>
+      <path className="g" d="M182,40 L216,58 Q236,250 270,526 Q228,536 184,533 Q176,300 173,46 Z"/>
+      <path className="s" d="M124,170 Q112,350 86,524 M196,170 Q208,350 234,524"/>
+      <path className="pleat" d="M147,48 Q144,300 137,530 M173,48 Q176,300 183,530"/>
+      <path className="n" d="M138,41 Q160,30 182,41"/>
+      <path className="g" d="M104,58 Q66,170 30,334 Q76,352 122,338 Q116,220 120,118 Z"/>
+      <path className="g" d="M216,58 Q254,170 290,334 Q244,352 198,338 Q204,220 200,118 Z"/>
+      <path className="n" d="M104.0,82.0 L42.9,333.4 M107.2,89.0 L57.6,336.9 M110.4,96.0 L72.3,338.8 M113.6,103.0 L87.0,339.0 M116.8,110.0 L101.8,337.6 M216.0,82.0 L277.1,333.4 M212.8,89.0 L262.4,336.9 M209.6,96.0 L247.7,338.8 M206.4,103.0 L233.0,339.0 M203.2,110.0 L218.2,337.6"/>
+      <path className="pleat" d="M80.0,195.1 L46.4,331.4 M88.4,200.6 L61.1,334.9 M96.8,205.3 L75.8,336.8 M105.1,209.2 L90.5,337.0 M113.5,212.4 L105.3,335.6 M240.0,195.1 L273.6,331.4 M231.6,200.6 L258.9,334.9 M223.2,205.3 L244.2,336.8 M214.9,209.2 L229.5,337.0 M206.5,212.4 L214.7,335.6"/>
   </>
 );
 

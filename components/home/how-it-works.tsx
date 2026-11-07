@@ -1,8 +1,9 @@
 import { processIcons } from "@/components/home/process-icons";
+import { section } from "@/components/home/section";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 
 /**
- * The process on a linen ground, one line icon per step on an ivory tile. On
+ * The process on the ivory ground, one line icon per step on a pale tile. On
  * phones it becomes a swipeable row (with the next tile peeking in) instead
  * of four stacks.
  */
@@ -10,14 +11,14 @@ export function HowItWorks({ dict }: { dict: Dictionary }) {
   const t = dict.home.howItWorks;
 
   return (
-    <section className="bg-linen py-24 md:py-36">
+    <section className={section.padding}>
       <div className="mx-auto max-w-[90rem]">
-        <div className="flex flex-wrap items-end justify-between gap-6 px-4 md:px-10 xl:px-18">
+        <div className={`${section.container} flex flex-wrap items-end justify-between gap-6`}>
           <div>
-            <p className="text-sm tracking-[0.3em] text-foreground/70 uppercase">{t.eyebrow}</p>
-            <h2 className="mt-4 font-heading text-5xl leading-none font-light md:text-7xl">{t.title}</h2>
+            <p className={section.eyebrow}>{t.eyebrow}</p>
+            <h2 className={`mt-4 ${section.title}`}>{t.title}</h2>
           </div>
-          <p className="max-w-sm text-lg leading-relaxed text-foreground/75">{t.intro}</p>
+          <p className={`max-w-sm ${section.body}`}>{t.intro}</p>
         </div>
 
         <ol className="mt-14 grid snap-x snap-mandatory auto-cols-[78%] grid-flow-col gap-6 overflow-x-auto scroll-px-4 px-4 pb-2 [scrollbar-width:none] sm:auto-cols-[45%] md:scroll-px-10 md:px-10 lg:grid-flow-row lg:grid-cols-4 lg:overflow-visible xl:px-18">
@@ -25,7 +26,7 @@ export function HowItWorks({ dict }: { dict: Dictionary }) {
             const Icon = processIcons[i];
             return (
             <li key={step.title} className="flex snap-start flex-col gap-5">
-              <div className="flex aspect-[4/3] w-full items-center justify-center border border-champagne/40 bg-background">
+              <div className={`flex aspect-[4/3] w-full items-center justify-center ${section.tile}`}>
                 <Icon className="w-[42%] text-foreground" />
               </div>
               <h3 className="font-heading text-3xl">

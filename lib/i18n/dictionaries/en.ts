@@ -54,24 +54,18 @@ const en = {
       ],
       imageAlt: "Black and gold beads sewn by hand onto dark fabric",
     },
-    spotlight: {
-      eyebrow: "First in the collection",
-      name: "Rida 01",
-      nameAlt: "رِدا 01",
-      nameAltLang: "ar",
-      body: "A black abaya cut wide through the arms, so the sleeves fall like a cape, and gathered softly at the waist. Plain on purpose — it is all in the line.",
-      price: "[Price]",
-      view: "View Rida 01",
-      custom: "Make it yours",
-      note: "Cut and sewn after you order · Ships in [X] weeks",
-      badge: "Made to order",
-      imageAlt: "Rida 01, a black abaya with cape sleeves, on a dress form",
-    },
     collectionRow: {
       eyebrow: "The Rida collection",
       title: "Four designs, made to measure.",
       cta: "View the collection",
       badge: "Made to measure",
+      view: "View this design",
+      custom: "Make it yours",
+      note: "Cut and sewn to your measurements · Ships in [X] weeks",
+      previous: "Previous design",
+      next: "Next design",
+      goTo: "Show {code}",
+      slide: "{n} of {total}",
       models: [
         {
           code: "Rida 01",
@@ -79,6 +73,7 @@ const en = {
           nameAlt: "الشلال",
           nameAltLang: "ar",
           cut: "A-line",
+          body: "An A-line abaya that opens gently from the shoulder. Crystals gather at the sleeve ends and climb upward, thinning as they go, like water caught in the light.",
           alt: "Rida 01: a black A-line abaya, crystals cascading up from the sleeve ends",
         },
         {
@@ -87,6 +82,7 @@ const en = {
           nameAlt: "الخط المعماري",
           nameAltLang: "ar",
           cut: "Straight",
+          body: "A straight cut with nothing to soften it but two lines of crystals on each sleeve, set to end at different heights. Precise, and quietly off-balance.",
           alt: "Rida 02: a black straight abaya, two crystal lines on each sleeve ending at different heights",
         },
         {
@@ -95,6 +91,7 @@ const en = {
           nameAlt: "العنقود",
           nameAltLang: "ar",
           cut: "Wrap",
+          body: "A wrap abaya tied at the waist, its crystals gathered in a single cluster near the hem, so the light moves when you walk.",
           alt: "Rida 03: a black wrap abaya with a waist tie and a crystal cluster near the hem",
         },
         {
@@ -103,6 +100,7 @@ const en = {
           nameAlt: "أسرار الطيات",
           nameAltLang: "ar",
           cut: "Bisht",
+          body: "A bisht with box-pleated sleeves. Small crystals follow the edge of each pleat, and only show when the fabric moves.",
           alt: "Rida 04: a black bisht with box-pleated sleeves and small crystals along the pleat edges",
         },
       ],
@@ -124,7 +122,6 @@ const en = {
       titleEmphasis: "only once.",
       body: "Choose the fabric, the cut, the sleeves and the finishing, and watch your abaya take shape as you go. Made to your own measurements.",
       cta: "Start designing",
-      steps: ["Fabric", "Body", "Colour", "Sleeve", "Neck", "Front", "Additions", "Measurements"],
       previewLabel: "An abaya drawing whose sleeves, colour and crystals change, as they do in the designer",
       chips: [
         { label: "Sleeve", value: "Straight · Black" },

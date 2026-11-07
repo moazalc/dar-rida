@@ -2,6 +2,7 @@ import Link from "next/link";
 import { BuilderPreview } from "@/components/drawings/builder-preview";
 import { LeafPattern } from "@/components/drawings/leaf-pattern";
 import { statusAction } from "@/components/status-page";
+import { section } from "@/components/home/section";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 
 /**
@@ -18,21 +19,16 @@ export function Invitation({ dict }: { dict: Dictionary }) {
         id="invitation-leaves"
         className="pointer-events-none absolute inset-0 text-champagne opacity-[0.16] [mask-image:linear-gradient(to_right,rgb(0_0_0/0.25)_0%,rgb(0_0_0/0.25)_38%,#000_72%)] rtl:[mask-image:linear-gradient(to_left,rgb(0_0_0/0.25)_0%,rgb(0_0_0/0.25)_38%,#000_72%)]"
       />
-      <div className="relative mx-auto grid max-w-[90rem] items-center gap-14 px-4 py-24 md:grid-cols-2 md:gap-20 md:px-10 md:py-36 xl:px-18">
+      <div className={`relative ${section.container} ${section.padding} grid items-center gap-14 md:grid-cols-2 md:gap-16 lg:gap-24`}>
         <div className="flex flex-col items-start">
-          <p className="text-sm tracking-[0.3em] text-foreground/70 uppercase">{t.eyebrow}</p>
-          <h2 className="mt-6 font-heading text-5xl leading-[1.04] font-light text-balance md:text-7xl">
+          <p className={section.eyebrow}>{t.eyebrow}</p>
+          <h2 className={`mt-4 ${section.title}`}>
             {t.title} <span className="italic">{t.titleEmphasis}</span>
           </h2>
-          <p className="mt-6 max-w-md text-lg leading-relaxed text-foreground/75">{t.body}</p>
+          <p className={`mt-6 max-w-md ${section.body}`}>{t.body}</p>
           <Link href="/design" className={`mt-10 ${statusAction.primary}`}>
             {t.cta}
           </Link>
-          <ul className="mt-8 flex flex-wrap gap-x-4 gap-y-2 text-xs tracking-[0.2em] text-foreground/70 uppercase">
-            {t.steps.map((step) => (
-              <li key={step}>{step}</li>
-            ))}
-          </ul>
         </div>
         <BuilderPreview label={t.previewLabel} chips={t.chips} />
       </div>
