@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import "./globals.css";
+import "./(frontend)/globals.css";
 import { StatusPage, statusAction } from "@/components/status-page";
 import en from "@/lib/i18n/dictionaries/en";
 import ar from "@/lib/i18n/dictionaries/ar";

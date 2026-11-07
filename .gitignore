@@ -43,3 +43,6 @@ next-env.d.ts
 
 # brainstorming mockups
 .superpowers/
+
+# uploaded media (local development)
+/media/

@@ -1,9 +1,14 @@
+import { withPayload } from "@payloadcms/next/withPayload";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    // Product photos come from Shopify's CDN.
-    remotePatterns: [new URL("https://cdn.shopify.com/**")],
+    // Photos uploaded in the admin are served by Payload.
+    localPatterns: [{ pathname: "/api/media/file/**" }, { pathname: "/media/**" }],
+  },
+  experimental: {
+    // Two root layouts (the shop and the admin), so unmatched URLs need their own 404.
+    globalNotFound: true,
   },
   turbopack: {
     rules: {
@@ -15,4 +20,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withPayload(nextConfig, { devBundleServerPackages: false });
