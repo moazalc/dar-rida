@@ -2,14 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { DesignTile } from "@/components/collection/design-tile";
 import type { ShopDesign } from "@/lib/designs";
-import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { formatUsd } from "@/lib/money";
 
 const SIZES = "(min-width: 1024px) 30vw, (min-width: 768px) 45vw, 50vw";
 
 /** One design in the collection grid: photo (second photo on hover) or drawing, name, price. */
-export function ProductCard({ design, dict, locale }: { design: ShopDesign; dict: Dictionary; locale: Locale }) {
+export function ProductCard({ design, dict }: { design: ShopDesign; dict: Dictionary }) {
   const t = dict.collection;
   const [first, second] = design.images;
 
@@ -53,7 +52,7 @@ export function ProductCard({ design, dict, locale }: { design: ShopDesign; dict
         </p>
         <h2 className="font-heading text-2xl leading-tight md:text-3xl">{design.name}</h2>
         <p className="text-muted-foreground">
-          <bdi>{formatUsd(design.price, locale)}</bdi>
+          <bdi>{formatUsd(design.price)}</bdi>
         </p>
       </div>
     </Link>

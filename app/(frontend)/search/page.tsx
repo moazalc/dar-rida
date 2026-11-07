@@ -71,7 +71,7 @@ export default async function SearchPage({
             <ul className="mt-10 grid grid-cols-2 gap-x-4 gap-y-14 md:gap-x-8 lg:grid-cols-3">
               {results.map((design) => (
                 <li key={design.id}>
-                  <ProductCard design={design} dict={dict} locale={locale} />
+                  <ProductCard design={design} dict={dict} />
                 </li>
               ))}
             </ul>

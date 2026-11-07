@@ -51,6 +51,11 @@ export async function findOrCreateCart(): Promise<Cart> {
   });
   if (existing) return existing;
   const payload = await payloadClient();
+  // New bags are a natural moment to clear out ones untouched for a month.
+  const cutoff = new Date(Date.now() - COOKIE_MAX_AGE * 1000).toISOString();
+  await payload
+    .delete({ collection: "carts", where: { updatedAt: { less_than: cutoff } } })
+    .catch((error) => console.error("Pruning old bags failed", error));
   return payload.create({ collection: "carts", data: { token, lines: [] } });
 }
 

@@ -16,7 +16,7 @@ const en = {
     home: "Home",
     collection: "Collection",
     designYourAbaya: "Design Your Abaya",
-    sizeGuide: "Size Guide",
+    sizeGuide: "How to Measure",
     search: "Search",
     cart: "Cart",
   },
@@ -363,8 +363,8 @@ const en = {
           a: "We alter it free of charge within [X] days of delivery. See Returns & alterations.",
         },
         {
-          q: "Which size should I choose?",
-          a: "Start with your length and bust; the size guide shows both. Between sizes, choose the larger, or give us your own measurements.",
+          q: "How do I give my size?",
+          a: "There are no standard sizes: every piece is cut to six measurements of your own. The measuring guide shows how to take each one, and you can add a note for anything particular.",
         },
         {
           q: "Can I see the fabric first?",
@@ -518,7 +518,7 @@ const en = {
     links: {
       collection: "Collection",
       designYourAbaya: "Design Your Abaya",
-      sizeGuide: "Size Guide",
+      sizeGuide: "How to Measure",
       fabricLibrary: "Fabric Library",
       shipping: "Shipping & Delivery",
       returns: "Returns & Alterations",

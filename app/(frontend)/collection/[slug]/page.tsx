@@ -81,7 +81,7 @@ export default async function DesignPage({ params }: Props) {
             </p>
             <h1 className="mt-1 font-heading text-5xl leading-[1.02] font-light md:text-6xl xl:text-7xl">{design.name}</h1>
             <p className="mt-5 font-heading text-3xl">
-              <bdi>{formatUsd(design.price, locale)}</bdi>
+              <bdi>{formatUsd(design.price)}</bdi>
             </p>
             <p className="mt-3 text-sm text-muted-foreground">{leadTime || t.leadTimeFallback}</p>
           </div>

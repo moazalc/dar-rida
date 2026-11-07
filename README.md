@@ -1,36 +1,104 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Dar Rida
 
-## Getting Started
+The Dar Rida storefront: made-to-measure abayas, in English and Arabic.
 
-First, run the development server:
+- **Next.js 16** (App Router) for the shop, in `app/(frontend)`.
+- **Payload CMS 3** for the admin at `/admin`, in `app/(payload)`, configured in
+  `payload.config.ts` and `cms/`. Its data lives in **Postgres**.
+- **Stripe Checkout** for payment. An order is only marked paid by Stripe's
+  webhook (`app/api/stripe/webhook`).
+- **Email** through any SMTP server (nodemailer): a new-order notice to the
+  owners and a confirmation to the customer.
+
+The design notes for this setup are in `docs/superpowers/specs/`.
+
+## Running it locally
+
+You need Node 22+, pnpm and Docker.
+
+1. Start Postgres:
+
+   ```bash
+   docker run -d --name dar-rida-pg -e POSTGRES_USER=darrida -e POSTGRES_PASSWORD=darrida -e POSTGRES_DB=darrida -p 127.0.0.1:5433:5432 -v dar-rida-pg:/var/lib/postgresql/data postgres:17-alpine
+   ```
+
+2. Copy `.env.example` to `.env`, set `PAYLOAD_SECRET`, and install:
+
+   ```bash
+   pnpm install
+   ```
+
+3. Add the four Rida designs and the starting store settings (set
+   `SEED_ADMIN_EMAIL` and `SEED_ADMIN_PASSWORD` first to also create an admin):
+
+   ```bash
+   pnpm seed
+   ```
+
+4. Run the site at http://localhost:3000 and the admin at http://localhost:3000/admin:
+
+   ```bash
+   pnpm dev
+   ```
+
+In development the database schema follows the code automatically. Without
+SMTP settings, emails are printed in the terminal.
+
+## Stripe
+
+1. Create a Stripe account. Test mode works straight away, before the business
+   bank account is connected.
+2. Put the test secret key in `STRIPE_SECRET_KEY`.
+3. In development, forward webhooks with the Stripe CLI and put the secret it
+   prints in `STRIPE_WEBHOOK_SECRET`:
+
+   ```bash
+   stripe listen --forward-to localhost:3000/api/stripe/webhook
+   ```
+
+4. In production, add a webhook endpoint in the Stripe dashboard pointing at
+   `https://<your domain>/api/stripe/webhook` with these events:
+   `checkout.session.completed`, `checkout.session.async_payment_succeeded`,
+   `checkout.session.expired`.
+5. Turn on **Adaptive Pricing** (Settings → Payments → Adaptive Pricing) so
+   customers see prices in their own currency at checkout. Prices are set and
+   charged in US dollars.
+
+Test card: `4242 4242 4242 4242`, any future date, any CVC.
+
+## Changing the database schema
+
+After changing a collection in `cms/`, create a migration and commit it.
+Production applies new migrations when the server starts.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm payload migrate:create <name>
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then regenerate the types (`pnpm generate:types`) and, if you added admin
+components, the import map (`pnpm generate:importmap`).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Deploying to a VPS
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Install Node 22+, pnpm and Postgres, and create a database and user for the shop.
+2. Set the production `.env`: a real `PAYLOAD_SECRET`, `NEXT_PUBLIC_SITE_URL`
+   set to the domain, `MEDIA_DIR` set to a folder outside the app (for example
+   `/var/lib/dar-rida/media`), the Stripe keys and the SMTP settings.
+3. Build and start:
 
-## Learn More
+   ```bash
+   pnpm install --frozen-lockfile && pnpm build && pnpm start
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+4. Run it under a process manager (systemd or pm2) behind a reverse proxy
+   (nginx or Caddy) with HTTPS.
+5. Sign in at `/admin` to set the real prices, the new-order email addresses
+   and the lead time in **Store settings**.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Checks
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+pnpm lint
+pnpm test
+pnpm build
+```

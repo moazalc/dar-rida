@@ -4,6 +4,7 @@ import type Stripe from "stripe";
 import { findCart, priceCart } from "@/lib/cart";
 import type { Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
+import { handlePaidSession } from "@/lib/orders/paid";
 import { snapshotLine } from "@/lib/orders/snapshot";
 import { payloadClient } from "@/lib/payload";
 import { shippingCountries } from "@/lib/shipping-countries";
@@ -38,9 +39,14 @@ export async function startCheckout(locale: Locale): Promise<CheckoutResult> {
       const previous = await payload.findByID({ collection: "orders", id: previousId, depth: 0, disableErrors: true });
       if (previous?.status === "pending_payment") {
         if (previous.stripeCheckoutSessionId) {
-          await stripe.checkout.sessions.expire(previous.stripeCheckoutSessionId).catch(() => undefined);
+          const closed = await closeSession(stripe, previous.stripeCheckoutSessionId);
+          if (closed === "paid") return { status: "not-ready" }; // it was paid after all; the bag is now empty
+          if (closed === "open") return { status: "error" };
         }
-        await payload.delete({ collection: "orders", id: previous.id });
+        await payload.delete({
+          collection: "orders",
+          where: { and: [{ id: { equals: previous.id } }, { status: { equals: "pending_payment" } }] },
+        });
       }
     }
 
@@ -98,5 +104,26 @@ export async function startCheckout(locale: Locale): Promise<CheckoutResult> {
   } catch (error) {
     console.error("Starting checkout failed", error);
     return { status: "error" };
+  }
+}
+
+/**
+ * Close a bag's earlier Checkout Session before starting a new one. If it
+ * can't be closed because the customer already paid (and Stripe's webhook has
+ * not landed yet), record the payment now instead of discarding the order.
+ */
+async function closeSession(stripe: Stripe, sessionId: string): Promise<"closed" | "paid" | "open"> {
+  try {
+    await stripe.checkout.sessions.expire(sessionId);
+    return "closed";
+  } catch {
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    if (session.status === "expired") return "closed";
+    if (session.status === "complete" && session.payment_status !== "unpaid") {
+      await handlePaidSession(session);
+      return "paid";
+    }
+    // Complete but still unpaid (a delayed payment method) or still open: leave it alone.
+    return "open";
   }
 }

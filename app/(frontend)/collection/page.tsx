@@ -44,7 +44,7 @@ export default async function CollectionPage() {
         <ul className="mt-12 grid grid-cols-2 gap-x-4 gap-y-14 md:mt-16 md:gap-x-8 lg:grid-cols-3 lg:gap-y-20">
           {designs.map((design) => (
             <li key={design.id}>
-              <ProductCard design={design} dict={dict} locale={locale} />
+              <ProductCard design={design} dict={dict} />
             </li>
           ))}
           <li>

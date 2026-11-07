@@ -81,7 +81,7 @@ ${leadTime ? `<p style="margin:0 0 20px;color:${MUTED}">${esc(t.leadTime.replace
 ${lines
   .map(
     ({ line, name, choices }) => `<div style="border-top:1px solid ${RULE};padding:16px 0">
-<table role="presentation" width="100%"><tr><td style="font-family:${SERIF};font-size:21px">${esc(name)}</td><td style="text-align:${dir === "rtl" ? "left" : "right"};white-space:nowrap">${esc(formatUsd(line.unitPrice * line.quantity, locale))}</td></tr></table>
+<table role="presentation" width="100%"><tr><td style="font-family:${SERIF};font-size:21px">${esc(name)}</td><td style="text-align:${dir === "rtl" ? "left" : "right"};white-space:nowrap">${esc(formatUsd(line.unitPrice * line.quantity))}</td></tr></table>
 ${line.quantity > 1 ? `<p style="margin:2px 0;color:${MUTED}">${esc(t.quantity)}: ${line.quantity.toLocaleString(locale)}</p>` : ""}
 ${choices.map((c) => `<p style="margin:2px 0"><span style="color:${MUTED}">${esc(c.label)}:</span> ${esc(c.value)}</p>`).join("")}
 <p style="margin:10px 0 2px;font-size:12px;letter-spacing:0.16em;color:${MUTED};text-transform:uppercase">${esc(t.measurements)}</p>
@@ -90,7 +90,7 @@ ${line.notes ? `<p style="margin:8px 0 0"><span style="color:${MUTED}">${esc(t.n
 </div>`,
   )
   .join("")}
-<table role="presentation" width="100%" style="border-top:1px solid ${INK};padding-top:12px"><tr><td style="font-size:16px">${esc(t.total)}</td><td style="text-align:${dir === "rtl" ? "left" : "right"};font-family:${SERIF};font-size:24px">${esc(formatUsd(order.total, locale))}</td></tr></table>
+<table role="presentation" width="100%" style="border-top:1px solid ${INK};padding-top:12px"><tr><td style="font-size:16px">${esc(t.total)}</td><td style="text-align:${dir === "rtl" ? "left" : "right"};font-family:${SERIF};font-size:24px">${esc(formatUsd(order.total))}</td></tr></table>
 ${paid ? `<p style="margin:4px 0 0;color:${MUTED};font-size:13px">${esc(paid)}</p>` : ""}
 ${address(order).length ? `<p style="margin:24px 0 4px;font-size:12px;letter-spacing:0.16em;color:${MUTED};text-transform:uppercase">${esc(t.shipTo)}</p><p style="margin:0">${address(order).map(esc).join("<br>")}</p>` : ""}
 <p style="margin:28px 0 0">${esc(t.questions)}</p>
@@ -107,7 +107,7 @@ ${address(order).length ? `<p style="margin:24px 0 4px;font-size:12px;letter-spa
     `${t.order} ${number}`,
     ...lines.flatMap(({ line, name, choices }) => [
       "",
-      `${name} — ${formatUsd(line.unitPrice * line.quantity, locale)}${line.quantity > 1 ? ` (${t.quantity}: ${line.quantity})` : ""}`,
+      `${name} — ${formatUsd(line.unitPrice * line.quantity)}${line.quantity > 1 ? ` (${t.quantity}: ${line.quantity})` : ""}`,
       ...choices.map((c) => `${c.label}: ${c.value}`),
       `${t.measurements}: ${measurementKeys
         .map((m) => `${dict.design.sizing.fields[m].label} ${line.measurements[m]} ${dict.design.sizing.units[measurementSpec[m].unit]}`)
@@ -115,7 +115,7 @@ ${address(order).length ? `<p style="margin:24px 0 4px;font-size:12px;letter-spa
       line.notes ? `${t.notes}: ${line.notes}` : "",
     ]),
     "",
-    `${t.total}: ${formatUsd(order.total, locale)}`,
+    `${t.total}: ${formatUsd(order.total)}`,
     paid ?? "",
     "",
     ...(address(order).length ? [t.shipTo, ...address(order), ""] : []),
@@ -132,7 +132,7 @@ ${address(order).length ? `<p style="margin:24px 0 4px;font-size:12px;letter-spa
 /** The notice the owners receive: everything the workshop needs, in English. */
 export function ownerEmail(order: Order, adminUrl: string): Email {
   const count = (order.lines ?? []).reduce((n, l) => n + l.quantity, 0);
-  const total = formatUsd(order.total, "en");
+  const total = formatUsd(order.total);
   const subject = `New order ${order.number} — ${count} ${count === 1 ? "piece" : "pieces"} — ${total}`;
   const unit = (m: (typeof measurementKeys)[number]) => measurementSpec[m].unit;
   const label = (m: string) => m.charAt(0).toUpperCase() + m.slice(1);
@@ -141,7 +141,7 @@ export function ownerEmail(order: Order, adminUrl: string): Email {
     .map(
       (line) => `<div style="border-top:1px solid ${RULE};padding:14px 0">
 <p style="margin:0;font-family:${SERIF};font-size:21px">${esc(line.name)} × ${line.quantity}</p>
-<p style="margin:2px 0 8px;color:${MUTED}">${esc(formatUsd(line.unitPrice, "en"))} each</p>
+<p style="margin:2px 0 8px;color:${MUTED}">${esc(formatUsd(line.unitPrice))} each</p>
 ${(line.choices ?? []).map((c) => `<p style="margin:2px 0"><span style="color:${MUTED}">${esc(c.label ?? "")}:</span> ${esc(c.value ?? "")}</p>`).join("")}
 <table role="presentation" style="font-size:14px;margin-top:6px">${measurementKeys
         .map((m) => `<tr><td style="padding:2px 12px 2px 0;color:${MUTED}">${label(m)}</td><td>${line.measurements[m]} ${unit(m)}</td></tr>`)
@@ -170,7 +170,7 @@ ${linesHtml}
     `${count} ${count === 1 ? "piece" : "pieces"} · ${total}`,
     ...(order.lines ?? []).flatMap((line) => [
       "",
-      `${line.name} × ${line.quantity} (${formatUsd(line.unitPrice, "en")} each)`,
+      `${line.name} × ${line.quantity} (${formatUsd(line.unitPrice)} each)`,
       ...(line.choices ?? []).map((c) => `${c.label}: ${c.value}`),
       ...measurementKeys.map((m) => `  ${label(m)}: ${line.measurements[m]} ${unit(m)}`),
       line.notes ? `Notes: ${line.notes}` : "",

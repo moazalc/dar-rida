@@ -5,9 +5,12 @@ export function dollarsToCents(dollars: number | null | undefined): number {
   return typeof dollars === "number" && Number.isFinite(dollars) ? Math.round(dollars * 100) : 0;
 }
 
-/** "$1,240" (or "$1,240.50") in the page's language. */
-export function formatUsd(cents: number, locale: string): string {
-  return new Intl.NumberFormat(locale === "ar" ? "ar-u-nu-latn" : "en-US", {
+/**
+ * "$1,240" (or "$1,240.50"). Written the same way in both languages: the Arabic
+ * format adds a right-to-left mark that flips "US$" around inside RTL text.
+ */
+export function formatUsd(cents: number): string {
+  return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
     minimumFractionDigits: cents % 100 === 0 ? 0 : 2,

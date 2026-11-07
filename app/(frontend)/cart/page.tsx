@@ -64,7 +64,7 @@ export default async function CartPage() {
             <div className="mt-5 flex items-baseline justify-between gap-4">
               <span>{t.subtotal}</span>
               <span className="font-heading text-3xl">
-                <bdi>{formatUsd(bag.subtotal, locale)}</bdi>
+                <bdi>{formatUsd(bag.subtotal)}</bdi>
               </span>
             </div>
             <p className="mt-3 text-sm text-muted-foreground">{t.taxNote}</p>
@@ -112,11 +112,11 @@ function Line({ line, dict, locale }: { line: BagLine; dict: Dictionary; locale:
           {!unavailable && (
             <div className="shrink-0 pt-1 text-end">
               <p>
-                <bdi>{formatUsd(line.unitPrice! * line.quantity, locale)}</bdi>
+                <bdi>{formatUsd(line.unitPrice! * line.quantity)}</bdi>
               </p>
               {line.quantity > 1 && (
                 <p className="text-xs text-muted-foreground">
-                  {t.each.replace("{price}", formatUsd(line.unitPrice!, locale))}
+                  {t.each.replace("{price}", formatUsd(line.unitPrice!))}
                 </p>
               )}
             </div>
