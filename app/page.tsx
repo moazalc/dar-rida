@@ -1,3 +1,4 @@
+import { CollectionRow } from "@/components/home/collection-row";
 import { Detail } from "@/components/home/detail";
 import { Hero } from "@/components/home/hero";
 import { HowItWorks } from "@/components/home/how-it-works";
@@ -16,6 +17,7 @@ export default async function Home() {
       <Paths dict={dict} />
       <Detail dict={dict} />
       <Spotlight dict={dict} />
+      <CollectionRow dict={dict} />
       <HowItWorks dict={dict} />
       <Invitation dict={dict} />
     </>
