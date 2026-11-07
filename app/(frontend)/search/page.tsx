@@ -6,7 +6,7 @@ import { pageFrame } from "@/components/page-intro";
 import { statusAction } from "@/components/status-page";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getLocale } from "@/lib/i18n/locale";
-import { searchProducts } from "@/lib/shopify/products";
+import { searchDesigns } from "@/lib/designs";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = (await getDictionary(await getLocale())).search;
@@ -23,7 +23,7 @@ export default async function SearchPage({
   const locale = await getLocale();
   const dict = await getDictionary(locale);
   const t = dict.search;
-  const results = q ? await searchProducts(q, locale).catch(() => []) : undefined;
+  const results = q ? await searchDesigns(q, locale) : undefined;
   const count = results?.length ?? 0;
 
   return (
@@ -50,8 +50,6 @@ export default async function SearchPage({
         </button>
       </form>
 
-      {q && results === null && <p className="mt-10 text-muted-foreground">{t.notConnected}</p>}
-
       {q && results && (
         <>
           <p className="mt-10 text-sm tracking-[0.2em] text-muted-foreground uppercase">
@@ -71,9 +69,9 @@ export default async function SearchPage({
             </div>
           ) : (
             <ul className="mt-10 grid grid-cols-2 gap-x-4 gap-y-14 md:gap-x-8 lg:grid-cols-3">
-              {results.map((product) => (
-                <li key={product.handle}>
-                  <ProductCard product={product} dict={dict} locale={locale} />
+              {results.map((design) => (
+                <li key={design.id}>
+                  <ProductCard design={design} dict={dict} locale={locale} />
                 </li>
               ))}
             </ul>

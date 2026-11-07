@@ -2,7 +2,7 @@
 
 import { useFormStatus } from "react-dom";
 import { Minus, Plus } from "lucide-react";
-import { updateLine } from "@/app/cart/actions";
+import { updateLine } from "@/app/(frontend)/cart/actions";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { cn } from "@/lib/utils";
 

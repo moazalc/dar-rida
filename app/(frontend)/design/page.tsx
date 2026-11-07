@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Configurator } from "@/components/design/configurator";
-import { parseConfig } from "@/lib/configurator/options";
+import { configFromParams } from "@/lib/configurator/options";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getLocale } from "@/lib/i18n/locale";
 
@@ -14,5 +14,5 @@ export default async function DesignPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  return <Configurator initialConfig={parseConfig(await searchParams)} />;
+  return <Configurator initialConfig={configFromParams(await searchParams)} />;
 }

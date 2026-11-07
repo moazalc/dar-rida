@@ -237,7 +237,7 @@ export interface Design {
   /**
    * The line drawing shown when there are no photos
    */
-  drawing: 'rida01' | 'rida02' | 'rida03' | 'rida04';
+  drawing: 'rida-01' | 'rida-02' | 'rida-03' | 'rida-04';
   /**
    * Untick to hide it from the shop
    */

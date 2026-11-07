@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
 import "./globals.css";
 import { fontVars } from "@/lib/fonts";
 import { DirectionProvider } from "@/components/ui/direction";
@@ -9,7 +8,7 @@ import { SiteHeader } from "@/components/site-header";
 import { getLocale } from "@/lib/i18n/locale";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getDirection } from "@/lib/i18n/config";
-import { CART_COUNT_COOKIE, parseCartCount } from "@/lib/shopify/cart-count";
+import { cartCount as readCartCount } from "@/lib/cart";
 
 export const metadata: Metadata = {
   title: "Dar Rida",
@@ -24,7 +23,7 @@ export default async function RootLayout({
   const locale = await getLocale();
   const dir = getDirection(locale);
   const dict = await getDictionary(locale);
-  const cartCount = parseCartCount((await cookies()).get(CART_COUNT_COOKIE)?.value);
+  const cartCount = await readCartCount();
 
   return (
     <html lang={locale} dir={dir} style={fontVars} className="h-full antialiased">

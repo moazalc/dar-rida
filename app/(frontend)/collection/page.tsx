@@ -4,7 +4,7 @@ import { ProductCard } from "@/components/collection/product-card";
 import { statusAction } from "@/components/status-page";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getLocale } from "@/lib/i18n/locale";
-import { getCollectionProducts } from "@/lib/shopify/products";
+import { listDesigns } from "@/lib/designs";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = (await getDictionary(await getLocale())).collection;
@@ -15,8 +15,8 @@ export default async function CollectionPage() {
   const locale = await getLocale();
   const dict = await getDictionary(locale);
   const t = dict.collection;
-  const products = await getCollectionProducts(locale);
-  const count = products?.length ?? 0;
+  const designs = await listDesigns(locale);
+  const count = designs.length;
 
   return (
     <div className="mx-auto max-w-[90rem] px-4 pt-14 pb-24 md:px-10 md:pt-20 md:pb-36 xl:px-18">
@@ -35,16 +35,16 @@ export default async function CollectionPage() {
 
       {count === 0 ? (
         <div className="flex flex-col items-start gap-8 py-20">
-          <p className="max-w-xl text-lg text-muted-foreground">{products ? t.empty : t.notConnected}</p>
+          <p className="max-w-xl text-lg text-muted-foreground">{t.empty}</p>
           <Link href="/design" className={statusAction.primary}>
             {t.designYourOwn}
           </Link>
         </div>
       ) : (
         <ul className="mt-12 grid grid-cols-2 gap-x-4 gap-y-14 md:mt-16 md:gap-x-8 lg:grid-cols-3 lg:gap-y-20">
-          {products!.map((product) => (
-            <li key={product.handle}>
-              <ProductCard product={product} dict={dict} locale={locale} />
+          {designs.map((design) => (
+            <li key={design.id}>
+              <ProductCard design={design} dict={dict} locale={locale} />
             </li>
           ))}
           <li>

@@ -2,23 +2,21 @@
 
 import { useRef, useState } from "react";
 import Image from "next/image";
-import { Placeholder } from "@/components/placeholder";
 import { useI18n } from "@/components/providers/i18n-provider";
-import type { ShopImage } from "@/lib/shopify/products";
+import type { ShopDesign } from "@/lib/designs";
 
 /**
  * Phones: a swipeable strip, one photo per screen, with a counter.
  * Desktop: every photo stacked down the page beside the sticky details.
+ * Without photos, shows `fallback` (the design's drawing).
  */
-export function ProductGallery({ images, title }: { images: ShopImage[]; title: string }) {
+export function ProductGallery({ images, title, fallback }: { images: ShopDesign["images"]; title: string; fallback: React.ReactNode }) {
   const { dict, locale } = useI18n();
   const t = dict.product;
   const strip = useRef<HTMLDivElement>(null);
   const [current, setCurrent] = useState(0);
 
-  if (images.length === 0) {
-    return <Placeholder label={dict.placeholder} className="aspect-[4/5] w-full" />;
-  }
+  if (images.length === 0) return fallback;
 
   const onScroll = () => {
     const el = strip.current;
@@ -38,7 +36,7 @@ export function ProductGallery({ images, title }: { images: ShopImage[]; title: 
             <div key={img.url} className="relative aspect-[4/5] w-full shrink-0 snap-center bg-muted">
               <Image
                 src={img.url}
-                alt={img.altText ?? title}
+                alt={img.alt || title}
                 fill
                 sizes="100vw"
                 priority={i === 0}
@@ -72,7 +70,7 @@ export function ProductGallery({ images, title }: { images: ShopImage[]; title: 
           >
             <Image
               src={img.url}
-              alt={img.altText ?? title}
+              alt={img.alt || title}
               fill
               sizes={i === 0 ? "55vw" : "28vw"}
               priority={i === 0}

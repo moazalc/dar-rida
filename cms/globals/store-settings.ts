@@ -21,7 +21,6 @@ export const StoreSettings: GlobalConfig = {
       name: "orderNotificationEmails",
       label: "Send new-order emails to",
       type: "array",
-      minRows: 1,
       fields: [{ name: "email", type: "email", required: true }],
     },
     {

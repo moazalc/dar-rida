@@ -10,7 +10,8 @@
     "payload": "payload",
     "generate:importmap": "payload generate:importmap",
     "generate:types": "payload generate:types",
-    "test": "vitest run"
+    "test": "vitest run",
+    "seed": "payload run scripts/seed.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
