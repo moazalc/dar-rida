@@ -1,7 +1,11 @@
 import "server-only";
 
+import { cookies } from "next/headers";
 import type Stripe from "stripe";
+import type { Customer } from "@/cms/payload-types";
+import { ADDRESS_COOKIE, pickAddress } from "@/lib/account";
 import { findCart, priceCart, type Bag } from "@/lib/cart";
+import { getCustomer } from "@/lib/customers";
 import type { Locale } from "@/lib/i18n/config";
 import { getDictionary, type Dictionary } from "@/lib/i18n/dictionaries";
 import { handlePaidSession } from "@/lib/orders/paid";
@@ -31,6 +35,10 @@ export async function startCheckout(locale: Locale): Promise<CheckoutResult> {
     if (!bag.ready) return { status: "not-ready" };
 
     const payload = await payloadClient();
+    const customer = await getCustomer().catch((error) => {
+      console.error("Reading the customer at checkout failed", error);
+      return null;
+    });
 
     // One open checkout per bag: close the previous one before starting another.
     const previousId = typeof cart.pendingOrder === "object" ? cart.pendingOrder?.id : cart.pendingOrder;
@@ -64,12 +72,14 @@ export async function startCheckout(locale: Locale): Promise<CheckoutResult> {
         total: bag.total,
         locale,
         cartToken: cart.token,
+        customer: customer?.id,
       },
     });
 
     let session: Stripe.Checkout.Session;
     try {
-      session = await createSession(stripe, order, lines, bag, locale, dict);
+      const stripeCustomer = customer ? await stripeCustomerFor(stripe, customer, bag.country) : null;
+      session = await createSession(stripe, order, lines, bag, locale, dict, stripeCustomer);
     } catch (error) {
       // Never leave an order behind that has no way to be paid or expire.
       await payload.delete({ collection: "orders", id: order.id }).catch(() => undefined);
@@ -117,6 +127,7 @@ async function createSession(
   bag: Bag,
   locale: Locale,
   dict: Dictionary,
+  stripeCustomer: string | null,
 ): Promise<Stripe.Checkout.Session> {
   const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = lines.map((l) => ({
     quantity: l.quantity,
@@ -149,6 +160,11 @@ async function createSession(
         },
       ],
       phone_number_collection: { enabled: true },
+      // Signed in: Stripe starts with her saved name, phone and address, and
+      // saves back anything she changes.
+      ...(stripeCustomer
+        ? { customer: stripeCustomer, customer_update: { name: "auto" as const, shipping: "auto" as const } }
+        : {}),
       // Dollar prices are shown in the customer's own currency; dirham prices are already local.
       adaptive_pricing: { enabled: bag.currency === "usd" },
       // Stripe Checkout has no Arabic; "auto" follows the browser, falling back to English.
@@ -160,4 +176,47 @@ async function createSession(
     { idempotencyKey: `order-${order.id}` },
   );
   return session;
+}
+
+/**
+ * Her Stripe customer, made on her first checkout, with the saved address for
+ * this country (the one chosen in the bag, else the default) as its shipping
+ * address, so Checkout opens with it filled in. A stored ID that Stripe no
+ * longer knows (test and live keys differ) is replaced.
+ */
+async function stripeCustomerFor(stripe: Stripe, customer: Customer, country: string | null): Promise<string> {
+  const chosen = (await cookies()).get(ADDRESS_COOKIE)?.value;
+  const address = pickAddress(customer.addresses ?? [], country, chosen);
+  const details: Stripe.CustomerUpdateParams = {
+    email: customer.email,
+    ...(customer.name && { name: customer.name }),
+    ...(customer.phone && { phone: customer.phone }),
+    ...(address && {
+      shipping: {
+        name: address.name,
+        phone: address.phone || customer.phone || undefined,
+        address: {
+          line1: address.line1,
+          line2: address.line2 || undefined,
+          city: address.city,
+          state: address.state || undefined,
+          postal_code: address.postalCode || undefined,
+          country: address.country,
+        },
+      },
+    }),
+  };
+
+  if (customer.stripeCustomerId) {
+    try {
+      await stripe.customers.update(customer.stripeCustomerId, details);
+      return customer.stripeCustomerId;
+    } catch (error) {
+      if ((error as { code?: string }).code !== "resource_missing") throw error;
+    }
+  }
+  const created = await stripe.customers.create({ ...(details as Stripe.CustomerCreateParams), metadata: { customerId: String(customer.id) } });
+  const payload = await payloadClient();
+  await payload.update({ collection: "customers", id: customer.id, data: { stripeCustomerId: created.id }, depth: 0 });
+  return created.id;
 }

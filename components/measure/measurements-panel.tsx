@@ -27,15 +27,39 @@ const ctaClass =
   "inline-flex h-12 items-center justify-center bg-primary px-7 text-sm tracking-[0.16em] text-primary-foreground uppercase transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-45";
 const linkClass = "text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground";
 
+/** A set saved to her account. */
+export type SavedProfile = { id: string; name: string; measurements: Measurements };
+
+const same = (a: MeasurementsDraft, b: Measurements) => a.unit === b.unit && measurementKeys.every((m) => a[m] === b[m]);
+
 /**
  * "Your measurements" on the product page: a compact card that opens a guided
  * panel, one measurement per step with the figure lighting up where to measure,
  * then a review. The card then lists the six values. Values are kept exactly as
  * picked, in the unit picked (see lib/measurements for why nothing drifts).
+ *
+ * Signed in, she can start from a saved set (`profiles`) and, when `saveAs` is
+ * given, save what she confirms to her account under a name; `onChange` then
+ * gets that name too.
  */
-export function MeasurementsPanel({ value, onChange }: { value: Measurements | null; onChange: (m: Measurements) => void }) {
+export function MeasurementsPanel({
+  value,
+  onChange,
+  title,
+  profiles = [],
+  saveAs,
+}: {
+  value: Measurements | null;
+  onChange: (m: Measurements, saveAs?: string | null) => void;
+  title?: string;
+  profiles?: SavedProfile[];
+  saveAs?: { defaultName: string } | null;
+}) {
   const { dict, locale, dir } = useI18n();
   const t = dict.measure;
+  const ta = dict.account.profiles;
+  const [saveChecked, setSaveChecked] = useState(profiles.length === 0);
+  const [saveName, setSaveName] = useState(saveAs?.defaultName ?? "");
   const { unit: preferred, setUnit } = useUnit();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<MeasurementsDraft>(() => value ?? { unit: preferred });
@@ -77,11 +101,59 @@ export function MeasurementsPanel({ value, onChange }: { value: Measurements | n
     setOpen(true);
   }
 
+  // Offered only for measurements that aren't already one of her saved sets.
+  const offerSave = Boolean(saveAs) && isComplete(draft) && !profiles.some((p) => same(draft, p.measurements));
+  const chosenName = saveName.trim().slice(0, 40);
+
   function save() {
     if (!isComplete(draft)) return;
-    onChange({ ...draft });
+    onChange({ ...draft }, offerSave && saveChecked && chosenName ? chosenName : null);
     setOpen(false);
   }
+
+  function pickProfile(p: SavedProfile) {
+    setDraft({ ...p.measurements });
+    setUnit(p.measurements.unit);
+    setPendingUnit(null);
+    setMode("review");
+    setOpen(true);
+  }
+
+  const saveField = offerSave && (
+    <div className="flex flex-col gap-2 border border-border/70 p-4">
+      <label className="flex items-center gap-2.5 text-sm">
+        <input type="checkbox" checked={saveChecked} onChange={(e) => setSaveChecked(e.target.checked)} className="size-4 accent-foreground" />
+        {ta.saveAs}
+      </label>
+      {saveChecked && (
+        <input
+          value={saveName}
+          maxLength={40}
+          onChange={(e) => setSaveName(e.target.value)}
+          placeholder={ta.namePlaceholder}
+          aria-label={ta.name}
+          className="h-10 border border-border bg-card px-3 text-sm outline-none focus:border-foreground"
+        />
+      )}
+    </div>
+  );
+
+  const savedChips = profiles.length > 0 && (
+    <div className="flex flex-wrap items-center gap-2 text-sm">
+      <span className="text-muted-foreground">{ta.useSaved}:</span>
+      {profiles.map((p) => (
+        <button
+          key={p.id}
+          type="button"
+          onClick={() => pickProfile(p)}
+          aria-pressed={value ? same(value, p.measurements) : false}
+          className="border border-border/80 px-3 py-1.5 transition-colors hover:border-foreground aria-pressed:border-foreground aria-pressed:bg-foreground aria-pressed:text-background"
+        >
+          {p.name}
+        </button>
+      ))}
+    </div>
+  );
 
   const notice = pendingUnit && (
     <div className="flex flex-col gap-3 border border-gold p-4 text-sm" role="status">
@@ -104,7 +176,7 @@ export function MeasurementsPanel({ value, onChange }: { value: Measurements | n
       <section aria-labelledby="measurements-title" className="flex flex-col gap-4 border border-border/70 p-5 md:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 id="measurements-title" className="font-heading text-3xl">
-            {t.title}
+            {title ?? t.title}
           </h2>
           <div className="flex items-center gap-4">
             <UnitSwitch value={pendingUnit ?? unit} onChange={requestUnit} />
@@ -115,6 +187,7 @@ export function MeasurementsPanel({ value, onChange }: { value: Measurements | n
             )}
           </div>
         </div>
+        {savedChips}
         {value ? (
           <dl className="grid grid-cols-2 gap-x-5 gap-y-3 sm:grid-cols-3">
             {measurementKeys.map((m) => (
@@ -166,9 +239,9 @@ export function MeasurementsPanel({ value, onChange }: { value: Measurements | n
               {notice ? (
                 notice
               ) : mode === "review" ? (
-                <Review draft={draft} fmt={fmt} onEdit={(i) => (setStep(i), setMode("steps"))} onSave={save} />
+                <Review draft={draft} fmt={fmt} onEdit={(i) => (setStep(i), setMode("steps"))} onSave={save} extra={saveField} />
               ) : mode === "all" ? (
-                <AllAtOnce draft={draft} setDraft={setDraft} fmt={fmt} onSave={save} onGuided={() => (setStep(0), setMode("steps"))} />
+                <AllAtOnce draft={draft} setDraft={setDraft} fmt={fmt} onSave={save} onGuided={() => (setStep(0), setMode("steps"))} extra={saveField} />
               ) : (
                 <Step
                   step={step}
@@ -267,11 +340,13 @@ function Review({
   fmt,
   onEdit,
   onSave,
+  extra,
 }: {
   draft: MeasurementsDraft;
   fmt: Fmt;
   onEdit: (step: number) => void;
   onSave: () => void;
+  extra?: React.ReactNode;
 }) {
   const { dict, locale } = useI18n();
   const t = dict.measure;
@@ -296,6 +371,7 @@ function Review({
           </div>
         ))}
       </dl>
+      {extra}
       <button type="button" onClick={onSave} disabled={!isComplete(draft)} className={cn(ctaClass, "w-full")}>
         {t.save}
       </button>
@@ -309,12 +385,14 @@ function AllAtOnce({
   fmt,
   onSave,
   onGuided,
+  extra,
 }: {
   draft: MeasurementsDraft;
   setDraft: (d: MeasurementsDraft) => void;
   fmt: Fmt;
   onSave: () => void;
   onGuided: () => void;
+  extra?: React.ReactNode;
 }) {
   const t = useI18n().dict.measure;
   const id = useId();
@@ -345,6 +423,7 @@ function AllAtOnce({
           </div>
         ))}
       </div>
+      {extra}
       <button type="button" onClick={onSave} disabled={!isComplete(draft)} className={cn(ctaClass, "w-full")}>
         {t.save}
       </button>

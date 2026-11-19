@@ -172,9 +172,17 @@ export const Orders: CollectionConfig = {
           type: "row",
           fields: [
             { name: "customerName", label: "Name", type: "text", admin: readOnly },
-            { name: "customerEmail", label: "Email", type: "email", admin: readOnly },
+            { name: "customerEmail", label: "Email", type: "email", index: true, admin: readOnly },
             { name: "customerPhone", label: "Phone", type: "text", admin: readOnly },
           ],
+        },
+        {
+          name: "customer",
+          label: "Account",
+          type: "relationship",
+          relationTo: "customers",
+          index: true,
+          admin: { ...readOnly, description: "Set when the customer was signed in at checkout." },
         },
         {
           name: "shippingAddress",

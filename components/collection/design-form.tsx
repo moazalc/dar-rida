@@ -1,16 +1,23 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { useId, useState, useTransition } from "react";
+import { addProfile } from "@/app/(frontend)/account/actions";
 import { addDesignToBag, type AddToBagResult } from "@/app/(frontend)/cart/actions";
-import { MeasurementsPanel } from "@/components/measure/measurements-panel";
+import { MeasurementsPanel, type SavedProfile } from "@/components/measure/measurements-panel";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { NOTES_MAX, type Measurements } from "@/lib/measurements";
 
-/** Measurements, notes and Add to bag for one collection design. */
-export function DesignForm({ slug, available }: { slug: string; available: boolean }) {
+/**
+ * Measurements, notes and Add to bag for one collection design. Signed in
+ * (`profiles` is an array), her saved sets are offered and new ones can be saved.
+ */
+export function DesignForm({ slug, available, profiles }: { slug: string; available: boolean; profiles: SavedProfile[] | null }) {
   const { dict } = useI18n();
   const t = dict.product;
+  const router = useRouter();
+  const path = usePathname();
   const [measurements, setMeasurements] = useState<Measurements | null>(null);
   const [notes, setNotes] = useState("");
   const [result, setResult] = useState<AddToBagResult | null>(null);
@@ -31,7 +38,28 @@ export function DesignForm({ slug, available }: { slug: string; available: boole
         });
       }}
     >
-      <MeasurementsPanel value={measurements} onChange={(m) => (setMeasurements(m), setResult(null))} />
+      <div className="flex flex-col gap-2">
+        <MeasurementsPanel
+          value={measurements}
+          profiles={profiles ?? []}
+          saveAs={profiles ? { defaultName: profiles.length === 0 ? dict.account.profiles.defaultName : "" } : null}
+          onChange={(m, saveAs) => {
+            setMeasurements(m);
+            setResult(null);
+            if (saveAs) {
+              void addProfile({ name: saveAs, measurements: m }).then((r) => r.status === "ok" && router.refresh());
+            }
+          }}
+        />
+        {!profiles && (
+          <p className="text-sm text-muted-foreground">
+            <Link href={`/account/sign-in?next=${encodeURIComponent(path)}`} className="underline underline-offset-4 hover:text-foreground">
+              {dict.account.prompt.action}
+            </Link>{" "}
+            · {dict.account.prompt.bag}
+          </p>
+        )}
+      </div>
 
       <div className="flex flex-col gap-2">
         <label htmlFor={notesId} className="text-sm">

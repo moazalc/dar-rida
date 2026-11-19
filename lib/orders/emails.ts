@@ -10,16 +10,16 @@ import { formatMinorUnits } from "@/lib/money";
 
 export type Email = { subject: string; html: string; text: string };
 
-const esc = (s: string) =>
+export const esc = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 
-const INK = "#2b2420";
-const MUTED = "#7a6f66";
+export const INK = "#2b2420";
+export const MUTED = "#7a6f66";
 const RULE = "#e6dccb";
-const SERIF = "'Cormorant Garamond', Georgia, 'Times New Roman', serif";
+export const SERIF = "'Cormorant Garamond', Georgia, 'Times New Roman', serif";
 const SANS = "Jost, 'Helvetica Neue', Arial, sans-serif";
 
-function shell(body: string, dir: "ltr" | "rtl", lang: string) {
+export function shell(body: string, dir: "ltr" | "rtl", lang: string) {
   return `<!doctype html><html lang="${lang}" dir="${dir}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
 <body style="margin:0;background:#f7f2e9;color:${INK};font-family:${SANS};font-size:15px;line-height:1.55">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f7f2e9"><tr><td align="center" style="padding:32px 16px">

@@ -34,6 +34,8 @@ export const Carts: CollectionConfig = {
         { name: "quantity", type: "number", required: true, min: 1, max: 10, defaultValue: 1 },
       ],
     },
+    // The signed-in customer this bag belongs to, so it follows them across devices.
+    { name: "customer", type: "relationship", relationTo: "customers", unique: true, index: true },
     // The checkout this bag last started, so starting a new one can close the old.
     { name: "pendingOrder", type: "relationship", relationTo: "orders" },
   ],

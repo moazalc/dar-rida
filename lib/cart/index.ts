@@ -3,6 +3,7 @@ import "server-only";
 import { randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
 import type { Cart, Design, Media } from "@/cms/payload-types";
+import { mergeLines } from "@/lib/account";
 import { describeConfig } from "@/lib/configurator/describe";
 import type { Config } from "@/lib/configurator/options";
 import type { Locale } from "@/lib/i18n/config";
@@ -11,6 +12,7 @@ import type { Measurements, StoredMeasurements } from "@/lib/measurements";
 import { mediaPath } from "@/lib/media";
 import { getCountry } from "@/lib/country";
 import { marketFor, type Country, type Currency, type Market } from "@/lib/markets";
+import { getCustomer } from "@/lib/customers";
 import { payloadClient } from "@/lib/payload";
 import { shippingFor, type ShippingQuote } from "@/lib/shipping";
 import { unitPrice, type PricedDesign } from "./pricing";
@@ -31,12 +33,33 @@ async function cartToken(): Promise<string | null> {
   return value && TOKEN.test(value) ? value : null;
 }
 
-/** The current visitor's bag, or null if they have none yet. */
+const cookieOptions = {
+  httpOnly: true,
+  sameSite: "lax" as const,
+  secure: process.env.NODE_ENV === "production",
+  path: "/",
+  maxAge: COOKIE_MAX_AGE,
+};
+
+function ownerId(cart: Cart): number | null {
+  return typeof cart.customer === "object" && cart.customer ? cart.customer.id : (cart.customer ?? null);
+}
+
+/**
+ * The current visitor's bag, or null if they have none yet: the one in the
+ * cookie, or for a signed-in customer on a new device, their account's bag.
+ * A bag that belongs to someone else's account is never shown.
+ */
 export async function findCart(depth = 0): Promise<Cart | null> {
-  const token = await cartToken();
-  if (!token) return null;
+  const [token, customer] = await Promise.all([cartToken(), getCustomer().catch(() => null)]);
   const payload = await payloadClient();
-  const { docs } = await payload.find({ collection: "carts", where: { token: { equals: token } }, limit: 1, depth });
+  if (token) {
+    const { docs } = await payload.find({ collection: "carts", where: { token: { equals: token } }, limit: 1, depth });
+    const cart = docs[0];
+    if (cart && (ownerId(cart) === null || ownerId(cart) === customer?.id)) return cart;
+  }
+  if (!customer) return null;
+  const { docs } = await payload.find({ collection: "carts", where: { customer: { equals: customer.id } }, limit: 1, depth });
   return docs[0] ?? null;
 }
 
@@ -46,21 +69,55 @@ export async function findOrCreateCart(): Promise<Cart> {
   const store = await cookies();
   const token = existing?.token ?? randomBytes(24).toString("base64url");
   // Refresh the cookie on every change, so an active bag never expires.
-  store.set(CART_COOKIE, token, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: COOKIE_MAX_AGE,
-  });
+  store.set(CART_COOKIE, token, cookieOptions);
   if (existing) return existing;
   const payload = await payloadClient();
   // New bags are a natural moment to clear out ones untouched for a month.
+  // Account bags are kept: they follow the customer, however long she is away.
   const cutoff = new Date(Date.now() - COOKIE_MAX_AGE * 1000).toISOString();
   await payload
-    .delete({ collection: "carts", where: { updatedAt: { less_than: cutoff } } })
+    .delete({ collection: "carts", where: { and: [{ updatedAt: { less_than: cutoff } }, { customer: { exists: false } }] } })
     .catch((error) => console.error("Pruning old bags failed", error));
-  return payload.create({ collection: "carts", data: { token, lines: [] } });
+  const customer = await getCustomer().catch(() => null);
+  return payload.create({ collection: "carts", data: { token, lines: [], customer: customer?.id } });
+}
+
+/**
+ * Right after signing in: this device's bag joins the account's. With no
+ * account bag yet, the device's bag becomes it; with both, the device's lines
+ * move into the account's bag and the device's is deleted. Either way the
+ * cookie ends up pointing at the account's bag. For route handlers and
+ * Server Actions only (it sets the cookie).
+ */
+export async function adoptBag(customerId: number): Promise<void> {
+  const payload = await payloadClient();
+  const store = await cookies();
+  const token = await cartToken();
+  const device = token
+    ? (await payload.find({ collection: "carts", where: { token: { equals: token } }, limit: 1, depth: 0 })).docs[0]
+    : undefined;
+  const account = (await payload.find({ collection: "carts", where: { customer: { equals: customerId } }, limit: 1, depth: 0 })).docs[0];
+
+  // Someone else's bag on this device stays theirs; this customer gets their own.
+  const deviceIsMine = device && (ownerId(device) === null || ownerId(device) === customerId);
+
+  if (account && deviceIsMine && device.id !== account.id) {
+    const lines = mergeLines(plainLines(account), plainLines(device));
+    await payload.update({ collection: "carts", id: account.id, data: { lines } });
+    await payload.delete({ collection: "carts", id: device.id });
+    store.set(CART_COOKIE, account.token, cookieOptions);
+  } else if (account) {
+    store.set(CART_COOKIE, account.token, cookieOptions);
+  } else if (deviceIsMine) {
+    if (ownerId(device) === null) await payload.update({ collection: "carts", id: device.id, data: { customer: customerId } });
+  } else if (device) {
+    store.delete(CART_COOKIE);
+  }
+}
+
+/** On signing out, so the next person on this device starts with an empty bag. */
+export async function forgetBag(): Promise<void> {
+  (await cookies()).delete(CART_COOKIE);
 }
 
 type StoredLine = NonNullable<Cart["lines"]>[number];

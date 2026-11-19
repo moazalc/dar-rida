@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { StatusPage, statusAction } from "@/components/status-page";
+import { getSessionUser } from "@/lib/customers";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getLocale } from "@/lib/i18n/locale";
 import { payloadClient } from "@/lib/payload";
@@ -43,11 +44,27 @@ export default async function CheckoutSuccessPage({
       ? `${t.body.replace("{number}", order.number ?? "")}${order.customerEmail ? ` ${t.emailSent.replace("{email}", order.customerEmail)}` : ""}`
       : t.pendingBody;
 
+  // A guest who just paid: one click to an account that keeps these measurements.
+  const signedIn = Boolean(await getSessionUser().catch(() => null));
+  const href = signedIn && order?.number ? `/account/orders/${order.number}` : null;
+
   return (
     <StatusPage code="✓" title={title} body={body}>
       <Link href="/collection" className={statusAction.primary}>
         {t.continue}
       </Link>
+      {href ? (
+        <Link href={href} className={statusAction.secondary}>
+          {dict.account.nav.orders}
+        </Link>
+      ) : (
+        order && (
+          <Link href={`/account/sign-in?next=${encodeURIComponent("/account/measurements")}`} className={statusAction.secondary}>
+            {dict.account.prompt.action}
+          </Link>
+        )
+      )}
+      {!signedIn && order && <p className="basis-full text-sm text-muted-foreground">{dict.account.prompt.confirmation}</p>}
     </StatusPage>
   );
 }

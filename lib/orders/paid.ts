@@ -4,6 +4,7 @@ import { sql } from "@payloadcms/db-postgres";
 import type { BasePayload } from "payload";
 import type Stripe from "stripe";
 import { emptyCartByToken } from "@/lib/cart";
+import { isCountry } from "@/lib/markets";
 import { payloadClient } from "@/lib/payload";
 import { sendOrderEmails } from "./notify";
 
@@ -14,7 +15,7 @@ export function paidDetails(session: Stripe.Checkout.Session) {
   const a = shipping?.address ?? customer?.address ?? null;
   return {
     customerName: shipping?.name || customer?.name || null,
-    customerEmail: customer?.email || session.customer_email || null,
+    customerEmail: (customer?.email || session.customer_email || "").trim().toLowerCase() || null,
     customerPhone: customer?.phone || null,
     shippingAddress: {
       line1: a?.line1 ?? null,
@@ -80,8 +81,44 @@ export async function handlePaidSession(session: Stripe.Checkout.Session): Promi
     data: { ...paidDetails(session), stripeCheckoutSessionId: session.id },
   });
   if (order.cartToken) await emptyCartByToken(order.cartToken).catch((error) => payload.logger.error(error));
+  const customerId = typeof order.customer === "object" ? order.customer?.id : order.customer;
+  if (customerId) {
+    await rememberFirstAddress(payload, customerId, paidDetails(session)).catch((error) =>
+      payload.logger.error({ err: error, order: order.number }, "Saving the customer's first address failed"),
+    );
+  }
   await sendOrderEmails(orderId, "missing");
   return "paid";
+}
+
+/**
+ * After her first paid order, the address she typed at Stripe becomes her
+ * saved default, and her name and phone fill in if they were empty. Never
+ * overwrites anything she already saved.
+ */
+async function rememberFirstAddress(payload: BasePayload, customerId: number, details: ReturnType<typeof paidDetails>) {
+  const customer = await payload.findByID({ collection: "customers", id: customerId, depth: 0, disableErrors: true });
+  if (!customer) return;
+  const a = details.shippingAddress;
+  const data: { name?: string; phone?: string; addresses?: NonNullable<typeof customer.addresses> } = {};
+  if (!customer.name && details.customerName) data.name = details.customerName;
+  if (!customer.phone && details.customerPhone) data.phone = details.customerPhone;
+  if ((customer.addresses ?? []).length === 0 && a.line1 && a.city && a.country && isCountry(a.country)) {
+    data.addresses = [
+      {
+        name: details.customerName || customer.name || customer.email,
+        phone: details.customerPhone,
+        line1: a.line1,
+        line2: a.line2,
+        city: a.city,
+        state: a.state,
+        postalCode: a.postalCode,
+        country: a.country,
+        isDefault: true,
+      },
+    ];
+  }
+  if (Object.keys(data).length) await payload.update({ collection: "customers", id: customerId, data, depth: 0 });
 }
 
 /** An abandoned checkout: remove its order, which never became one. */

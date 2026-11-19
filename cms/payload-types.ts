@@ -68,6 +68,7 @@ export interface Config {
   blocks: {};
   collections: {
     orders: Order;
+    customers: Customer;
     designs: Design;
     media: Media;
     users: User;
@@ -77,9 +78,14 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    customers: {
+      orders: 'orders';
+    };
+  };
   collectionsSelect: {
     orders: OrdersSelect<false> | OrdersSelect<true>;
+    customers: CustomersSelect<false> | CustomersSelect<true>;
     designs: DesignsSelect<false> | DesignsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -198,6 +204,10 @@ export interface Order {
   customerName?: string | null;
   customerEmail?: string | null;
   customerPhone?: string | null;
+  /**
+   * Set when the customer was signed in at checkout.
+   */
+  customer?: (number | null) | Customer;
   shippingAddress?: {
     line1?: string | null;
     line2?: string | null;
@@ -302,6 +312,296 @@ export interface Media {
   focalY?: number | null;
 }
 /**
+ * People who have signed in to the shop. Guests who never signed in are only on their orders.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "customers".
+ */
+export interface Customer {
+  id: number;
+  email: string;
+  name?: string | null;
+  phone?: string | null;
+  profiles?:
+    | {
+        name: string;
+        measurements: {
+          /**
+           * The unit the customer entered these in. The numbers are exactly as entered.
+           */
+          unit: 'in' | 'cm' | 'legacy';
+          height: number;
+          length: number;
+          shoulder: number;
+          bust: number;
+          sleeve: number;
+          hips: number;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  addresses?:
+    | {
+        name: string;
+        phone?: string | null;
+        isDefault?: boolean | null;
+        line1: string;
+        line2?: string | null;
+        city: string;
+        state?: string | null;
+        postalCode?: string | null;
+        country:
+          | 'AF'
+          | 'AX'
+          | 'AL'
+          | 'DZ'
+          | 'AD'
+          | 'AO'
+          | 'AI'
+          | 'AQ'
+          | 'AG'
+          | 'AR'
+          | 'AM'
+          | 'AW'
+          | 'AC'
+          | 'AU'
+          | 'AT'
+          | 'AZ'
+          | 'BS'
+          | 'BH'
+          | 'BD'
+          | 'BB'
+          | 'BY'
+          | 'BE'
+          | 'BZ'
+          | 'BJ'
+          | 'BM'
+          | 'BT'
+          | 'BO'
+          | 'BA'
+          | 'BW'
+          | 'BV'
+          | 'BR'
+          | 'IO'
+          | 'VG'
+          | 'BN'
+          | 'BG'
+          | 'BF'
+          | 'BI'
+          | 'KH'
+          | 'CM'
+          | 'CA'
+          | 'CV'
+          | 'BQ'
+          | 'KY'
+          | 'CF'
+          | 'TD'
+          | 'CL'
+          | 'CN'
+          | 'CO'
+          | 'KM'
+          | 'CG'
+          | 'CD'
+          | 'CK'
+          | 'CR'
+          | 'CI'
+          | 'HR'
+          | 'CW'
+          | 'CY'
+          | 'CZ'
+          | 'DK'
+          | 'DJ'
+          | 'DM'
+          | 'DO'
+          | 'EC'
+          | 'EG'
+          | 'SV'
+          | 'GQ'
+          | 'ER'
+          | 'EE'
+          | 'SZ'
+          | 'ET'
+          | 'FK'
+          | 'FO'
+          | 'FJ'
+          | 'FI'
+          | 'FR'
+          | 'GF'
+          | 'PF'
+          | 'TF'
+          | 'GA'
+          | 'GM'
+          | 'GE'
+          | 'DE'
+          | 'GH'
+          | 'GI'
+          | 'GR'
+          | 'GL'
+          | 'GD'
+          | 'GP'
+          | 'GU'
+          | 'GT'
+          | 'GG'
+          | 'GN'
+          | 'GW'
+          | 'GY'
+          | 'HT'
+          | 'HN'
+          | 'HK'
+          | 'HU'
+          | 'IS'
+          | 'IN'
+          | 'ID'
+          | 'IQ'
+          | 'IE'
+          | 'IM'
+          | 'IL'
+          | 'IT'
+          | 'JM'
+          | 'JP'
+          | 'JE'
+          | 'JO'
+          | 'KZ'
+          | 'KE'
+          | 'KI'
+          | 'XK'
+          | 'KW'
+          | 'KG'
+          | 'LA'
+          | 'LV'
+          | 'LB'
+          | 'LS'
+          | 'LR'
+          | 'LY'
+          | 'LI'
+          | 'LT'
+          | 'LU'
+          | 'MO'
+          | 'MG'
+          | 'MW'
+          | 'MY'
+          | 'MV'
+          | 'ML'
+          | 'MT'
+          | 'MQ'
+          | 'MR'
+          | 'MU'
+          | 'YT'
+          | 'MX'
+          | 'MD'
+          | 'MC'
+          | 'MN'
+          | 'ME'
+          | 'MS'
+          | 'MA'
+          | 'MZ'
+          | 'MM'
+          | 'NA'
+          | 'NR'
+          | 'NP'
+          | 'NL'
+          | 'NC'
+          | 'NZ'
+          | 'NI'
+          | 'NE'
+          | 'NG'
+          | 'NU'
+          | 'MK'
+          | 'NO'
+          | 'OM'
+          | 'PK'
+          | 'PS'
+          | 'PA'
+          | 'PG'
+          | 'PY'
+          | 'PE'
+          | 'PH'
+          | 'PN'
+          | 'PL'
+          | 'PT'
+          | 'PR'
+          | 'QA'
+          | 'RE'
+          | 'RO'
+          | 'RU'
+          | 'RW'
+          | 'WS'
+          | 'SM'
+          | 'ST'
+          | 'SA'
+          | 'SN'
+          | 'RS'
+          | 'SC'
+          | 'SL'
+          | 'SG'
+          | 'SX'
+          | 'SK'
+          | 'SI'
+          | 'SB'
+          | 'SO'
+          | 'ZA'
+          | 'GS'
+          | 'KR'
+          | 'SS'
+          | 'ES'
+          | 'LK'
+          | 'BL'
+          | 'SH'
+          | 'KN'
+          | 'LC'
+          | 'MF'
+          | 'PM'
+          | 'VC'
+          | 'SD'
+          | 'SR'
+          | 'SJ'
+          | 'SE'
+          | 'CH'
+          | 'TW'
+          | 'TJ'
+          | 'TZ'
+          | 'TH'
+          | 'TL'
+          | 'TG'
+          | 'TK'
+          | 'TO'
+          | 'TT'
+          | 'TA'
+          | 'TN'
+          | 'TR'
+          | 'TM'
+          | 'TC'
+          | 'TV'
+          | 'UG'
+          | 'UA'
+          | 'AE'
+          | 'GB'
+          | 'US'
+          | 'UY'
+          | 'UZ'
+          | 'VU'
+          | 'VA'
+          | 'VE'
+          | 'VN'
+          | 'WF'
+          | 'EH'
+          | 'YE'
+          | 'ZM'
+          | 'ZW';
+        id?: string | null;
+      }[]
+    | null;
+  orders?: {
+    docs?: (number | Order)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  authUserId?: string | null;
+  stripeCustomerId?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
@@ -369,6 +669,7 @@ export interface Cart {
         id?: string | null;
       }[]
     | null;
+  customer?: (number | null) | Customer;
   pendingOrder?: (number | null) | Order;
   updatedAt: string;
   createdAt: string;
@@ -400,6 +701,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'orders';
         value: number | Order;
+      } | null)
+    | ({
+        relationTo: 'customers';
+        value: number | Customer;
       } | null)
     | ({
         relationTo: 'designs';
@@ -510,6 +815,7 @@ export interface OrdersSelect<T extends boolean = true> {
   customerName?: T;
   customerEmail?: T;
   customerPhone?: T;
+  customer?: T;
   shippingAddress?:
     | T
     | {
@@ -527,6 +833,51 @@ export interface OrdersSelect<T extends boolean = true> {
   ownerNotifiedAt?: T;
   customerNotifiedAt?: T;
   cartToken?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "customers_select".
+ */
+export interface CustomersSelect<T extends boolean = true> {
+  email?: T;
+  name?: T;
+  phone?: T;
+  profiles?:
+    | T
+    | {
+        name?: T;
+        measurements?:
+          | T
+          | {
+              unit?: T;
+              height?: T;
+              length?: T;
+              shoulder?: T;
+              bust?: T;
+              sleeve?: T;
+              hips?: T;
+            };
+        id?: T;
+      };
+  addresses?:
+    | T
+    | {
+        name?: T;
+        phone?: T;
+        isDefault?: T;
+        line1?: T;
+        line2?: T;
+        city?: T;
+        state?: T;
+        postalCode?: T;
+        country?: T;
+        id?: T;
+      };
+  orders?: T;
+  authUserId?: T;
+  stripeCustomerId?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -624,6 +975,7 @@ export interface CartsSelect<T extends boolean = true> {
         quantity?: T;
         id?: T;
       };
+  customer?: T;
   pendingOrder?: T;
   updatedAt?: T;
   createdAt?: T;

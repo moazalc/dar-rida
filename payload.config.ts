@@ -5,6 +5,7 @@ import { nodemailerAdapter } from "@payloadcms/email-nodemailer";
 import { buildConfig } from "payload";
 import sharp from "sharp";
 import { Carts } from "./cms/collections/carts";
+import { Customers } from "./cms/collections/customers";
 import { Designs } from "./cms/collections/designs";
 import { Media } from "./cms/collections/media";
 import { Orders } from "./cms/collections/orders";
@@ -12,6 +13,7 @@ import { Users } from "./cms/collections/users";
 import { Shipping } from "./cms/globals/shipping";
 import { StoreSettings } from "./cms/globals/store-settings";
 import { migrations } from "./cms/migrations";
+import { authTables } from "./lib/auth/schema";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -39,7 +41,7 @@ export default buildConfig({
     importMap: { baseDir: dirname },
     meta: { titleSuffix: " — Dar Rida admin" },
   },
-  collections: [Orders, Designs, Media, Users, Carts],
+  collections: [Orders, Customers, Designs, Media, Users, Carts],
   globals: [StoreSettings, Shipping],
   localization: {
     locales: [
@@ -58,6 +60,8 @@ export default buildConfig({
     push: process.env.NODE_ENV !== "production",
     migrationDir: path.resolve(dirname, "cms/migrations"),
     prodMigrations: migrations,
+    // Customer sign-in tables (Better Auth), so migrations manage them too.
+    beforeSchemaInit: [({ schema }) => ({ ...schema, tables: { ...schema.tables, ...authTables } })],
   }),
   email,
   sharp,

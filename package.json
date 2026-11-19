@@ -19,6 +19,7 @@
     "@payloadcms/email-nodemailer": "3.93.0",
     "@payloadcms/next": "3.93.0",
     "@payloadcms/ui": "3.93.0",
+    "better-auth": "1.7.26",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cn": "^0.5.0",

@@ -7,6 +7,7 @@ import { ProductCard } from "@/components/collection/product-card";
 import { ProductDetails } from "@/components/collection/product-details";
 import { DesignTile } from "@/components/collection/design-tile";
 import { ProductGallery } from "@/components/collection/product-gallery";
+import { savedProfiles } from "@/lib/customers";
 import { getDesign, getLook } from "@/lib/designs";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getLocale } from "@/lib/i18n/locale";
@@ -104,7 +105,7 @@ export default async function DesignPage({ params }: Props) {
             )}
           </section>
 
-          <DesignForm slug={design.slug} available={design.price !== null} />
+          <DesignForm slug={design.slug} available={design.price !== null} profiles={await savedProfiles()} />
 
           <ProductDetails
             items={[

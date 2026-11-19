@@ -1,12 +1,16 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { CheckoutButton } from "@/components/cart/checkout-button";
+import { ShipTo } from "@/components/cart/ship-to";
 import { CountrySwitcher } from "@/components/country-switcher";
 import { LineControls } from "@/components/cart/line-controls";
 import { DesignTile } from "@/components/collection/design-tile";
 import { statusAction } from "@/components/status-page";
+import { ADDRESS_COOKIE, pickAddress } from "@/lib/account";
 import { loadBag, type BagLine } from "@/lib/cart";
+import { addressList, getCustomer } from "@/lib/customers";
 import { getDictionary, type Dictionary } from "@/lib/i18n/dictionaries";
 import { getLocale } from "@/lib/i18n/locale";
 import { formatMeasurement, measurementRows } from "@/lib/measurements";
@@ -21,8 +25,14 @@ export default async function CartPage() {
   const locale = await getLocale();
   const dict = await getDictionary(locale);
   const t = dict.cart;
-  const bag = await loadBag(locale, dict);
+  const [bag, customer, chosen] = await Promise.all([
+    loadBag(locale, dict),
+    getCustomer().catch(() => null),
+    cookies().then((c) => c.get(ADDRESS_COOKIE)?.value ?? null),
+  ]);
   const lines = bag?.lines ?? [];
+  const addresses = customer ? addressList(customer) : [];
+  const shipTo = pickAddress(addresses, bag?.country ?? null, chosen);
 
   return (
     <div className="mx-auto max-w-[90rem] px-4 pt-14 pb-24 md:px-10 md:pt-20 md:pb-36 xl:px-18">
@@ -59,6 +69,7 @@ export default async function CartPage() {
 
           <aside className="h-fit border border-border/70 bg-card p-6 md:p-8 lg:sticky lg:top-28">
             <h2 className="text-xs tracking-[0.2em] text-muted-foreground uppercase">{t.summary}</h2>
+            {addresses.length > 0 && <ShipTo addresses={addresses} selected={shipTo?.id ?? null} />}
             <CountrySwitcher country={bag.country} className="mt-5 flex-wrap text-sm" />
             <dl className="mt-5 flex flex-col gap-2 border-t border-border/60 pt-5">
               <div className="flex items-baseline justify-between gap-4">
@@ -87,6 +98,14 @@ export default async function CartPage() {
             </p>
             <CheckoutButton disabled={!bag.ready} />
             <p className="mt-2 text-sm text-muted-foreground">{t.madeToOrder}</p>
+            {!customer && (
+              <p className="mt-4 border-t border-border/60 pt-4 text-sm text-muted-foreground">
+                <Link href="/account/sign-in?next=/cart" className="text-foreground underline underline-offset-4 hover:text-muted-foreground">
+                  {dict.account.prompt.action}
+                </Link>{" "}
+                · {dict.account.prompt.bag}
+              </p>
+            )}
             <Link href="/collection" className="mt-6 inline-block text-sm underline underline-offset-4 hover:text-muted-foreground">
               {t.continue}
             </Link>

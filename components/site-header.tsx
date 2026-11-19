@@ -4,7 +4,7 @@ import { useSyncExternalStore } from "react";
 import Link from "next/link";
 import { ComingSoon } from "@/components/coming-soon";
 import { usePathname } from "next/navigation";
-import { Menu, Search, ShoppingBag, X } from "lucide-react";
+import { Menu, Search, ShoppingBag, UserRound, X } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { LanguageToggle } from "@/components/language-toggle";
 import { useI18n } from "@/components/providers/i18n-provider";
@@ -35,7 +35,7 @@ function usePastHero() {
   return useSyncExternalStore(subscribe, pastHeroSnapshot, () => false);
 }
 
-export function SiteHeader({ cartCount }: { cartCount: number }) {
+export function SiteHeader({ cartCount, signedIn }: { cartCount: number; signedIn: boolean }) {
   const { dict, dir, locale } = useI18n();
   const overlay = OVERLAY_PATHS.has(usePathname());
   const pastHero = usePastHero();
@@ -133,6 +133,10 @@ export function SiteHeader({ cartCount }: { cartCount: number }) {
           <Link href="/search" className={iconButton}>
             <Search className="size-6" strokeWidth={1.5} />
             <span className="sr-only">{dict.nav.search}</span>
+          </Link>
+          <Link href={signedIn ? "/account" : "/account/sign-in"} className={iconButton}>
+            <UserRound className="size-6" strokeWidth={1.5} />
+            <span className="sr-only">{signedIn ? dict.account.link : dict.account.signInLink}</span>
           </Link>
           <Link href="/cart" className={cn(iconButton, "relative -me-2")}>
             <ShoppingBag className="size-6" strokeWidth={1.5} />
