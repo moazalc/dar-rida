@@ -18,6 +18,13 @@ export const StoreSettings: GlobalConfig = {
       admin: { step: 1, description: "The price of an abaya from Design your own. Option extras come later." },
     },
     {
+      name: "customAbayaPriceAed",
+      label: "Custom abaya price (AED)",
+      type: "number",
+      min: 0,
+      admin: { step: 1, description: "The same, for customers shipping to the UAE." },
+    },
+    {
       name: "orderNotificationEmails",
       label: "Send new-order emails to",
       type: "array",

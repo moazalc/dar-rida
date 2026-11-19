@@ -8,8 +8,9 @@ import { useI18n } from "@/components/providers/i18n-provider";
 import { NOTES_MAX, type Measurements } from "@/lib/measurements";
 
 /** Measurements, notes and Add to bag for one collection design. */
-export function DesignForm({ slug }: { slug: string }) {
-  const t = useI18n().dict.product;
+export function DesignForm({ slug, available }: { slug: string; available: boolean }) {
+  const { dict } = useI18n();
+  const t = dict.product;
   const [measurements, setMeasurements] = useState<Measurements | null>(null);
   const [notes, setNotes] = useState("");
   const [result, setResult] = useState<AddToBagResult | null>(null);
@@ -50,12 +51,14 @@ export function DesignForm({ slug }: { slug: string }) {
       <div className="flex flex-col gap-3">
         <button
           type="submit"
-          disabled={pending || !measurements}
+          disabled={pending || !measurements || !available}
           className="inline-flex h-14 items-center justify-center bg-primary px-10 text-sm tracking-[0.16em] text-primary-foreground uppercase transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {pending ? t.adding : t.addToBag}
         </button>
-        {!result && <p className="text-sm text-muted-foreground">{measurements ? t.ready : t.incomplete}</p>}
+        {!result && (
+          <p className="text-sm text-muted-foreground">{!available ? dict.market.notHere : measurements ? t.ready : t.incomplete}</p>
+        )}
         <div aria-live="polite" className="text-sm">
           {result?.status === "added" && (
             <p>

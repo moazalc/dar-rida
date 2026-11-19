@@ -56,8 +56,11 @@ export function measurementsField(readOnly = false): Field[] {
   ];
 }
 
-/** "$1,240.00" from whole cents. */
-export function formatUsd(cents: number | null | undefined): string {
-  if (typeof cents !== "number") return "";
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
+/** "$1,240.00" or "AED 4,500.00" from minor units, in the order's own currency. */
+export function formatOrderMoney(minor: number | null | undefined, currency: string | null | undefined): string {
+  if (typeof minor !== "number") return "";
+  const code = (currency || "usd").toUpperCase();
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: code, currencyDisplay: code === "USD" ? "symbol" : "code" }).format(
+    minor / 100,
+  );
 }

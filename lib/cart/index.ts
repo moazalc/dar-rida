@@ -9,7 +9,10 @@ import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Measurements, StoredMeasurements } from "@/lib/measurements";
 import { mediaPath } from "@/lib/media";
+import { getCountry } from "@/lib/country";
+import { marketFor, type Country, type Currency, type Market } from "@/lib/markets";
 import { payloadClient } from "@/lib/payload";
+import { shippingFor, type ShippingQuote } from "@/lib/shipping";
 import { unitPrice, type PricedDesign } from "./pricing";
 
 // The bag lives in the database, found by a random token in an httpOnly
@@ -123,8 +126,10 @@ export type BagLine = {
   measurements: StoredMeasurements;
   notes: string;
   quantity: number;
-  /** Cents, or null when it can no longer be bought. */
+  /** Minor units of the bag's currency, or null when it can't be bought. */
   unitPrice: number | null;
+  /** The design is on sale, just not priced in this market yet. */
+  unavailableHere: boolean;
   designId: number | null;
 };
 
@@ -132,9 +137,17 @@ export type Bag = {
   cart: Cart;
   lines: BagLine[];
   count: number;
-  /** Cents. */
+  /** Where it ships, which decides the market. Null until known. */
+  country: Country | null;
+  market: Market;
+  currency: Currency;
+  /** Minor units. */
   subtotal: number;
-  /** Every line can be bought. */
+  /** Null until the country is known or while the bag is empty. */
+  shipping: ShippingQuote | null;
+  /** Subtotal plus shipping, minor units. */
+  total: number;
+  /** Every line can be bought and the country is known. */
   ready: boolean;
 };
 
@@ -144,22 +157,25 @@ export type Bag = {
  */
 export async function loadBag(locale: Locale, dict: Dictionary): Promise<Bag | null> {
   const cart = await findCart();
-  if (!cart || !cart.lines?.length) return cart ? { cart, lines: [], count: 0, subtotal: 0, ready: false } : null;
+  if (!cart) return null;
   return priceCart(cart, locale, dict);
 }
 
 export async function priceCart(cart: Cart, locale: Locale, dict: Dictionary, dictEn?: Dictionary): Promise<Bag> {
   const payload = await payloadClient();
+  const country = await getCountry();
+  const market = marketFor(country);
   const stored = plainLines(cart);
   const ids = [...new Set(stored.map((l) => l.design).filter((id): id is number => typeof id === "number"))];
 
-  const [local, english, ar, settings] = await Promise.all([
+  const [local, english, ar, settings, shippingSettings] = await Promise.all([
     ids.length
       ? payload.find({ collection: "designs", where: { id: { in: ids } }, locale, depth: 1, limit: ids.length })
       : null,
     ids.length ? payload.find({ collection: "designs", where: { id: { in: ids } }, locale: "en", depth: 0, limit: ids.length }) : null,
     ids.length ? payload.find({ collection: "designs", where: { id: { in: ids } }, locale: "ar", depth: 0, limit: ids.length }) : null,
     payload.findGlobal({ slug: "store-settings" }),
+    country && stored.length ? payload.findGlobal({ slug: "shipping" }) : null,
   ]);
 
   const designs = new Map<number, Design>((local?.docs ?? []).map((d) => [d.id, d]));
@@ -168,7 +184,13 @@ export async function priceCart(cart: Cart, locale: Locale, dict: Dictionary, di
   const priced = new Map<number, PricedDesign>([...designs].map(([id, d]) => [id, d]));
 
   const lines: BagLine[] = stored.map((l) => {
-    const price = unitPrice({ kind: l.kind, design: l.design as number | null, quantity: l.quantity }, priced, settings.customAbayaPrice);
+    const price = unitPrice(
+      { kind: l.kind, design: l.design as number | null, quantity: l.quantity },
+      priced,
+      { usd: settings.customAbayaPrice, aed: settings.customAbayaPriceAed },
+      market,
+    );
+    const onSale = l.kind === "custom" || (typeof l.design === "number" && designs.get(l.design)?.active !== false && designs.has(l.design));
     const base = {
       id: l.id ?? "",
       kind: l.kind,
@@ -176,6 +198,7 @@ export async function priceCart(cart: Cart, locale: Locale, dict: Dictionary, di
       notes: l.notes ?? "",
       quantity: l.quantity,
       unitPrice: price,
+      unavailableHere: price === null && onSale,
     };
     if (l.kind === "custom") {
       const choices = describeConfig(l.config, dict);
@@ -213,12 +236,19 @@ export async function priceCart(cart: Cart, locale: Locale, dict: Dictionary, di
     };
   });
 
+  const subtotal = lines.reduce((sum, l) => sum + (l.unitPrice ?? 0) * l.quantity, 0);
+  const shipping = country && shippingSettings ? shippingFor(country, subtotal, shippingSettings) : null;
   return {
     cart,
     lines,
     count: lines.reduce((n, l) => n + l.quantity, 0),
-    subtotal: lines.reduce((sum, l) => sum + (l.unitPrice ?? 0) * l.quantity, 0),
-    ready: lines.length > 0 && lines.every((l) => l.unitPrice !== null),
+    country,
+    market,
+    currency: market.currency,
+    subtotal,
+    shipping,
+    total: subtotal + (shipping?.fee ?? 0),
+    ready: lines.length > 0 && shipping !== null && lines.every((l) => l.unitPrice !== null),
   };
 }
 

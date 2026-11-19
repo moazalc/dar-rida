@@ -58,6 +58,18 @@ describe("order emails", () => {
     expect(text).not.toContain("≈");
   });
 
+  it("bills UAE orders in dirhams with the shipping line, and tells the workshop the market", () => {
+    const aed = { ...order, market: "uae", currency: "aed", subtotal: 150000, shipping: 2500, shippingZone: "UAE", total: 152500, shippingCountry: "AE", lines: [{ ...order.lines![0], unitPrice: 150000 }] } as Order;
+    const customer = customerEmail(aed, en, null).text;
+    expect(customer).toContain("Shipping: AED 25");
+    expect(customer).toContain("Total: AED 1,525");
+    expect(customer).not.toContain("Charged as");
+    const owner = ownerEmail(aed, "https://example.test/admin");
+    expect(owner.subject).toBe("New order DR-1007 — 1 piece — AED 1,525");
+    expect(owner.text).toContain("UAE prices (AED) · Shipping (UAE): AED 25");
+    expect(owner.text).toContain("(AED 1,500 each)");
+  });
+
   it("writes to Arabic customers in Arabic, right to left", () => {
     const email = customerEmail({ ...order, locale: "ar" }, ar, null);
     expect(email.subject).toContain("DR-1007");

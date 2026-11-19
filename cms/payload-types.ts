@@ -95,9 +95,11 @@ export interface Config {
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'ar') | ('en' | 'ar')[];
   globals: {
     'store-settings': StoreSetting;
+    shipping: Shipping;
   };
   globalsSelect: {
     'store-settings': StoreSettingsSelect<false> | StoreSettingsSelect<true>;
+    shipping: ShippingSelect<false> | ShippingSelect<true>;
   };
   locale: 'en' | 'ar';
   widgets: {
@@ -178,9 +180,19 @@ export interface Order {
         id?: string | null;
       }[]
     | null;
-  subtotal: number;
-  total: number;
+  market?: ('uae' | 'global') | null;
   currency?: string | null;
+  /**
+   * Checkout only accepted an address in this country.
+   */
+  shippingCountry?: string | null;
+  /**
+   * Minor units of the order's currency (cents or fils): 150000 is 1,500.00.
+   */
+  subtotal: number;
+  shipping?: number | null;
+  shippingZone?: string | null;
+  total: number;
   presentmentAmount?: number | null;
   presentmentCurrency?: string | null;
   customerName?: string | null;
@@ -227,9 +239,13 @@ export interface Design {
    */
   cut?: string | null;
   /**
-   * In US dollars. Stripe shows customers their own currency at checkout.
+   * For everywhere except the UAE. Stripe shows customers their own currency at checkout.
    */
   price: number;
+  /**
+   * For customers shipping to the UAE. Leave empty and the piece shows as not available in the UAE yet.
+   */
+  priceAed?: number | null;
   /**
    * e.g. "Ready in 3 weeks"
    */
@@ -482,9 +498,13 @@ export interface OrdersSelect<T extends boolean = true> {
         notes?: T;
         id?: T;
       };
-  subtotal?: T;
-  total?: T;
+  market?: T;
   currency?: T;
+  shippingCountry?: T;
+  subtotal?: T;
+  shipping?: T;
+  shippingZone?: T;
+  total?: T;
   presentmentAmount?: T;
   presentmentCurrency?: T;
   customerName?: T;
@@ -521,6 +541,7 @@ export interface DesignsSelect<T extends boolean = true> {
   description?: T;
   cut?: T;
   price?: T;
+  priceAed?: T;
   leadTime?: T;
   composition?: T;
   care?: T;
@@ -657,6 +678,10 @@ export interface StoreSetting {
    * The price of an abaya from Design your own. Option extras come later.
    */
   customAbayaPrice: number;
+  /**
+   * The same, for customers shipping to the UAE.
+   */
+  customAbayaPriceAed?: number | null;
   orderNotificationEmails?:
     | {
         email: string;
@@ -672,10 +697,301 @@ export interface StoreSetting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "shipping".
+ */
+export interface Shipping {
+  id: number;
+  uae: {
+    /**
+     * Per order within the UAE. 0 for free shipping.
+     */
+    fee: number;
+    /**
+     * Optional: shipping is free when the bag is worth at least this much.
+     */
+    freeOver?: number | null;
+  };
+  /**
+   * e.g. GCC, Europe, North America. A country belongs to one zone at most.
+   */
+  zones?:
+    | {
+        /**
+         * Shown on the order, e.g. Europe
+         */
+        name: string;
+        countries: (
+          | 'AF'
+          | 'AX'
+          | 'AL'
+          | 'DZ'
+          | 'AD'
+          | 'AO'
+          | 'AI'
+          | 'AQ'
+          | 'AG'
+          | 'AR'
+          | 'AM'
+          | 'AW'
+          | 'AC'
+          | 'AU'
+          | 'AT'
+          | 'AZ'
+          | 'BS'
+          | 'BH'
+          | 'BD'
+          | 'BB'
+          | 'BY'
+          | 'BE'
+          | 'BZ'
+          | 'BJ'
+          | 'BM'
+          | 'BT'
+          | 'BO'
+          | 'BA'
+          | 'BW'
+          | 'BV'
+          | 'BR'
+          | 'IO'
+          | 'VG'
+          | 'BN'
+          | 'BG'
+          | 'BF'
+          | 'BI'
+          | 'KH'
+          | 'CM'
+          | 'CA'
+          | 'CV'
+          | 'BQ'
+          | 'KY'
+          | 'CF'
+          | 'TD'
+          | 'CL'
+          | 'CN'
+          | 'CO'
+          | 'KM'
+          | 'CG'
+          | 'CD'
+          | 'CK'
+          | 'CR'
+          | 'CI'
+          | 'HR'
+          | 'CW'
+          | 'CY'
+          | 'CZ'
+          | 'DK'
+          | 'DJ'
+          | 'DM'
+          | 'DO'
+          | 'EC'
+          | 'EG'
+          | 'SV'
+          | 'GQ'
+          | 'ER'
+          | 'EE'
+          | 'SZ'
+          | 'ET'
+          | 'FK'
+          | 'FO'
+          | 'FJ'
+          | 'FI'
+          | 'FR'
+          | 'GF'
+          | 'PF'
+          | 'TF'
+          | 'GA'
+          | 'GM'
+          | 'GE'
+          | 'DE'
+          | 'GH'
+          | 'GI'
+          | 'GR'
+          | 'GL'
+          | 'GD'
+          | 'GP'
+          | 'GU'
+          | 'GT'
+          | 'GG'
+          | 'GN'
+          | 'GW'
+          | 'GY'
+          | 'HT'
+          | 'HN'
+          | 'HK'
+          | 'HU'
+          | 'IS'
+          | 'IN'
+          | 'ID'
+          | 'IQ'
+          | 'IE'
+          | 'IM'
+          | 'IL'
+          | 'IT'
+          | 'JM'
+          | 'JP'
+          | 'JE'
+          | 'JO'
+          | 'KZ'
+          | 'KE'
+          | 'KI'
+          | 'XK'
+          | 'KW'
+          | 'KG'
+          | 'LA'
+          | 'LV'
+          | 'LB'
+          | 'LS'
+          | 'LR'
+          | 'LY'
+          | 'LI'
+          | 'LT'
+          | 'LU'
+          | 'MO'
+          | 'MG'
+          | 'MW'
+          | 'MY'
+          | 'MV'
+          | 'ML'
+          | 'MT'
+          | 'MQ'
+          | 'MR'
+          | 'MU'
+          | 'YT'
+          | 'MX'
+          | 'MD'
+          | 'MC'
+          | 'MN'
+          | 'ME'
+          | 'MS'
+          | 'MA'
+          | 'MZ'
+          | 'MM'
+          | 'NA'
+          | 'NR'
+          | 'NP'
+          | 'NL'
+          | 'NC'
+          | 'NZ'
+          | 'NI'
+          | 'NE'
+          | 'NG'
+          | 'NU'
+          | 'MK'
+          | 'NO'
+          | 'OM'
+          | 'PK'
+          | 'PS'
+          | 'PA'
+          | 'PG'
+          | 'PY'
+          | 'PE'
+          | 'PH'
+          | 'PN'
+          | 'PL'
+          | 'PT'
+          | 'PR'
+          | 'QA'
+          | 'RE'
+          | 'RO'
+          | 'RU'
+          | 'RW'
+          | 'WS'
+          | 'SM'
+          | 'ST'
+          | 'SA'
+          | 'SN'
+          | 'RS'
+          | 'SC'
+          | 'SL'
+          | 'SG'
+          | 'SX'
+          | 'SK'
+          | 'SI'
+          | 'SB'
+          | 'SO'
+          | 'ZA'
+          | 'GS'
+          | 'KR'
+          | 'SS'
+          | 'ES'
+          | 'LK'
+          | 'BL'
+          | 'SH'
+          | 'KN'
+          | 'LC'
+          | 'MF'
+          | 'PM'
+          | 'VC'
+          | 'SD'
+          | 'SR'
+          | 'SJ'
+          | 'SE'
+          | 'CH'
+          | 'TW'
+          | 'TJ'
+          | 'TZ'
+          | 'TH'
+          | 'TL'
+          | 'TG'
+          | 'TK'
+          | 'TO'
+          | 'TT'
+          | 'TA'
+          | 'TN'
+          | 'TR'
+          | 'TM'
+          | 'TC'
+          | 'TV'
+          | 'UG'
+          | 'UA'
+          | 'GB'
+          | 'US'
+          | 'UY'
+          | 'UZ'
+          | 'VU'
+          | 'VA'
+          | 'VE'
+          | 'VN'
+          | 'WF'
+          | 'EH'
+          | 'YE'
+          | 'ZM'
+          | 'ZW'
+        )[];
+        /**
+         * Per order to these countries. 0 for free shipping.
+         */
+        fee: number;
+        /**
+         * Optional: shipping is free when the bag is worth at least this much.
+         */
+        freeOver?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Any country that is not in a zone above.
+   */
+  restOfWorld: {
+    /**
+     * Per order. 0 for free shipping.
+     */
+    fee: number;
+    /**
+     * Optional: shipping is free when the bag is worth at least this much.
+     */
+    freeOver?: number | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "store-settings_select".
  */
 export interface StoreSettingsSelect<T extends boolean = true> {
   customAbayaPrice?: T;
+  customAbayaPriceAed?: T;
   orderNotificationEmails?:
     | T
     | {
@@ -683,6 +999,36 @@ export interface StoreSettingsSelect<T extends boolean = true> {
         id?: T;
       };
   defaultLeadTime?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "shipping_select".
+ */
+export interface ShippingSelect<T extends boolean = true> {
+  uae?:
+    | T
+    | {
+        fee?: T;
+        freeOver?: T;
+      };
+  zones?:
+    | T
+    | {
+        name?: T;
+        countries?: T;
+        fee?: T;
+        freeOver?: T;
+        id?: T;
+      };
+  restOfWorld?:
+    | T
+    | {
+        fee?: T;
+        freeOver?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

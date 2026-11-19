@@ -7,6 +7,7 @@ import { addLine, setLineQuantity } from "@/lib/cart";
 import { isValidQuantity, MAX_QUANTITY } from "@/lib/cart/pricing";
 import { startCheckout } from "@/lib/checkout";
 import { getLocale } from "@/lib/i18n/locale";
+import { COUNTRY_COOKIE, isCountry } from "@/lib/markets";
 import { cleanNotes, isUnit, parseMeasurements, UNIT_COOKIE, type Unit } from "@/lib/measurements";
 import { payloadClient } from "@/lib/payload";
 
@@ -64,4 +65,10 @@ export async function checkout(): Promise<{ status: "error" | "not-ready" }> {
 export async function setUnitPreference(unit: Unit) {
   if (!isUnit(unit)) return;
   (await cookies()).set(UNIT_COOKIE, unit, { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
+}
+
+/** Save the country we ship to. It sets the market, so the page re-renders with its prices. */
+export async function setShippingCountry(country: string) {
+  if (!isCountry(country)) return;
+  (await cookies()).set(COUNTRY_COOKIE, country, { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
 }

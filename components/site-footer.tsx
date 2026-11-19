@@ -1,15 +1,17 @@
 import Link from "next/link";
 import { ComingSoon } from "@/components/coming-soon";
+import { CountrySwitcher } from "@/components/country-switcher";
 import { LanguageToggle } from "@/components/language-toggle";
 import { NewsletterForm } from "@/components/newsletter-form";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
+import type { Country } from "@/lib/markets";
 
 /**
  * Warm sand (linen) ground: the sign-up and three quiet link columns up top; underneath,
  * DAR RIDA set edge to edge in light Cormorant, tone on tone, and cut off by
  * the page bottom.
  */
-export function SiteFooter({ dict }: { dict: Dictionary }) {
+export function SiteFooter({ dict, country }: { dict: Dictionary; country: Country | null }) {
   const l = dict.footer.links;
   const columns = [
     {
@@ -64,6 +66,11 @@ export function SiteFooter({ dict }: { dict: Dictionary }) {
               {i === columns.length - 1 && (
                 <li>
                   <LanguageToggle className="-ms-2 text-base text-foreground/80 hover:bg-foreground/5 hover:text-foreground" />
+                </li>
+              )}
+              {i === 0 && (
+                <li className="pt-2">
+                  <CountrySwitcher country={country} className="flex-wrap text-sm" />
                 </li>
               )}
             </ul>

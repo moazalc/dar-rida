@@ -11,6 +11,7 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getDirection } from "@/lib/i18n/config";
 import { cartCount as readCartCount } from "@/lib/cart";
 import { getUnitPreference } from "@/lib/unit-preference";
+import { getCountry } from "@/lib/country";
 
 export const metadata: Metadata = {
   title: "Dar Rida",
@@ -25,7 +26,7 @@ export default async function RootLayout({
   const locale = await getLocale();
   const dir = getDirection(locale);
   const dict = await getDictionary(locale);
-  const [cartCount, unit] = await Promise.all([readCartCount(), getUnitPreference()]);
+  const [cartCount, unit, country] = await Promise.all([readCartCount(), getUnitPreference(), getCountry()]);
 
   return (
     <html lang={locale} dir={dir} style={fontVars} className="h-full antialiased">
@@ -37,7 +38,7 @@ export default async function RootLayout({
               <main id="main" className="flex-1">
                 {children}
               </main>
-              <SiteFooter dict={dict} />
+              <SiteFooter dict={dict} country={country} />
             </UnitProvider>
           </I18nProvider>
         </DirectionProvider>

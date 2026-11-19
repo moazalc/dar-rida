@@ -3,7 +3,7 @@ import Link from "next/link";
 import { DesignTile } from "@/components/collection/design-tile";
 import type { ShopDesign } from "@/lib/designs";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
-import { formatUsd } from "@/lib/money";
+import { formatMoney } from "@/lib/markets";
 
 const SIZES = "(min-width: 1024px) 30vw, (min-width: 768px) 45vw, 50vw";
 
@@ -52,7 +52,7 @@ export function ProductCard({ design, dict }: { design: ShopDesign; dict: Dictio
         </p>
         <h2 className="font-heading text-2xl leading-tight md:text-3xl">{design.name}</h2>
         <p className="text-muted-foreground">
-          <bdi>{formatUsd(design.price)}</bdi>
+          {design.price === null ? dict.market.notHere : <bdi>{formatMoney(design.price, design.currency)}</bdi>}
         </p>
       </div>
     </Link>

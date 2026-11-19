@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { CheckoutButton } from "@/components/cart/checkout-button";
+import { CountrySwitcher } from "@/components/country-switcher";
 import { LineControls } from "@/components/cart/line-controls";
 import { DesignTile } from "@/components/collection/design-tile";
 import { statusAction } from "@/components/status-page";
@@ -9,7 +10,7 @@ import { loadBag, type BagLine } from "@/lib/cart";
 import { getDictionary, type Dictionary } from "@/lib/i18n/dictionaries";
 import { getLocale } from "@/lib/i18n/locale";
 import { formatMeasurement, measurementRows } from "@/lib/measurements";
-import { formatUsd } from "@/lib/money";
+import { countryName, formatMoney, type Currency } from "@/lib/markets";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = (await getDictionary(await getLocale())).cart;
@@ -51,20 +52,39 @@ export default async function CartPage() {
           <ul className="divide-y divide-border/60">
             {lines.map((line) => (
               <li key={line.id}>
-                <Line line={line} dict={dict} locale={locale} />
+                <Line line={line} dict={dict} locale={locale} currency={bag.currency} country={bag.country} />
               </li>
             ))}
           </ul>
 
           <aside className="h-fit border border-border/70 bg-card p-6 md:p-8 lg:sticky lg:top-28">
             <h2 className="text-xs tracking-[0.2em] text-muted-foreground uppercase">{t.summary}</h2>
-            <div className="mt-5 flex items-baseline justify-between gap-4">
-              <span>{t.subtotal}</span>
-              <span className="font-heading text-3xl">
-                <bdi>{formatUsd(bag.subtotal)}</bdi>
-              </span>
-            </div>
-            <p className="mt-3 text-sm text-muted-foreground">{t.taxNote}</p>
+            <CountrySwitcher country={bag.country} className="mt-5 flex-wrap text-sm" />
+            <dl className="mt-5 flex flex-col gap-2 border-t border-border/60 pt-5">
+              <div className="flex items-baseline justify-between gap-4">
+                <dt>{t.subtotal}</dt>
+                <dd>
+                  <bdi>{formatMoney(bag.subtotal, bag.currency)}</bdi>
+                </dd>
+              </div>
+              {bag.shipping && (
+                <div className="flex items-baseline justify-between gap-4">
+                  <dt>{t.shipping}</dt>
+                  <dd>{bag.shipping.free ? t.shippingFree : <bdi>{formatMoney(bag.shipping.fee, bag.currency)}</bdi>}</dd>
+                </div>
+              )}
+              <div className="mt-2 flex items-baseline justify-between gap-4 border-t border-border/60 pt-4">
+                <dt>{t.total}</dt>
+                <dd className="font-heading text-3xl">
+                  <bdi>{formatMoney(bag.total, bag.currency)}</bdi>
+                </dd>
+              </div>
+            </dl>
+            <p className="mt-3 text-sm text-muted-foreground">
+              {bag.country
+                ? `${dict.market.currencyNote[bag.currency]} ${dict.market.lockNote.replace("{country}", countryName(bag.country, locale))}`
+                : dict.market.unknown}
+            </p>
             <CheckoutButton disabled={!bag.ready} />
             <p className="mt-2 text-sm text-muted-foreground">{t.madeToOrder}</p>
             <Link href="/collection" className="mt-6 inline-block text-sm underline underline-offset-4 hover:text-muted-foreground">
@@ -77,7 +97,19 @@ export default async function CartPage() {
   );
 }
 
-function Line({ line, dict, locale }: { line: BagLine; dict: Dictionary; locale: string }) {
+function Line({
+  line,
+  dict,
+  locale,
+  currency,
+  country,
+}: {
+  line: BagLine;
+  dict: Dictionary;
+  locale: string;
+  currency: Currency;
+  country: string | null;
+}) {
   const t = dict.cart;
   const fields = dict.measure.fields;
   const unavailable = line.unitPrice === null;
@@ -108,18 +140,24 @@ function Line({ line, dict, locale }: { line: BagLine; dict: Dictionary; locale:
           {!unavailable && (
             <div className="shrink-0 pt-1 text-end">
               <p>
-                <bdi>{formatUsd(line.unitPrice! * line.quantity)}</bdi>
+                <bdi>{formatMoney(line.unitPrice! * line.quantity, currency)}</bdi>
               </p>
               {line.quantity > 1 && (
                 <p className="text-xs text-muted-foreground">
-                  {t.each.replace("{price}", formatUsd(line.unitPrice!))}
+                  {t.each.replace("{price}", formatMoney(line.unitPrice!, currency))}
                 </p>
               )}
             </div>
           )}
         </div>
 
-        {unavailable && <p className="text-sm text-destructive">{t.unavailableNote}</p>}
+        {unavailable && (
+          <p className="text-sm text-destructive">
+            {line.unavailableHere && country
+              ? dict.market.notHereNote.replace("{country}", countryName(country, locale))
+              : t.unavailableNote}
+          </p>
+        )}
 
         {line.choices.length > 0 && (
           <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1 text-sm">

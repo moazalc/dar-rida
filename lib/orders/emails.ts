@@ -2,7 +2,8 @@ import type { Order } from "@/cms/payload-types";
 import { describeConfig } from "@/lib/configurator/describe";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { formatMeasurement, measurementRows, otherUnit, type StoredMeasurements } from "@/lib/measurements";
-import { formatMinorUnits, formatUsd } from "@/lib/money";
+import { formatMoney, type Currency } from "@/lib/markets";
+import { formatMinorUnits } from "@/lib/money";
 
 // Plain, well-typeset order emails: inline styles and simple tables, which is
 // what email clients render reliably, with a text version alongside.
@@ -53,6 +54,17 @@ function ownerMeasurements(set: StoredMeasurements) {
   }));
 }
 
+/** Amounts in the order's own currency (orders from before markets are dollars). */
+function moneyFor(order: Order) {
+  const currency: Currency = order.currency === "aed" ? "aed" : "usd";
+  return (minor: number) => formatMoney(minor, currency);
+}
+
+/** Paid in another currency than the order's, through Stripe's local-currency prices. */
+function paidElsewhere(order: Order): boolean {
+  return Boolean(order.presentmentCurrency && order.presentmentAmount && order.presentmentCurrency !== (order.currency || "usd"));
+}
+
 function address(order: Order): string[] {
   const a = order.shippingAddress;
   if (!a) return [];
@@ -76,10 +88,11 @@ export function customerEmail(order: Order, dict: Dictionary, leadTime: string |
     return { line, name, choices };
   });
 
-  const paid =
-    order.presentmentCurrency && order.presentmentCurrency !== "usd" && order.presentmentAmount
-      ? t.paidIn.replace("{amount}", formatMinorUnits(order.presentmentAmount, order.presentmentCurrency, locale))
-      : null;
+  const money = moneyFor(order);
+  const paid = paidElsewhere(order)
+    ? t.paidIn.replace("{amount}", formatMinorUnits(order.presentmentAmount!, order.presentmentCurrency!, locale))
+    : null;
+  const shipping = order.shipping ? money(order.shipping) : order.shippingZone ? t.shippingFree : null;
 
   const html = shell(
     `<p style="font-family:${SERIF};font-size:30px;margin:0 0 8px">${esc(greeting)}</p>
@@ -89,7 +102,7 @@ ${leadTime ? `<p style="margin:0 0 20px;color:${MUTED}">${esc(t.leadTime.replace
 ${lines
   .map(
     ({ line, name, choices }) => `<div style="border-top:1px solid ${RULE};padding:16px 0">
-<table role="presentation" width="100%"><tr><td style="font-family:${SERIF};font-size:21px">${esc(name)}</td><td style="text-align:${dir === "rtl" ? "left" : "right"};white-space:nowrap">${esc(formatUsd(line.unitPrice * line.quantity))}</td></tr></table>
+<table role="presentation" width="100%"><tr><td style="font-family:${SERIF};font-size:21px">${esc(name)}</td><td style="text-align:${dir === "rtl" ? "left" : "right"};white-space:nowrap">${esc(money(line.unitPrice * line.quantity))}</td></tr></table>
 ${line.quantity > 1 ? `<p style="margin:2px 0;color:${MUTED}">${esc(t.quantity)}: ${line.quantity.toLocaleString(locale)}</p>` : ""}
 ${choices.map((c) => `<p style="margin:2px 0"><span style="color:${MUTED}">${esc(c.label)}:</span> ${esc(c.value)}</p>`).join("")}
 <p style="margin:10px 0 2px;font-size:12px;letter-spacing:0.16em;color:${MUTED};text-transform:uppercase">${esc(t.measurements)}</p>
@@ -98,7 +111,8 @@ ${line.notes ? `<p style="margin:8px 0 0"><span style="color:${MUTED}">${esc(t.n
 </div>`,
   )
   .join("")}
-<table role="presentation" width="100%" style="border-top:1px solid ${INK};padding-top:12px"><tr><td style="font-size:16px">${esc(t.total)}</td><td style="text-align:${dir === "rtl" ? "left" : "right"};font-family:${SERIF};font-size:24px">${esc(formatUsd(order.total))}</td></tr></table>
+${shipping ? `<table role="presentation" width="100%" style="border-top:1px solid ${RULE};padding:10px 0 4px"><tr><td>${esc(t.shipping)}</td><td style="text-align:${dir === "rtl" ? "left" : "right"}">${esc(shipping)}</td></tr></table>` : ""}
+<table role="presentation" width="100%" style="border-top:1px solid ${INK};padding-top:12px"><tr><td style="font-size:16px">${esc(t.total)}</td><td style="text-align:${dir === "rtl" ? "left" : "right"};font-family:${SERIF};font-size:24px">${esc(money(order.total))}</td></tr></table>
 ${paid ? `<p style="margin:4px 0 0;color:${MUTED};font-size:13px">${esc(paid)}</p>` : ""}
 ${address(order).length ? `<p style="margin:24px 0 4px;font-size:12px;letter-spacing:0.16em;color:${MUTED};text-transform:uppercase">${esc(t.shipTo)}</p><p style="margin:0">${address(order).map(esc).join("<br>")}</p>` : ""}
 <p style="margin:28px 0 0">${esc(t.questions)}</p>
@@ -115,7 +129,7 @@ ${address(order).length ? `<p style="margin:24px 0 4px;font-size:12px;letter-spa
     `${t.order} ${number}`,
     ...lines.flatMap(({ line, name, choices }) => [
       "",
-      `${name} — ${formatUsd(line.unitPrice * line.quantity)}${line.quantity > 1 ? ` (${t.quantity}: ${line.quantity})` : ""}`,
+      `${name} — ${money(line.unitPrice * line.quantity)}${line.quantity > 1 ? ` (${t.quantity}: ${line.quantity})` : ""}`,
       ...choices.map((c) => `${c.label}: ${c.value}`),
       `${t.measurements}: ${customerMeasurements(line.measurements, dict, locale)
         .map((r) => `${r.label} ${r.value}`)
@@ -123,7 +137,8 @@ ${address(order).length ? `<p style="margin:24px 0 4px;font-size:12px;letter-spa
       line.notes ? `${t.notes}: ${line.notes}` : "",
     ]),
     "",
-    `${t.total}: ${formatUsd(order.total)}`,
+    shipping ? `${t.shipping}: ${shipping}` : "",
+    `${t.total}: ${money(order.total)}`,
     paid ?? "",
     "",
     ...(address(order).length ? [t.shipTo, ...address(order), ""] : []),
@@ -140,14 +155,17 @@ ${address(order).length ? `<p style="margin:24px 0 4px;font-size:12px;letter-spa
 /** The notice the owners receive: everything the workshop needs, in English. */
 export function ownerEmail(order: Order, adminUrl: string): Email {
   const count = (order.lines ?? []).reduce((n, l) => n + l.quantity, 0);
-  const total = formatUsd(order.total);
+  const money = moneyFor(order);
+  const total = money(order.total);
+  const shipping = `Shipping${order.shippingZone ? ` (${order.shippingZone})` : ""}: ${order.shipping ? money(order.shipping) : "free"}`;
+  const market = order.market === "uae" ? "UAE prices (AED)" : "global prices (USD)";
   const subject = `New order ${order.number} — ${count} ${count === 1 ? "piece" : "pieces"} — ${total}`;
 
   const linesHtml = (order.lines ?? [])
     .map(
       (line) => `<div style="border-top:1px solid ${RULE};padding:14px 0">
 <p style="margin:0;font-family:${SERIF};font-size:21px">${esc(line.name)} × ${line.quantity}</p>
-<p style="margin:2px 0 8px;color:${MUTED}">${esc(formatUsd(line.unitPrice))} each</p>
+<p style="margin:2px 0 8px;color:${MUTED}">${esc(money(line.unitPrice))} each</p>
 ${(line.choices ?? []).map((c) => `<p style="margin:2px 0"><span style="color:${MUTED}">${esc(c.label ?? "")}:</span> ${esc(c.value ?? "")}</p>`).join("")}
 <table role="presentation" style="font-size:14px;margin-top:6px">${ownerMeasurements(line.measurements)
         .map((r) => `<tr><td style="padding:2px 12px 2px 0;color:${MUTED}">${r.label}</td><td><strong>${esc(r.value)}</strong></td><td style="padding-left:12px;color:${MUTED}">${esc(r.other)}</td></tr>`)
@@ -160,7 +178,8 @@ ${line.notes ? `<p style="margin:8px 0 0"><span style="color:${MUTED}">Notes:</s
   const contact = [order.customerName, order.customerEmail, order.customerPhone].filter((s): s is string => Boolean(s));
   const html = shell(
     `<p style="font-family:${SERIF};font-size:28px;margin:0 0 4px">New order ${esc(order.number ?? "")}</p>
-<p style="margin:0 0 18px;color:${MUTED}">${count} ${count === 1 ? "piece" : "pieces"} · ${esc(total)}${order.presentmentCurrency && order.presentmentCurrency !== "usd" && order.presentmentAmount ? ` · paid in ${esc(order.presentmentCurrency.toUpperCase())}` : ""} · ordered in ${order.locale === "ar" ? "Arabic" : "English"}</p>
+<p style="margin:0 0 18px;color:${MUTED}">${count} ${count === 1 ? "piece" : "pieces"} · ${esc(total)}${paidElsewhere(order) ? ` · paid in ${esc(order.presentmentCurrency!.toUpperCase())}` : ""} · ordered in ${order.locale === "ar" ? "Arabic" : "English"}</p>
+<p style="margin:0 0 18px;color:${MUTED}">${esc(market)} · ${esc(shipping)}</p>
 ${linesHtml}
 <p style="margin:20px 0 4px;font-size:12px;letter-spacing:0.16em;color:${MUTED};text-transform:uppercase">Customer</p>
 <p style="margin:0">${contact.map(esc).join("<br>")}</p>
@@ -174,9 +193,10 @@ ${linesHtml}
   const text = [
     `New order ${order.number}`,
     `${count} ${count === 1 ? "piece" : "pieces"} · ${total}`,
+    `${market} · ${shipping}`,
     ...(order.lines ?? []).flatMap((line) => [
       "",
-      `${line.name} × ${line.quantity} (${formatUsd(line.unitPrice)} each)`,
+      `${line.name} × ${line.quantity} (${money(line.unitPrice)} each)`,
       ...(line.choices ?? []).map((c) => `${c.label}: ${c.value}`),
       ...ownerMeasurements(line.measurements).map((r) => `  ${r.label}: ${r.value} (${r.other})`),
       line.notes ? `Notes: ${line.notes}` : "",

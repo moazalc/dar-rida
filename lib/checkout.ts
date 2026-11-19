@@ -1,13 +1,12 @@
 import "server-only";
 
 import type Stripe from "stripe";
-import { findCart, priceCart } from "@/lib/cart";
+import { findCart, priceCart, type Bag } from "@/lib/cart";
 import type { Locale } from "@/lib/i18n/config";
 import { getDictionary, type Dictionary } from "@/lib/i18n/dictionaries";
 import { handlePaidSession } from "@/lib/orders/paid";
 import { snapshotLine, type OrderLine } from "@/lib/orders/snapshot";
 import { payloadClient } from "@/lib/payload";
-import { shippingCountries } from "@/lib/shipping-countries";
 import { siteUrl, stripeClient } from "@/lib/stripe";
 
 export type CheckoutResult = { status: "redirect"; url: string } | { status: "not-ready" } | { status: "error" };
@@ -56,9 +55,13 @@ export async function startCheckout(locale: Locale): Promise<CheckoutResult> {
       data: {
         status: "pending_payment",
         lines,
+        market: bag.market.id,
+        currency: bag.currency,
+        shippingCountry: bag.country,
         subtotal: bag.subtotal,
-        total: bag.subtotal,
-        currency: "usd",
+        shipping: bag.shipping!.fee,
+        shippingZone: bag.shipping!.zone,
+        total: bag.total,
         locale,
         cartToken: cart.token,
       },
@@ -66,7 +69,7 @@ export async function startCheckout(locale: Locale): Promise<CheckoutResult> {
 
     let session: Stripe.Checkout.Session;
     try {
-      session = await createSession(stripe, order, lines, locale, dict);
+      session = await createSession(stripe, order, lines, bag, locale, dict);
     } catch (error) {
       // Never leave an order behind that has no way to be paid or expire.
       await payload.delete({ collection: "orders", id: order.id }).catch(() => undefined);
@@ -111,13 +114,14 @@ async function createSession(
   stripe: Stripe,
   order: { id: number; number?: string | null },
   lines: OrderLine[],
+  bag: Bag,
   locale: Locale,
   dict: Dictionary,
 ): Promise<Stripe.Checkout.Session> {
   const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = lines.map((l) => ({
     quantity: l.quantity,
     price_data: {
-      currency: "usd",
+      currency: bag.currency,
       unit_amount: l.unitPrice,
       product_data: {
         name: locale === "ar" && l.nameAr ? l.nameAr : l.kind === "custom" ? dict.cart.customName : l.name,
@@ -133,9 +137,20 @@ async function createSession(
       client_reference_id: String(order.id),
       metadata: { orderId: String(order.id), orderNumber: order.number ?? "" },
       payment_intent_data: { metadata: { orderId: String(order.id), orderNumber: order.number ?? "" } },
-      shipping_address_collection: { allowed_countries: [...shippingCountries] },
+      // Only the country the bag was priced for, so a market's prices can't ship elsewhere.
+      shipping_address_collection: { allowed_countries: [bag.country!] },
+      shipping_options: [
+        {
+          shipping_rate_data: {
+            type: "fixed_amount",
+            fixed_amount: { amount: bag.shipping!.fee, currency: bag.currency },
+            display_name: bag.shipping!.free ? dict.cart.shippingFree : dict.cart.shipping,
+          },
+        },
+      ],
       phone_number_collection: { enabled: true },
-      adaptive_pricing: { enabled: true },
+      // Dollar prices are shown in the customer's own currency; dirham prices are already local.
+      adaptive_pricing: { enabled: bag.currency === "usd" },
       // Stripe Checkout has no Arabic; "auto" follows the browser, falling back to English.
       locale: locale === "ar" ? "auto" : "en",
       expires_at: Math.floor(Date.now() / 1000) + 60 * 60 * 2,

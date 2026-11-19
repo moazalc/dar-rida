@@ -10,7 +10,7 @@ import { ProductGallery } from "@/components/collection/product-gallery";
 import { getDesign, getLook } from "@/lib/designs";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getLocale } from "@/lib/i18n/locale";
-import { formatUsd } from "@/lib/money";
+import { formatMoney } from "@/lib/markets";
 import { payloadClient } from "@/lib/payload";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -46,12 +46,15 @@ export default async function DesignPage({ params }: Props) {
     name: `${design.code} ${design.name}`,
     description: design.description,
     image: design.images.map((i) => i.url),
-    offers: {
-      "@type": "Offer",
-      price: (design.price / 100).toFixed(2),
-      priceCurrency: "USD",
-      availability: "https://schema.org/PreOrder",
-    },
+    offers:
+      design.price === null
+        ? undefined
+        : {
+            "@type": "Offer",
+            price: (design.price / 100).toFixed(2),
+            priceCurrency: design.currency.toUpperCase(),
+            availability: "https://schema.org/PreOrder",
+          },
   };
 
   return (
@@ -86,7 +89,7 @@ export default async function DesignPage({ params }: Props) {
             </p>
             <h1 className="mt-1 font-heading text-5xl leading-[1.02] font-light md:text-6xl xl:text-7xl">{design.name}</h1>
             <p className="mt-5 font-heading text-3xl">
-              <bdi>{formatUsd(design.price)}</bdi>
+              {design.price === null ? dict.market.notHere : <bdi>{formatMoney(design.price, design.currency)}</bdi>}
             </p>
             <p className="mt-3 text-sm text-muted-foreground">{leadTime || t.leadTimeFallback}</p>
           </div>
@@ -101,7 +104,7 @@ export default async function DesignPage({ params }: Props) {
             )}
           </section>
 
-          <DesignForm slug={design.slug} />
+          <DesignForm slug={design.slug} available={design.price !== null} />
 
           <ProductDetails
             items={[

@@ -9,6 +9,7 @@ import { Designs } from "./cms/collections/designs";
 import { Media } from "./cms/collections/media";
 import { Orders } from "./cms/collections/orders";
 import { Users } from "./cms/collections/users";
+import { Shipping } from "./cms/globals/shipping";
 import { StoreSettings } from "./cms/globals/store-settings";
 import { migrations } from "./cms/migrations";
 
@@ -39,7 +40,7 @@ export default buildConfig({
     meta: { titleSuffix: " — Dar Rida admin" },
   },
   collections: [Orders, Designs, Media, Users, Carts],
-  globals: [StoreSettings],
+  globals: [StoreSettings, Shipping],
   localization: {
     locales: [
       { label: "English", code: "en" },

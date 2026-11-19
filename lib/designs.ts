@@ -2,8 +2,10 @@ import "server-only";
 
 import type { Design, Media } from "@/cms/payload-types";
 import type { Locale } from "@/lib/i18n/config";
+import { designPrice } from "@/lib/cart/pricing";
+import { getMarket } from "@/lib/country";
+import type { Currency, Market } from "@/lib/markets";
 import { mediaPath } from "@/lib/media";
-import { dollarsToCents } from "@/lib/money";
 import { payloadClient } from "@/lib/payload";
 
 export type ShopDesign = {
@@ -13,8 +15,9 @@ export type ShopDesign = {
   name: string;
   description: string;
   cut: string | null;
-  /** Cents. */
-  price: number;
+  /** In the visitor's market, in minor units; null when it has no price there yet. */
+  price: number | null;
+  currency: Currency;
   leadTime: string | null;
   composition: string | null;
   care: string | null;
@@ -25,7 +28,7 @@ export type ShopDesign = {
   images: { url: string; alt: string; width: number; height: number }[];
 };
 
-function toShop(d: Design): ShopDesign {
+function toShop(d: Design, market: Market): ShopDesign {
   return {
     id: d.id,
     code: d.code,
@@ -33,7 +36,8 @@ function toShop(d: Design): ShopDesign {
     name: d.name,
     description: d.description,
     cut: d.cut ?? null,
-    price: dollarsToCents(d.price),
+    price: designPrice(d, market),
+    currency: market.currency,
     leadTime: d.leadTime ?? null,
     composition: d.composition?.trim() || null,
     care: d.care?.trim() || null,
@@ -46,13 +50,15 @@ function toShop(d: Design): ShopDesign {
   };
 }
 
+const shop = (market: Market) => (d: Design) => toShop(d, market);
+
 const active = { active: { equals: true } } as const;
 
 /** The designs on sale, in the owners' order. */
 export async function listDesigns(locale: Locale): Promise<ShopDesign[]> {
   const payload = await payloadClient();
   const { docs } = await payload.find({ collection: "designs", where: active, sort: "sortOrder", locale, depth: 1, limit: 100 });
-  return docs.map(toShop);
+  return docs.map(shop(await getMarket()));
 }
 
 export async function getDesign(slug: string, locale: Locale): Promise<ShopDesign | null> {
@@ -65,7 +71,7 @@ export async function getDesign(slug: string, locale: Locale): Promise<ShopDesig
     depth: 1,
     limit: 1,
   });
-  return docs[0] ? toShop(docs[0]) : null;
+  return docs[0] ? toShop(docs[0], await getMarket()) : null;
 }
 
 /**
@@ -84,10 +90,10 @@ export async function getLook(design: ShopDesign, locale: Locale): Promise<ShopD
       limit: 4,
     });
     const order = new Map(design.lookIds.map((id, i) => [id, i]));
-    if (docs.length) return docs.sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0)).map(toShop);
+    if (docs.length) return docs.sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0)).map(shop(await getMarket()));
   }
   const { docs } = await payload.find({ collection: "designs", where: { and: [active, others] }, sort: "sortOrder", locale, depth: 1, limit: 4 });
-  return docs.map(toShop);
+  return docs.map(shop(await getMarket()));
 }
 
 /** Active designs whose code, name, description or cut match, in either language. */
@@ -110,5 +116,5 @@ export async function searchDesigns(query: string, locale: Locale): Promise<Shop
   const ids = [...new Set(matches.flatMap((m) => m.docs.map((d) => d.id)))];
   if (!ids.length) return [];
   const { docs } = await payload.find({ collection: "designs", where: { id: { in: ids } }, sort: "sortOrder", locale, depth: 1, limit: 100 });
-  return docs.map(toShop);
+  return docs.map(shop(await getMarket()));
 }

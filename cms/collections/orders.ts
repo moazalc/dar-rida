@@ -1,7 +1,7 @@
 import type { CollectionConfig } from "payload";
 import { isAdmin, nobody } from "../access";
 import { resendEmailsEndpoint } from "../endpoints/resend-emails";
-import { formatUsd, measurementsField } from "../fields";
+import { formatOrderMoney, measurementsField } from "../fields";
 
 export const orderStatuses = [
   { label: "Awaiting payment", value: "pending_payment" },
@@ -67,7 +67,7 @@ export const Orders: CollectionConfig = {
           type: "text",
           virtual: true,
           admin: readOnly,
-          hooks: { afterRead: [({ siblingData }) => formatUsd(siblingData?.total)] },
+          hooks: { afterRead: [({ siblingData }) => formatOrderMoney(siblingData?.total, siblingData?.currency)] },
         },
       ],
     },
@@ -96,7 +96,7 @@ export const Orders: CollectionConfig = {
             { name: "name", type: "text", required: true },
             { name: "nameAr", label: "Name (Arabic)", type: "text" },
             { name: "quantity", type: "number", required: true },
-            { name: "unitPrice", label: "Unit price (cents)", type: "number", required: true },
+            { name: "unitPrice", label: "Unit price (minor units)", type: "number", required: true },
           ],
         },
         { name: "design", type: "relationship", relationTo: "designs" },
@@ -123,9 +123,33 @@ export const Orders: CollectionConfig = {
     {
       type: "row",
       fields: [
-        { name: "subtotal", label: "Subtotal (cents)", type: "number", required: true, admin: readOnly },
-        { name: "total", label: "Total (cents)", type: "number", required: true, admin: readOnly },
+        {
+          name: "market",
+          type: "select",
+          defaultValue: "global",
+          options: [
+            { label: "UAE (AED)", value: "uae" },
+            { label: "Global (USD)", value: "global" },
+          ],
+          admin: readOnly,
+        },
         { name: "currency", type: "text", defaultValue: "usd", admin: readOnly },
+        { name: "shippingCountry", label: "Ships to", type: "text", admin: { ...readOnly, description: "Checkout only accepted an address in this country." } },
+      ],
+    },
+    {
+      type: "row",
+      fields: [
+        {
+          name: "subtotal",
+          label: "Subtotal",
+          type: "number",
+          required: true,
+          admin: { ...readOnly, description: "Minor units of the order's currency (cents or fils): 150000 is 1,500.00." },
+        },
+        { name: "shipping", label: "Shipping", type: "number", defaultValue: 0, admin: readOnly },
+        { name: "shippingZone", label: "Shipping zone", type: "text", admin: readOnly },
+        { name: "total", label: "Total", type: "number", required: true, admin: readOnly },
       ],
     },
     {
