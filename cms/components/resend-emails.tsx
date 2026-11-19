@@ -12,11 +12,12 @@ export function ResendEmails() {
   const status = useFormFields(([fields]) => fields.status?.value as string | undefined);
   const ownerSent = useFormFields(([fields]) => Boolean(fields.ownerNotifiedAt?.value));
   const customerSent = useFormFields(([fields]) => Boolean(fields.customerNotifiedAt?.value));
+  const shipped = useFormFields(([fields]) => Boolean(fields.shippedAt?.value));
   const [busy, setBusy] = useState(false);
 
   if (!id || !status || status === "pending_payment") return null;
 
-  async function send(which: "missing" | "owner" | "customer") {
+  async function send(which: "missing" | "owner" | "customer" | "shipped") {
     setBusy(true);
     try {
       const res = await fetch(`/api/orders/${id}/resend-emails`, {
@@ -49,6 +50,11 @@ export function ResendEmails() {
       <Button buttonStyle="secondary" size="small" disabled={busy} onClick={() => send("owner")} margin={false}>
         Resend owner notice
       </Button>
+      {shipped && (
+        <Button buttonStyle="secondary" size="small" disabled={busy} onClick={() => send("shipped")} margin={false}>
+          Resend shipped email
+        </Button>
+      )}
     </div>
   );
 }

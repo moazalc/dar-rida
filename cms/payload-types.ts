@@ -78,11 +78,7 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {
-    customers: {
-      orders: 'orders';
-    };
-  };
+  collectionsJoins: {};
   collectionsSelect: {
     orders: OrdersSelect<false> | OrdersSelect<true>;
     customers: CustomersSelect<false> | CustomersSelect<true>;
@@ -109,6 +105,7 @@ export interface Config {
   };
   locale: 'en' | 'ar';
   widgets: {
+    overview: OverviewWidget;
     collections: CollectionsWidget;
   };
   user: User;
@@ -146,6 +143,30 @@ export interface Order {
   number?: string | null;
   status: 'pending_payment' | 'paid' | 'in_production' | 'shipped' | 'completed' | 'cancelled';
   formattedTotal?: string | null;
+  /**
+   * Set from the slowest piece when production starts. Change it for this order if needed.
+   */
+  readyBy?: string | null;
+  productionStartedAt?: string | null;
+  carrier?: ('aramex' | 'dhl' | 'fedex' | 'ups' | 'emirates_post' | 'other') | null;
+  trackingNumber?: string | null;
+  trackingUrl?: string | null;
+  shippedAt?: string | null;
+  expectedDelivery?: string | null;
+  deliveredAt?: string | null;
+  cancelledAt?: string | null;
+  cancelReason?: string | null;
+  /**
+   * Who moved the order on, and when.
+   */
+  history?:
+    | {
+        status: 'pending_payment' | 'paid' | 'in_production' | 'shipped' | 'completed' | 'cancelled';
+        at: string;
+        by?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   lines?:
     | {
         kind: 'design' | 'custom';
@@ -222,6 +243,7 @@ export interface Order {
   paidAt?: string | null;
   ownerNotifiedAt?: string | null;
   customerNotifiedAt?: string | null;
+  shippedEmailSentAt?: string | null;
   cartToken?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -260,6 +282,10 @@ export interface Design {
    * e.g. "Ready in 3 weeks"
    */
   leadTime?: string | null;
+  /**
+   * For the team only: how many days this piece usually takes to make. Sets an order's ready-by date. Empty uses the store default.
+   */
+  makingDays?: number | null;
   /**
    * e.g. "100% Japanese crepe, 220 g/m². Lining: viscose satin."
    */
@@ -591,11 +617,6 @@ export interface Customer {
         id?: string | null;
       }[]
     | null;
-  orders?: {
-    docs?: (number | Order)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
   authUserId?: string | null;
   stripeCustomerId?: string | null;
   updatedAt: string;
@@ -772,6 +793,24 @@ export interface OrdersSelect<T extends boolean = true> {
   number?: T;
   status?: T;
   formattedTotal?: T;
+  readyBy?: T;
+  productionStartedAt?: T;
+  carrier?: T;
+  trackingNumber?: T;
+  trackingUrl?: T;
+  shippedAt?: T;
+  expectedDelivery?: T;
+  deliveredAt?: T;
+  cancelledAt?: T;
+  cancelReason?: T;
+  history?:
+    | T
+    | {
+        status?: T;
+        at?: T;
+        by?: T;
+        id?: T;
+      };
   lines?:
     | T
     | {
@@ -832,6 +871,7 @@ export interface OrdersSelect<T extends boolean = true> {
   paidAt?: T;
   ownerNotifiedAt?: T;
   customerNotifiedAt?: T;
+  shippedEmailSentAt?: T;
   cartToken?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -875,7 +915,6 @@ export interface CustomersSelect<T extends boolean = true> {
         country?: T;
         id?: T;
       };
-  orders?: T;
   authUserId?: T;
   stripeCustomerId?: T;
   updatedAt?: T;
@@ -894,6 +933,7 @@ export interface DesignsSelect<T extends boolean = true> {
   price?: T;
   priceAed?: T;
   leadTime?: T;
+  makingDays?: T;
   composition?: T;
   care?: T;
   origin?: T;
@@ -1041,6 +1081,10 @@ export interface StoreSetting {
       }[]
     | null;
   /**
+   * For designs without their own making time, and custom abayas.
+   */
+  defaultMakingDays?: number | null;
+  /**
    * Shown when a design has none of its own, e.g. "Ready in 3–4 weeks"
    */
   defaultLeadTime?: string | null;
@@ -1062,6 +1106,10 @@ export interface Shipping {
      * Optional: shipping is free when the bag is worth at least this much.
      */
     freeOver?: number | null;
+    /**
+     * For the team only: after shipping, the dashboard expects delivery around then.
+     */
+    deliveryDays?: number | null;
   };
   /**
    * e.g. GCC, Europe, North America. A country belongs to one zone at most.
@@ -1318,6 +1366,10 @@ export interface Shipping {
          * Optional: shipping is free when the bag is worth at least this much.
          */
         freeOver?: number | null;
+        /**
+         * For the team only: after shipping, the dashboard expects delivery around then.
+         */
+        deliveryDays?: number | null;
         id?: string | null;
       }[]
     | null;
@@ -1333,6 +1385,10 @@ export interface Shipping {
      * Optional: shipping is free when the bag is worth at least this much.
      */
     freeOver?: number | null;
+    /**
+     * For the team only: after shipping, the dashboard expects delivery around then.
+     */
+    deliveryDays?: number | null;
   };
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1350,6 +1406,7 @@ export interface StoreSettingsSelect<T extends boolean = true> {
         email?: T;
         id?: T;
       };
+  defaultMakingDays?: T;
   defaultLeadTime?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1365,6 +1422,7 @@ export interface ShippingSelect<T extends boolean = true> {
     | {
         fee?: T;
         freeOver?: T;
+        deliveryDays?: T;
       };
   zones?:
     | T
@@ -1373,6 +1431,7 @@ export interface ShippingSelect<T extends boolean = true> {
         countries?: T;
         fee?: T;
         freeOver?: T;
+        deliveryDays?: T;
         id?: T;
       };
   restOfWorld?:
@@ -1380,10 +1439,21 @@ export interface ShippingSelect<T extends boolean = true> {
     | {
         fee?: T;
         freeOver?: T;
+        deliveryDays?: T;
       };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "overview_widget".
+ */
+export interface OverviewWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

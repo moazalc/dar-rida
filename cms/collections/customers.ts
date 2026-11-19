@@ -17,8 +17,9 @@ const countryOptions = shippingCountries
  */
 export const Customers: CollectionConfig = {
   slug: "customers",
+  labels: { singular: { en: "Customer", ar: "عميلة" }, plural: { en: "Customers", ar: "العملاء" } },
   admin: {
-    group: "Shop",
+    group: { en: "Shop", ar: "المتجر" },
     useAsTitle: "email",
     defaultColumns: ["email", "name", "phone", "createdAt"],
     listSearchableFields: ["email", "name", "phone"],
@@ -50,14 +51,14 @@ export const Customers: CollectionConfig = {
       label: "Saved measurements",
       type: "array",
       labels: { singular: "Profile", plural: "Profiles" },
-      admin: { initCollapsed: true },
+      admin: { initCollapsed: true, components: { RowLabel: "/cms/components/customer-row-labels#ProfileRowLabel" } },
       fields: [{ name: "name", type: "text", required: true }, ...measurementsField()],
     },
     {
       name: "addresses",
       type: "array",
       labels: { singular: "Address", plural: "Addresses" },
-      admin: { initCollapsed: true },
+      admin: { initCollapsed: true, components: { RowLabel: "/cms/components/customer-row-labels#AddressRowLabel" } },
       fields: [
         {
           type: "row",
@@ -86,11 +87,10 @@ export const Customers: CollectionConfig = {
       ],
     },
     {
+      // Signed-in orders and guest orders with her email, as her account shows them.
       name: "orders",
-      type: "join",
-      collection: "orders",
-      on: "customer",
-      admin: { defaultColumns: ["number", "status", "formattedTotal", "createdAt"] },
+      type: "ui",
+      admin: { components: { Field: "/cms/admin/customer-orders#CustomerOrders" } },
     },
     {
       type: "collapsible",

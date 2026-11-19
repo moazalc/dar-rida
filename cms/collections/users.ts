@@ -4,7 +4,8 @@ import { isAdmin } from "../access";
 /** Admin logins only. Customers check out as guests and have no accounts. */
 export const Users: CollectionConfig = {
   slug: "users",
-  admin: { useAsTitle: "email", group: "Settings" },
+  labels: { singular: { en: "Admin", ar: "مدير" }, plural: { en: "Admins", ar: "المديرون" } },
+  admin: { useAsTitle: "email", group: { en: "Settings", ar: "الإعدادات" } },
   auth: true,
   access: { read: isAdmin, create: isAdmin, update: isAdmin, delete: isAdmin },
   fields: [

@@ -4,6 +4,7 @@ import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { formatMeasurement, measurementRows, otherUnit, type StoredMeasurements } from "@/lib/measurements";
 import { formatMoney, type Currency } from "@/lib/markets";
 import { formatMinorUnits } from "@/lib/money";
+import { CARRIERS, isCarrier } from "./fulfilment";
 
 // Plain, well-typeset order emails: inline styles and simple tables, which is
 // what email clients render reliably, with a text version alongside.
@@ -212,4 +213,56 @@ ${linesHtml}
   ].join("\n");
 
   return { subject, html, text };
+}
+
+/** "Your order is on its way": sent once when the team marks the order shipped, in the language she ordered in. */
+export function shippedEmail(order: Order, dict: Dictionary): Email {
+  const t = dict.shippedEmail;
+  const locale = order.locale === "ar" ? "ar" : "en";
+  const dir = locale === "ar" ? "rtl" : "ltr";
+  const number = order.number ?? "";
+  const first = order.customerName?.trim().split(/\s+/)[0];
+  const greeting = first ? t.greeting.replace("{name}", first) : t.greetingNoName;
+  const carrier = order.carrier && isCarrier(order.carrier) && order.carrier !== "other" ? CARRIERS[order.carrier].name : null;
+  const link = order.trackingUrl ?? null;
+  const lines = (order.lines ?? []).map((line) =>
+    locale === "ar" && line.nameAr ? line.nameAr : line.kind === "custom" ? dict.cart.customName : line.name,
+  );
+
+  const html = shell(
+    `<p style="font-family:${SERIF};font-size:30px;margin:0 0 8px">${esc(greeting)}</p>
+<p style="margin:0 0 20px">${esc(t.intro)}</p>
+<p style="margin:0 0 12px;font-size:12px;letter-spacing:0.2em;color:${MUTED};text-transform:uppercase">${esc(t.order)} <span dir="ltr">${esc(number)}</span></p>
+<p style="margin:0 0 16px;font-family:${SERIF};font-size:20px">${lines.map(esc).join("<br>")}</p>
+<table role="presentation" style="border-top:1px solid ${RULE};padding-top:12px;font-size:14px">
+${carrier ? `<tr><td style="padding:2px 0;color:${MUTED}">${esc(t.courier)}</td><td style="padding:2px 12px">${esc(carrier)}</td></tr>` : ""}
+${order.trackingNumber ? `<tr><td style="padding:2px 0;color:${MUTED}">${esc(t.trackingNumber)}</td><td style="padding:2px 12px" dir="ltr">${esc(order.trackingNumber)}</td></tr>` : ""}
+</table>
+${link ? `<p style="margin:24px 0"><a href="${esc(link)}" style="display:inline-block;background:${INK};color:#fbf8f2;text-decoration:none;padding:14px 28px;font-size:13px;letter-spacing:0.16em;text-transform:uppercase">${esc(t.track)}</a></p>` : ""}
+${address(order).length ? `<p style="margin:24px 0 4px;font-size:12px;letter-spacing:0.16em;color:${MUTED};text-transform:uppercase">${esc(t.shipTo)}</p><p style="margin:0">${address(order).map(esc).join("<br>")}</p>` : ""}
+<p style="margin:28px 0 0">${esc(t.questions)}</p>
+<p style="margin:16px 0 0;font-family:${SERIF};font-size:18px">${esc(t.signoff).replace(/\n/g, "<br>")}</p>`,
+    dir,
+    locale,
+  );
+
+  const text = [
+    greeting,
+    t.intro,
+    "",
+    `${t.order} ${number}`,
+    ...lines,
+    "",
+    carrier ? `${t.courier}: ${carrier}` : "",
+    order.trackingNumber ? `${t.trackingNumber}: ${order.trackingNumber}` : "",
+    link ? `${t.track}: ${link}` : "",
+    "",
+    t.questions,
+    "",
+    t.signoff,
+  ]
+    .filter((l, i, all) => l !== "" || all[i - 1] !== "")
+    .join("\n");
+
+  return { subject: t.subject.replace("{number}", number), html, text };
 }

@@ -4,8 +4,9 @@ import { isAdmin } from "../access";
 /** The Rida collection: fixed designs, each made to the customer's measurements. */
 export const Designs: CollectionConfig = {
   slug: "designs",
+  labels: { singular: { en: "Design", ar: "تصميم" }, plural: { en: "Designs", ar: "التصاميم" } },
   admin: {
-    group: "Shop",
+    group: { en: "Shop", ar: "المتجر" },
     useAsTitle: "code",
     defaultColumns: ["code", "name", "price", "priceAed", "active", "sortOrder"],
     description: "The Rida collection. Each design is made to the customer's own measurements.",
@@ -60,6 +61,17 @@ export const Designs: CollectionConfig = {
         },
         { name: "leadTime", type: "text", localized: true, admin: { description: 'e.g. "Ready in 3 weeks"' } },
       ],
+    },
+    {
+      name: "makingDays",
+      label: "Making time (days)",
+      type: "number",
+      min: 1,
+      max: 120,
+      admin: {
+        step: 1,
+        description: "For the team only: how many days this piece usually takes to make. Sets an order's ready-by date. Empty uses the store default.",
+      },
     },
     {
       type: "collapsible",

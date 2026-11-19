@@ -8,7 +8,8 @@ import { isAdmin } from "../access";
  */
 export const Media: CollectionConfig = {
   slug: "media",
-  admin: { group: "Shop" },
+  labels: { singular: { en: "Photo", ar: "صورة" }, plural: { en: "Photos", ar: "الصور" } },
+  admin: { group: { en: "Shop", ar: "المتجر" } },
   access: { read: () => true, create: isAdmin, update: isAdmin, delete: isAdmin },
   upload: {
     staticDir: process.env.MEDIA_DIR || path.resolve(process.cwd(), "media"),

@@ -6,6 +6,7 @@ import { StatusBadge } from "@/components/account/status-badge";
 import { customerStatus } from "@/lib/account";
 import { describeConfig } from "@/lib/configurator/describe";
 import { customerOrder, requireCustomer } from "@/lib/customers";
+import { CARRIERS, isCarrier } from "@/lib/orders/fulfilment";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getLocale } from "@/lib/i18n/locale";
 import { countryName, formatMoney, isCountry, type Currency } from "@/lib/markets";
@@ -36,6 +37,8 @@ export default async function OrderPage({ params }: Params) {
   const country = a?.country && isCountry(a.country) ? countryName(a.country, locale) : a?.country;
   const address = [order.customerName, a?.line1, a?.line2, [a?.city, a?.state, a?.postalCode].filter(Boolean).join(", "), country].filter(Boolean);
   const defaultName = (customer.profiles ?? []).length === 0 ? dict.account.profiles.defaultName : "";
+  const carrier = order.carrier && isCarrier(order.carrier) && order.carrier !== "other" ? CARRIERS[order.carrier].name : null;
+  const shipped = order.shippedAt && (order.status === "shipped" || order.status === "completed");
 
   return (
     <section>
@@ -51,6 +54,34 @@ export default async function OrderPage({ params }: Params) {
         </div>
         <StatusBadge status={status} label={dict.account.orders.status[status]} />
       </div>
+
+      {shipped && (
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border border-border/70 bg-card p-5">
+          <div className="text-sm">
+            <p>
+              {(carrier ? t.shippedOn.replace("{carrier}", carrier) : t.shippedOnNoCarrier).replace("{date}", date.format(new Date(order.shippedAt!)))}
+            </p>
+            {order.trackingNumber && (
+              <p className="mt-1 text-muted-foreground">
+                {t.trackingNumber}: <bdi dir="ltr">{order.trackingNumber}</bdi>
+              </p>
+            )}
+            {order.status === "completed" && order.deliveredAt && (
+              <p className="mt-1 text-muted-foreground">{t.deliveredOn.replace("{date}", date.format(new Date(order.deliveredAt)))}</p>
+            )}
+          </div>
+          {order.trackingUrl && order.status === "shipped" && (
+            <a
+              href={order.trackingUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-12 items-center bg-primary px-7 text-sm tracking-[0.16em] text-primary-foreground uppercase transition-opacity hover:opacity-90"
+            >
+              {t.track}
+            </a>
+          )}
+        </div>
+      )}
 
       <div className="grid gap-12 pt-4 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-16">
         <ul className="divide-y divide-border/60">

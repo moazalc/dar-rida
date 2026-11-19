@@ -1,11 +1,12 @@
 import type { GlobalConfig } from "payload";
+import { DEFAULT_MAKING_DAYS } from "@/lib/orders/fulfilment";
 import { isAdmin } from "../access";
 
 /** Shop-wide settings the owners edit. */
 export const StoreSettings: GlobalConfig = {
   slug: "store-settings",
-  label: "Store settings",
-  admin: { group: "Settings" },
+  label: { en: "Store settings", ar: "إعدادات المتجر" },
+  admin: { group: { en: "Settings", ar: "الإعدادات" } },
   access: { read: isAdmin, update: isAdmin },
   fields: [
     {
@@ -29,6 +30,15 @@ export const StoreSettings: GlobalConfig = {
       label: "Send new-order emails to",
       type: "array",
       fields: [{ name: "email", type: "email", required: true }],
+    },
+    {
+      name: "defaultMakingDays",
+      label: "Default making time (days)",
+      type: "number",
+      min: 1,
+      max: 120,
+      defaultValue: DEFAULT_MAKING_DAYS,
+      admin: { step: 1, description: "For designs without their own making time, and custom abayas." },
     },
     {
       name: "defaultLeadTime",

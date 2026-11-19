@@ -1,0 +1,585 @@
+/*
+ * Dar Rida's look for the admin: the shop's warm neutrals and faces on top of
+ * Payload's own screens, plus the menu, login panel, dashboard and order tabs.
+ * Payload's --font-body is set from lib/fonts.ts in layout.tsx.
+ */
+
+:root {
+  /* Payload's neutral scale, warmed to the shop's sand and ink. */
+  --color-base-0: #fdfbf7;
+  --color-base-50: #f9f5ee;
+  --color-base-100: #f1ebe1;
+  --color-base-150: #e6dccb;
+  --color-base-200: #d9cfbe;
+  --color-base-250: #ccc2b1;
+  --color-base-300: #beb4a4;
+  --color-base-350: #b0a697;
+  --color-base-400: #a2988a;
+  --color-base-450: #958b7d;
+  --color-base-500: #877d71;
+  --color-base-550: #7a6f66;
+  --color-base-600: #6c6259;
+  --color-base-650: #5d544c;
+  --color-base-700: #4f4740;
+  --color-base-750: #413a34;
+  --color-base-800: #342e29;
+  --color-base-850: #2b2420;
+  --color-base-900: #1a1613;
+  --color-base-950: #0d0b09;
+  --color-base-1000: #080706;
+
+  --dr-ink: #2b2420;
+  --dr-on-ink: #fbf8f2;
+  --dr-accent-soft: #efe5d6;
+  --dr-alert: #a35a00;
+  --nav-width: 248px;
+  --accessibility-outline: 2px solid var(--dr-ink);
+}
+
+html[data-theme="dark"] {
+  --dr-ink: #efe5d6;
+  --dr-on-ink: #1a1613;
+  --dr-accent-soft: rgba(239, 229, 214, 0.12);
+  --dr-alert: #f0b45a;
+  --accessibility-outline: 2px solid var(--dr-ink);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display, Georgia, serif);
+  font-weight: 500;
+}
+
+/* Cormorant's default old-style figures make 0 and 1 read as "O" and "I". */
+h1,
+h2,
+h3,
+.dr-dash__kpi-value,
+.dr-dash__big,
+.dr-dash__sales-value {
+  font-variant-numeric: lining-nums;
+}
+
+.btn--style-primary {
+  --bg-color: var(--dr-ink);
+  --color: var(--dr-on-ink);
+  --hover-bg: var(--color-base-700);
+  --hover-color: var(--dr-on-ink);
+}
+
+.dr-wordmark {
+  font-family: var(--font-display, Georgia, serif);
+  font-size: 22px;
+  letter-spacing: 0.14em;
+  color: var(--theme-text);
+}
+.dr-wordmark--large {
+  font-size: 34px;
+}
+.dr-icon {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+.dr-muted {
+  color: var(--theme-elevation-600);
+}
+.dr-num {
+  text-align: end;
+  white-space: nowrap;
+}
+
+/* ---- Menu (cms/admin/Nav.tsx) ---- */
+.nav {
+  background: var(--theme-elevation-50);
+}
+.nav__scroll {
+  --nav-padding-block-start: calc(var(--app-header-height) + 4px);
+  --nav-padding-block-end: 20px;
+  --nav-padding-inline-start: 16px;
+  --nav-padding-inline-end: 16px;
+}
+.dr-nav {
+  gap: 22px;
+}
+.dr-nav__logo {
+  display: flex;
+  justify-content: center;
+  padding: 4px 0 8px;
+  text-decoration: none;
+}
+.dr-nav__groups {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  flex: 1;
+}
+.dr-nav__label {
+  margin: 0 0 6px;
+  padding-inline: 10px;
+  color: var(--theme-elevation-500);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.dr-nav__link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: var(--style-radius-s);
+  color: var(--theme-text);
+  text-decoration: none;
+}
+.dr-nav__link:hover {
+  background: var(--theme-elevation-100);
+}
+.dr-nav__link--active {
+  background: var(--dr-accent-soft);
+  font-weight: 600;
+}
+.dr-nav__badge {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--dr-ink);
+  color: var(--dr-on-ink);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.dr-nav__footer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--theme-elevation-150);
+}
+.dr-nav__user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--theme-text);
+  text-decoration: none;
+  min-width: 0;
+}
+.dr-nav__avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--theme-elevation-150);
+  font-size: 12px;
+}
+.dr-nav__who {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.dr-nav__email {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+.dr-nav__role {
+  color: var(--theme-elevation-500);
+  font-size: 12px;
+}
+.dr-nav__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.dr-nav__site {
+  flex: 1;
+  color: var(--theme-text);
+  font-size: 13px;
+  text-decoration: none;
+}
+.dr-nav__icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: var(--style-radius-s);
+  background: none;
+  color: var(--theme-text);
+  cursor: pointer;
+}
+.dr-nav__icon:hover {
+  background: var(--theme-elevation-100);
+}
+.dr-nav__logout a {
+  display: grid;
+  place-items: center;
+  color: inherit;
+}
+
+/* ---- Login (cms/admin/LoginBrand.tsx), around Payload's own form ---- */
+.dr-login__brand {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 32px;
+  margin: 0 calc(-1 * var(--gutter-h, 24px)) 32px;
+  padding: 32px 24px;
+  background: #2b2420;
+  color: #f7f2e9;
+}
+.dr-login__brand .dr-wordmark {
+  color: #f7f2e9;
+}
+.dr-login__title {
+  margin: 0 0 6px;
+  font-family: var(--font-display, Georgia, serif);
+  font-size: 26px;
+}
+.dr-login__text {
+  margin: 0;
+  color: #d9cfbe;
+}
+.template-minimal:has(.dr-login__brand) {
+  align-items: flex-start;
+  padding-top: 0;
+}
+.template-minimal__wrap:has(> .dr-login__brand) {
+  display: flex;
+  flex-direction: column;
+}
+.template-minimal__wrap > .dr-login__brand {
+  order: -1;
+}
+.login__brand {
+  justify-content: flex-start;
+  margin-bottom: 28px;
+}
+.dr-login__head h1 {
+  margin: 0 0 6px;
+  font-size: 32px;
+  line-height: 1.15;
+}
+.dr-login__head p {
+  margin: 0;
+  color: var(--theme-elevation-600);
+  font-size: 14px;
+}
+@media (min-width: 1024px) {
+  .dr-login__brand {
+    position: fixed;
+    inset-block: 0;
+    inset-inline: 0 50%;
+    margin: 0;
+    padding: clamp(40px, 5vw, 72px);
+  }
+  .template-minimal:has(.dr-login__brand) {
+    align-items: center;
+    padding-top: 60px;
+    padding-inline-start: calc(50% + 1.5rem);
+    min-height: 100vh;
+  }
+  .template-minimal:has(.dr-login__brand) .template-minimal__wrap {
+    max-width: 380px;
+  }
+}
+
+/* ---- Orders list tabs (cms/admin/order-tabs.tsx) ---- */
+.dr-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--theme-elevation-150);
+}
+.dr-tabs__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: -1px;
+  padding: 10px 14px;
+  border-bottom: 2px solid transparent;
+  color: var(--theme-elevation-600);
+  text-decoration: none;
+}
+.dr-tabs__tab:hover {
+  color: var(--theme-text);
+}
+.dr-tabs__tab--active {
+  border-color: var(--dr-ink);
+  color: var(--theme-text);
+  font-weight: 600;
+}
+.dr-tabs__count {
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--theme-elevation-150);
+  font-size: 12px;
+}
+
+/* ---- Small tables and fields (customer orders) ---- */
+.dr-field {
+  margin-bottom: 24px;
+}
+.dr-field__label {
+  margin: 0 0 8px;
+  font-weight: 600;
+}
+.dr-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.dr-table td {
+  padding: 8px 8px 8px 0;
+  border-bottom: 1px solid var(--theme-elevation-100);
+  vertical-align: top;
+}
+
+/* ---- Dashboard (cms/admin/dashboard/Overview.tsx) ---- */
+.dr-dash {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-bottom: 40px;
+}
+.dr-dash__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+.dr-dash__date {
+  margin: 0;
+  color: var(--theme-elevation-600);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.dr-dash__greeting {
+  margin: 4px 0 0;
+  font-size: 40px;
+  line-height: 1.1;
+}
+.dr-dash__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.dr-dash__btn {
+  display: inline-flex;
+  align-items: center;
+  height: 38px;
+  padding: 0 16px;
+  border: 1px solid var(--theme-elevation-250);
+  border-radius: var(--style-radius-s);
+  color: var(--theme-text);
+  text-decoration: none;
+}
+.dr-dash__btn:hover {
+  border-color: var(--theme-text);
+}
+.dr-dash__btn--primary {
+  border-color: var(--dr-ink);
+  background: var(--dr-ink);
+  color: var(--dr-on-ink);
+}
+.dr-dash__btn--primary:hover {
+  color: var(--dr-on-ink);
+  opacity: 0.9;
+}
+.dr-dash__card {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: var(--style-radius-m);
+  background: var(--theme-elevation-0);
+}
+.dr-dash__kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+.dr-dash__kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--theme-text);
+  text-decoration: none;
+}
+.dr-dash__kpi:hover {
+  border-color: var(--theme-elevation-400);
+}
+.dr-dash__kpi-label {
+  color: var(--theme-elevation-600);
+  font-size: 13px;
+}
+.dr-dash__kpi-value {
+  font-family: var(--font-display, Georgia, serif);
+  font-size: 44px;
+  line-height: 1;
+}
+.dr-dash__kpi-note {
+  color: var(--theme-elevation-600);
+  font-size: 13px;
+}
+.dr-dash__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+}
+.dr-dash__card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.dr-dash__title {
+  margin: 0 0 12px;
+  font-size: 20px;
+}
+.dr-dash__subtitle {
+  margin: 16px 0 8px;
+  font-size: 16px;
+}
+.dr-dash__count {
+  color: var(--theme-elevation-500);
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+.dr-dash__link {
+  color: var(--theme-text);
+  font-size: 13px;
+}
+.dr-dash__muted {
+  margin: 0;
+  color: var(--theme-elevation-600);
+}
+.dr-dash__alert {
+  color: var(--dr-alert);
+  font-weight: 600;
+}
+.dr-dash__foot {
+  margin: 12px 0 0;
+  color: var(--theme-elevation-500);
+  font-size: 12px;
+}
+.dr-dash__big {
+  margin: 0;
+  font-family: var(--font-display, Georgia, serif);
+  font-size: 40px;
+  line-height: 1.1;
+}
+.dr-dash__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dr-dash__list > li + li {
+  border-top: 1px solid var(--theme-elevation-100);
+}
+.dr-dash__order {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  color: var(--theme-text);
+  text-decoration: none;
+}
+.dr-dash__order:hover .dr-dash__order-number {
+  text-decoration: underline;
+}
+.dr-dash__order-main,
+.dr-dash__order-side {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.dr-dash__order-side {
+  align-items: flex-end;
+  flex: none;
+  font-size: 13px;
+  text-align: end;
+}
+.dr-dash__order-number {
+  font-weight: 600;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+.dr-dash__order .dr-dash__muted {
+  font-size: 13px;
+}
+.dr-dash__ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dr-dash__sales {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 0;
+}
+.dr-dash__sales-value {
+  font-family: var(--font-display, Georgia, serif);
+  font-size: 30px;
+  line-height: 1.1;
+}
+.dr-dash__row-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 0;
+}
+.dr-dash__bars {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dr-dash__bar-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+.dr-dash__bar-track {
+  display: block;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--theme-elevation-100);
+}
+.dr-dash__bar {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--dr-ink);
+}
+.dr-dash__weeks {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 64px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.dr-dash__weeks li {
+  display: flex;
+  flex: 1;
+  align-items: flex-end;
+  height: 100%;
+}
+.dr-dash__week-bar {
+  display: block;
+  width: 100%;
+  min-height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: var(--theme-elevation-400);
+}

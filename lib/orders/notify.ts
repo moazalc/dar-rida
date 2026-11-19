@@ -4,9 +4,9 @@ import type { Order } from "@/cms/payload-types";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { payloadClient } from "@/lib/payload";
 import { siteUrl } from "@/lib/stripe";
-import { customerEmail, ownerEmail } from "./emails";
+import { customerEmail, ownerEmail, shippedEmail } from "./emails";
 
-export type EmailChoice = "missing" | "owner" | "customer";
+export type EmailChoice = "missing" | "owner" | "customer" | "shipped";
 
 /**
  * Send a paid order's emails and stamp each one when it goes out. "missing"
@@ -23,12 +23,14 @@ export async function sendOrderEmails(orderId: number, which: EmailChoice = "mis
   const wantOwner = which === "owner" || (which === "missing" && !order.ownerNotifiedAt);
   const wantCustomer = which === "customer" || (which === "missing" && !order.customerNotifiedAt);
 
+  if (which === "shipped") return (await sendShippedEmail(order)) ? ["shipped email"] : [];
+
   if (wantOwner) {
     const settings = await payload.findGlobal({ slug: "store-settings" });
     const to = (settings.orderNotificationEmails ?? []).map((r) => r.email).filter(Boolean);
     if (to.length) {
       try {
-        const email = ownerEmail(order, `${siteUrl()}/admin/collections/orders/${order.id}`);
+        const email = ownerEmail(order, `${siteUrl()}${payload.config.routes.admin}/collections/orders/${order.id}`);
         await payload.sendEmail({ to, subject: email.subject, html: email.html, text: email.text, replyTo: order.customerEmail ?? undefined });
         await payload.update({ collection: "orders", id: order.id, data: { ownerNotifiedAt: new Date().toISOString() } });
         sent.push("owner notice");
@@ -57,4 +59,22 @@ export async function sendOrderEmails(orderId: number, which: EmailChoice = "mis
   }
 
   return sent;
+}
+
+/**
+ * "Your order is on its way", with the courier and tracking link. Stamped when
+ * it goes out; a failure is logged and can be resent from the order page.
+ */
+export async function sendShippedEmail(order: Order): Promise<boolean> {
+  if (!order.customerEmail || !order.shippedAt) return false;
+  const payload = await payloadClient();
+  try {
+    const email = shippedEmail(order, await getDictionary(order.locale === "ar" ? "ar" : "en"));
+    await payload.sendEmail({ to: order.customerEmail, subject: email.subject, html: email.html, text: email.text });
+    await payload.update({ collection: "orders", id: order.id, data: { shippedEmailSentAt: new Date().toISOString() } });
+    return true;
+  } catch (error) {
+    payload.logger.error({ err: error, order: order.number }, "Sending the shipped email failed");
+    return false;
+  }
 }

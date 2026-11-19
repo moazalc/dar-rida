@@ -1,9 +1,9 @@
 import type { Endpoint } from "payload";
 import type { EmailChoice } from "@/lib/orders/notify";
 
-const choices: EmailChoice[] = ["missing", "owner", "customer"];
+const choices: EmailChoice[] = ["missing", "owner", "customer", "shipped"];
 
-/** POST /api/orders/:id/resend-emails, admin only: { which: "missing" | "owner" | "customer" }. */
+/** POST /api/orders/:id/resend-emails, admin only: { which: "missing" | "owner" | "customer" | "shipped" }. */
 export const resendEmailsEndpoint: Endpoint = {
   path: "/:id/resend-emails",
   method: "post",

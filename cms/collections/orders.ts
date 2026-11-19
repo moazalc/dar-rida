@@ -1,7 +1,9 @@
 import type { CollectionConfig } from "payload";
 import { isAdmin, nobody } from "../access";
 import { resendEmailsEndpoint } from "../endpoints/resend-emails";
+import { advanceOrderEndpoint } from "../endpoints/advance-order";
 import { formatOrderMoney, measurementsField } from "../fields";
+import { carrierOptions } from "@/lib/orders/fulfilment";
 
 export const orderStatuses = [
   { label: "Awaiting payment", value: "pending_payment" },
@@ -28,15 +30,17 @@ const readOnly = { readOnly: true } as const;
  */
 export const Orders: CollectionConfig = {
   slug: "orders",
+  labels: { singular: { en: "Order", ar: "طلب" }, plural: { en: "Orders", ar: "الطلبات" } },
   admin: {
-    group: "Shop",
+    group: { en: "Shop", ar: "المتجر" },
     useAsTitle: "number",
-    defaultColumns: ["number", "status", "customerName", "formattedTotal", "createdAt"],
+    defaultColumns: ["number", "status", "customerName", "shippingCountry", "formattedTotal", "readyBy", "createdAt"],
     listSearchableFields: ["number", "customerName", "customerEmail"],
     description: "Paid orders appear here once Stripe confirms the payment.",
+    components: { beforeListTable: ["/cms/admin/order-tabs#OrderTabs"] },
   },
   defaultSort: "-createdAt",
-  endpoints: [resendEmailsEndpoint],
+  endpoints: [resendEmailsEndpoint, advanceOrderEndpoint],
   access: { read: isAdmin, create: nobody, update: isAdmin, delete: isAdmin },
   hooks: {
     afterChange: [
@@ -60,6 +64,8 @@ export const Orders: CollectionConfig = {
           defaultValue: "pending_payment",
           options: [...orderStatuses],
           index: true,
+          // Moved on only by the step buttons above (and Stripe's webhook), so no step is skipped by mistake.
+          admin: { readOnly: true },
         },
         {
           name: "formattedTotal",
@@ -68,6 +74,72 @@ export const Orders: CollectionConfig = {
           virtual: true,
           admin: readOnly,
           hooks: { afterRead: [({ siblingData }) => formatOrderMoney(siblingData?.total, siblingData?.currency)] },
+        },
+      ],
+    },
+    {
+      name: "progress",
+      type: "ui",
+      admin: { components: { Field: "/cms/components/order-progress#OrderProgress" } },
+    },
+    {
+      type: "collapsible",
+      label: { en: "Making and shipping", ar: "التنفيذ والشحن" },
+      admin: { initCollapsed: true },
+      fields: [
+        {
+          type: "row",
+          fields: [
+            {
+              name: "readyBy",
+              label: "Ready by",
+              type: "date",
+              admin: {
+                date: { pickerAppearance: "dayOnly", displayFormat: "d MMM yyyy" },
+                description: "Set from the slowest piece when production starts. Change it for this order if needed.",
+              },
+            },
+            { name: "productionStartedAt", label: "Production started", type: "date", admin: { ...readOnly, date: { pickerAppearance: "dayAndTime" } } },
+          ],
+        },
+        {
+          type: "row",
+          fields: [
+            { name: "carrier", label: "Courier", type: "select", options: carrierOptions, admin: readOnly },
+            { name: "trackingNumber", label: "Tracking number", type: "text", admin: readOnly },
+            { name: "trackingUrl", label: "Tracking link", type: "text", admin: readOnly },
+          ],
+        },
+        {
+          type: "row",
+          fields: [
+            { name: "shippedAt", label: "Shipped", type: "date", admin: { ...readOnly, date: { pickerAppearance: "dayAndTime" } } },
+            { name: "expectedDelivery", label: "Expected delivery", type: "date", admin: { ...readOnly, date: { pickerAppearance: "dayOnly", displayFormat: "d MMM yyyy" } } },
+            { name: "deliveredAt", label: "Delivered", type: "date", admin: { ...readOnly, date: { pickerAppearance: "dayAndTime" } } },
+          ],
+        },
+        {
+          type: "row",
+          fields: [
+            { name: "cancelledAt", label: "Cancelled", type: "date", admin: { ...readOnly, date: { pickerAppearance: "dayAndTime" } } },
+            { name: "cancelReason", label: "Reason for cancelling", type: "textarea", admin: readOnly },
+          ],
+        },
+        {
+          name: "history",
+          label: "Steps",
+          type: "array",
+          admin: { ...readOnly, initCollapsed: true, description: "Who moved the order on, and when." },
+          fields: [
+            {
+              type: "row",
+              fields: [
+                { name: "status", type: "select", options: [...orderStatuses], required: true },
+                { name: "at", type: "date", required: true, admin: { date: { pickerAppearance: "dayAndTime" } } },
+                { name: "by", type: "text" },
+              ],
+            },
+          ],
         },
       ],
     },
@@ -229,6 +301,7 @@ export const Orders: CollectionConfig = {
         { name: "paidAt", type: "date", admin: { ...readOnly, date: { pickerAppearance: "dayAndTime" } } },
         { name: "ownerNotifiedAt", type: "date", admin: { ...readOnly, date: { pickerAppearance: "dayAndTime" } } },
         { name: "customerNotifiedAt", type: "date", admin: { ...readOnly, date: { pickerAppearance: "dayAndTime" } } },
+        { name: "shippedEmailSentAt", label: "Shipped email sent", type: "date", admin: { ...readOnly, date: { pickerAppearance: "dayAndTime" } } },
         { name: "cartToken", type: "text", admin: { hidden: true } },
       ],
     },

@@ -2,6 +2,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { nodemailerAdapter } from "@payloadcms/email-nodemailer";
+import { ar } from "@payloadcms/translations/languages/ar";
+import { en } from "@payloadcms/translations/languages/en";
 import { buildConfig } from "payload";
 import sharp from "sharp";
 import { Carts } from "./cms/collections/carts";
@@ -13,6 +15,8 @@ import { Users } from "./cms/collections/users";
 import { Shipping } from "./cms/globals/shipping";
 import { StoreSettings } from "./cms/globals/store-settings";
 import { migrations } from "./cms/migrations";
+import { t } from "./cms/admin/i18n";
+import { adminRoute } from "./lib/admin-route";
 import { authTables } from "./lib/auth/schema";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -36,11 +40,31 @@ const email = process.env.SMTP_HOST
 
 export default buildConfig({
   serverURL: process.env.NEXT_PUBLIC_SITE_URL || "",
+  // Admin requests only count the login cookie from the site's own address. Development servers move
+  // ports (3000 taken → 3002), so those are allowed too, outside production only.
+  csrf: [
+    ...(process.env.NEXT_PUBLIC_SITE_URL ? [process.env.NEXT_PUBLIC_SITE_URL] : []),
+    ...(process.env.NODE_ENV === "production" ? [] : [3000, 3001, 3002, 3003].map((port) => `http://localhost:${port}`)),
+  ],
+  routes: { admin: adminRoute() },
   admin: {
     user: Users.slug,
-    importMap: { baseDir: dirname },
+    // The admin code stays in app/(payload)/admin whatever its public path (see proxy.ts).
+    importMap: { baseDir: dirname, importMapFile: path.resolve(dirname, "app/(payload)/admin/importMap.js") },
     meta: { titleSuffix: " — Dar Rida admin" },
+    components: {
+      Nav: "/cms/admin/Nav#Nav",
+      graphics: { Icon: "/cms/admin/graphics#Icon", Logo: "/cms/admin/graphics#Logo" },
+      beforeLogin: ["/cms/admin/LoginBrand#LoginBrand"],
+    },
+    // Orders to act on, sales and visitors (cms/admin/dashboard), in place of Payload's collection cards.
+    dashboard: {
+      widgets: [{ slug: "overview", label: t("Overview", "نظرة عامة"), Component: "/cms/admin/dashboard/Overview#Overview", minWidth: "full" }],
+      defaultLayout: [{ widgetSlug: "overview", width: "full" }],
+    },
   },
+  // The admin in English or Arabic, as each owner picks under Account.
+  i18n: { supportedLanguages: { en, ar }, fallbackLanguage: "en" },
   collections: [Orders, Customers, Designs, Media, Users, Carts],
   globals: [StoreSettings, Shipping],
   localization: {

@@ -8,6 +8,15 @@ const countryOptions = shippingCountries
   .map((c) => ({ label: names.of(c) ?? c, value: c }))
   .sort((a, b) => a.label.localeCompare(b.label));
 
+const deliveryDays: Field = {
+  name: "deliveryDays",
+  label: "Usual delivery (days)",
+  type: "number",
+  min: 1,
+  max: 60,
+  admin: { step: 1, description: "For the team only: after shipping, the dashboard expects delivery around then." },
+};
+
 function feeRow(currency: "AED" | "USD", what: string): Field {
   return {
     type: "row",
@@ -39,15 +48,15 @@ function feeRow(currency: "AED" | "USD", what: string): Field {
  */
 export const Shipping: GlobalConfig = {
   slug: "shipping",
-  label: "Shipping",
-  admin: { group: "Settings" },
+  label: { en: "Shipping", ar: "الشحن" },
+  admin: { group: { en: "Settings", ar: "الإعدادات" } },
   access: { read: isAdmin, update: isAdmin },
   fields: [
     {
       name: "uae",
       label: "United Arab Emirates",
       type: "group",
-      fields: [feeRow("AED", " within the UAE")],
+      fields: [feeRow("AED", " within the UAE"), deliveryDays],
     },
     {
       name: "zones",
@@ -74,6 +83,7 @@ export const Shipping: GlobalConfig = {
         { name: "name", type: "text", required: true, admin: { description: "Shown on the order, e.g. Europe" } },
         { name: "countries", type: "select", hasMany: true, required: true, options: countryOptions },
         feeRow("USD", " to these countries"),
+        deliveryDays,
       ],
     },
     {
@@ -81,7 +91,7 @@ export const Shipping: GlobalConfig = {
       label: "Rest of world",
       type: "group",
       admin: { description: "Any country that is not in a zone above." },
-      fields: [feeRow("USD", "")],
+      fields: [feeRow("USD", ""), deliveryDays],
     },
   ],
 };
