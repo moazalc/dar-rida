@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ComingSoon } from "@/components/coming-soon";
 import { HeroVideo } from "@/components/home/hero-video";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 
@@ -26,9 +27,7 @@ export function Hero({ dict }: { dict: Dictionary }) {
             <Link href="/collection" className="border-b border-primary-foreground pb-1.5 transition-opacity hover:opacity-70">
               {t.shopCollection}
             </Link>
-            <Link href="/design" className="border-b border-primary-foreground/45 pb-1.5 transition-opacity hover:opacity-70">
-              {t.designYourOwn}
-            </Link>
+            <ComingSoon label={t.designYourOwn} soon={dict.common.comingSoon} className="pb-1.5" />
           </div>
         </div>
 

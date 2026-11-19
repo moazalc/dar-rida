@@ -3,40 +3,34 @@
 import Link from "next/link";
 import { useId, useState, useTransition } from "react";
 import { addDesignToBag, type AddToBagResult } from "@/app/(frontend)/cart/actions";
-import { MeasurementsFields } from "@/components/measurements-fields";
+import { MeasurementsPanel } from "@/components/measure/measurements-panel";
 import { useI18n } from "@/components/providers/i18n-provider";
-import { emptyMeasurements, isMeasurementsComplete, NOTES_MAX, type MeasurementsInput } from "@/lib/measurements";
+import { NOTES_MAX, type Measurements } from "@/lib/measurements";
 
 /** Measurements, notes and Add to bag for one collection design. */
 export function DesignForm({ slug }: { slug: string }) {
   const t = useI18n().dict.product;
-  const [measurements, setMeasurements] = useState<MeasurementsInput>(emptyMeasurements);
+  const [measurements, setMeasurements] = useState<Measurements | null>(null);
   const [notes, setNotes] = useState("");
   const [result, setResult] = useState<AddToBagResult | null>(null);
   const [pending, startTransition] = useTransition();
   const notesId = useId();
-  const complete = isMeasurementsComplete(measurements);
 
   return (
     <form
       className="flex flex-col gap-7"
       onSubmit={(e) => {
         e.preventDefault();
+        if (!measurements) return;
         startTransition(async () => {
           const r = await addDesignToBag({ slug, measurements, notes });
           setResult(r);
-          if (r.status === "added") {
-            setMeasurements(emptyMeasurements);
-            setNotes("");
-          }
+          // Measurements stay, ready for another piece; the notes were for this one.
+          if (r.status === "added") setNotes("");
         });
       }}
     >
-      <fieldset className="flex flex-col gap-5">
-        <legend className="font-heading text-3xl">{t.measurementsTitle}</legend>
-        <p className="-mt-1 text-sm text-muted-foreground">{t.measurementsIntro}</p>
-        <MeasurementsFields value={measurements} onChange={setMeasurements} />
-      </fieldset>
+      <MeasurementsPanel value={measurements} onChange={(m) => (setMeasurements(m), setResult(null))} />
 
       <div className="flex flex-col gap-2">
         <label htmlFor={notesId} className="text-sm">
@@ -56,12 +50,12 @@ export function DesignForm({ slug }: { slug: string }) {
       <div className="flex flex-col gap-3">
         <button
           type="submit"
-          disabled={pending || !complete}
-          className="inline-flex h-14 items-center justify-center bg-primary px-10 text-sm tracking-[0.16em] text-primary-foreground uppercase transition-opacity hover:opacity-90 disabled:opacity-60"
+          disabled={pending || !measurements}
+          className="inline-flex h-14 items-center justify-center bg-primary px-10 text-sm tracking-[0.16em] text-primary-foreground uppercase transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {pending ? t.adding : t.addToBag}
         </button>
-        {!complete && !result && <p className="text-sm text-muted-foreground">{t.incomplete}</p>}
+        {!result && <p className="text-sm text-muted-foreground">{measurements ? t.ready : t.incomplete}</p>}
         <div aria-live="polite" className="text-sm">
           {result?.status === "added" && (
             <p>

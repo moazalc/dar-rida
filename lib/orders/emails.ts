@@ -1,7 +1,7 @@
 import type { Order } from "@/cms/payload-types";
 import { describeConfig } from "@/lib/configurator/describe";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
-import { measurementKeys, measurementSpec } from "@/lib/measurements";
+import { formatMeasurement, measurementRows, otherUnit, type StoredMeasurements } from "@/lib/measurements";
 import { formatMinorUnits, formatUsd } from "@/lib/money";
 
 // Plain, well-typeset order emails: inline styles and simple tables, which is
@@ -28,15 +28,29 @@ function shell(body: string, dir: "ltr" | "rtl", lang: string) {
 </table></td></tr></table></body></html>`;
 }
 
+/** The customer's measurements exactly as they entered them, in their language. */
+function customerMeasurements(set: StoredMeasurements, dict: Dictionary, locale: string) {
+  return measurementRows(set).map((r) => ({
+    label: dict.measure.fields[r.key].label,
+    value: formatMeasurement(r.key, r.value, r.unit, locale, dict.measure.units),
+  }));
+}
+
 function measurementsTable(line: NonNullable<Order["lines"]>[number], dict: Dictionary, locale: string) {
-  const f = dict.design.sizing.fields;
-  const u = dict.design.sizing.units;
-  return measurementKeys
-    .map(
-      (m) =>
-        `<tr><td style="padding:2px 0;color:${MUTED}">${esc(f[m].label)}</td><td style="padding:2px 8px">${line.measurements[m].toLocaleString(locale)} ${esc(u[measurementSpec[m].unit])}</td></tr>`,
-    )
+  return customerMeasurements(line.measurements, dict, locale)
+    .map((r) => `<tr><td style="padding:2px 0;color:${MUTED}">${esc(r.label)}</td><td style="padding:2px 8px">${esc(r.value)}</td></tr>`)
     .join("");
+}
+
+const ownerLabels = { height: "Height", length: "Length", shoulder: "Shoulder width", bust: "Bust", sleeve: "Sleeve length", hips: "Hips" };
+
+/** For the workshop: the value as entered, with the other unit alongside for reference only. */
+function ownerMeasurements(set: StoredMeasurements) {
+  return measurementRows(set).map((r) => ({
+    label: ownerLabels[r.key],
+    value: formatMeasurement(r.key, r.value, r.unit, "en"),
+    other: otherUnit(r.key, r.value, r.unit, "en"),
+  }));
 }
 
 function address(order: Order): string[] {
@@ -103,8 +117,8 @@ ${address(order).length ? `<p style="margin:24px 0 4px;font-size:12px;letter-spa
       "",
       `${name} — ${formatUsd(line.unitPrice * line.quantity)}${line.quantity > 1 ? ` (${t.quantity}: ${line.quantity})` : ""}`,
       ...choices.map((c) => `${c.label}: ${c.value}`),
-      `${t.measurements}: ${measurementKeys
-        .map((m) => `${dict.design.sizing.fields[m].label} ${line.measurements[m]} ${dict.design.sizing.units[measurementSpec[m].unit]}`)
+      `${t.measurements}: ${customerMeasurements(line.measurements, dict, locale)
+        .map((r) => `${r.label} ${r.value}`)
         .join(", ")}`,
       line.notes ? `${t.notes}: ${line.notes}` : "",
     ]),
@@ -128,8 +142,6 @@ export function ownerEmail(order: Order, adminUrl: string): Email {
   const count = (order.lines ?? []).reduce((n, l) => n + l.quantity, 0);
   const total = formatUsd(order.total);
   const subject = `New order ${order.number} — ${count} ${count === 1 ? "piece" : "pieces"} — ${total}`;
-  const unit = (m: (typeof measurementKeys)[number]) => measurementSpec[m].unit;
-  const label = (m: string) => m.charAt(0).toUpperCase() + m.slice(1);
 
   const linesHtml = (order.lines ?? [])
     .map(
@@ -137,8 +149,8 @@ export function ownerEmail(order: Order, adminUrl: string): Email {
 <p style="margin:0;font-family:${SERIF};font-size:21px">${esc(line.name)} × ${line.quantity}</p>
 <p style="margin:2px 0 8px;color:${MUTED}">${esc(formatUsd(line.unitPrice))} each</p>
 ${(line.choices ?? []).map((c) => `<p style="margin:2px 0"><span style="color:${MUTED}">${esc(c.label ?? "")}:</span> ${esc(c.value ?? "")}</p>`).join("")}
-<table role="presentation" style="font-size:14px;margin-top:6px">${measurementKeys
-        .map((m) => `<tr><td style="padding:2px 12px 2px 0;color:${MUTED}">${label(m)}</td><td>${line.measurements[m]} ${unit(m)}</td></tr>`)
+<table role="presentation" style="font-size:14px;margin-top:6px">${ownerMeasurements(line.measurements)
+        .map((r) => `<tr><td style="padding:2px 12px 2px 0;color:${MUTED}">${r.label}</td><td><strong>${esc(r.value)}</strong></td><td style="padding-left:12px;color:${MUTED}">${esc(r.other)}</td></tr>`)
         .join("")}</table>
 ${line.notes ? `<p style="margin:8px 0 0"><span style="color:${MUTED}">Notes:</span> ${esc(line.notes)}</p>` : ""}
 </div>`,
@@ -166,7 +178,7 @@ ${linesHtml}
       "",
       `${line.name} × ${line.quantity} (${formatUsd(line.unitPrice)} each)`,
       ...(line.choices ?? []).map((c) => `${c.label}: ${c.value}`),
-      ...measurementKeys.map((m) => `  ${label(m)}: ${line.measurements[m]} ${unit(m)}`),
+      ...ownerMeasurements(line.measurements).map((r) => `  ${r.label}: ${r.value} (${r.other})`),
       line.notes ? `Notes: ${line.notes}` : "",
     ]),
     "",

@@ -16,6 +16,11 @@ export type ShopDesign = {
   /** Cents. */
   price: number;
   leadTime: string | null;
+  composition: string | null;
+  care: string | null;
+  origin: string | null;
+  /** The owners' "Complete your look" picks, in order. */
+  lookIds: number[];
   drawing: Design["drawing"];
   images: { url: string; alt: string; width: number; height: number }[];
 };
@@ -30,6 +35,10 @@ function toShop(d: Design): ShopDesign {
     cut: d.cut ?? null,
     price: dollarsToCents(d.price),
     leadTime: d.leadTime ?? null,
+    composition: d.composition?.trim() || null,
+    care: d.care?.trim() || null,
+    origin: d.origin?.trim() || null,
+    lookIds: (d.completeTheLook ?? []).map((l) => (typeof l === "object" ? l.id : l)),
     drawing: d.drawing,
     images: (d.images ?? [])
       .filter((m): m is Media => typeof m === "object" && m !== null && Boolean(m.url))
@@ -57,6 +66,28 @@ export async function getDesign(slug: string, locale: Locale): Promise<ShopDesig
     limit: 1,
   });
   return docs[0] ? toShop(docs[0]) : null;
+}
+
+/**
+ * Up to four pieces to show under a design: the owners' picks that are still on
+ * sale, or else other pieces from the collection.
+ */
+export async function getLook(design: ShopDesign, locale: Locale): Promise<ShopDesign[]> {
+  const payload = await payloadClient();
+  const others = { id: { not_equals: design.id } };
+  if (design.lookIds.length) {
+    const { docs } = await payload.find({
+      collection: "designs",
+      where: { and: [active, others, { id: { in: design.lookIds } }] },
+      locale,
+      depth: 1,
+      limit: 4,
+    });
+    const order = new Map(design.lookIds.map((id, i) => [id, i]));
+    if (docs.length) return docs.sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0)).map(toShop);
+  }
+  const { docs } = await payload.find({ collection: "designs", where: { and: [active, others] }, sort: "sortOrder", locale, depth: 1, limit: 4 });
+  return docs.map(toShop);
 }
 
 /** Active designs whose code, name, description or cut match, in either language. */

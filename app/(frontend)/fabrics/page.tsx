@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { PageIntro, pageFrame } from "@/components/page-intro";
 import { options } from "@/lib/configurator/options";
 import { getDictionary } from "@/lib/i18n/dictionaries";
@@ -67,12 +66,6 @@ export default async function FabricsPage() {
                     </div>
                   ))}
                 </dl>
-                <Link
-                  href={`/design?fabric=${fabric}`}
-                  className="mt-8 inline-block text-sm tracking-[0.16em] uppercase underline underline-offset-8 hover:opacity-70"
-                >
-                  {t.cta.replace("{fabric}", name)}
-                </Link>
               </div>
             </li>
           );

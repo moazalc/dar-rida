@@ -3,12 +3,14 @@ import "./globals.css";
 import { fontVars } from "@/lib/fonts";
 import { DirectionProvider } from "@/components/ui/direction";
 import { I18nProvider } from "@/components/providers/i18n-provider";
+import { UnitProvider } from "@/components/providers/unit-provider";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getLocale } from "@/lib/i18n/locale";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getDirection } from "@/lib/i18n/config";
 import { cartCount as readCartCount } from "@/lib/cart";
+import { getUnitPreference } from "@/lib/unit-preference";
 
 export const metadata: Metadata = {
   title: "Dar Rida",
@@ -23,18 +25,20 @@ export default async function RootLayout({
   const locale = await getLocale();
   const dir = getDirection(locale);
   const dict = await getDictionary(locale);
-  const cartCount = await readCartCount();
+  const [cartCount, unit] = await Promise.all([readCartCount(), getUnitPreference()]);
 
   return (
     <html lang={locale} dir={dir} style={fontVars} className="h-full antialiased">
       <body className="min-h-full flex flex-col">
         <DirectionProvider direction={dir}>
           <I18nProvider value={{ locale, dir, dict }}>
-            <SiteHeader cartCount={cartCount} />
-            <main id="main" className="flex-1">
-              {children}
-            </main>
-            <SiteFooter dict={dict} />
+            <UnitProvider initial={unit}>
+              <SiteHeader cartCount={cartCount} />
+              <main id="main" className="flex-1">
+                {children}
+              </main>
+              <SiteFooter dict={dict} />
+            </UnitProvider>
           </I18nProvider>
         </DirectionProvider>
       </body>

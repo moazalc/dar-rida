@@ -55,6 +55,26 @@ export const Designs: CollectionConfig = {
       ],
     },
     {
+      type: "collapsible",
+      label: "Composition, care and origin",
+      admin: { description: "Shown as the folding sections under the description. Leave one empty to hide it." },
+      fields: [
+        { name: "composition", type: "textarea", localized: true, admin: { description: 'e.g. "100% Japanese crepe, 220 g/m². Lining: viscose satin."' } },
+        { name: "care", type: "textarea", localized: true, admin: { description: 'e.g. "Dry clean, or hand wash cold."' } },
+        { name: "origin", type: "textarea", localized: true, admin: { description: 'e.g. "Cut and sewn to your measurements in our atelier in Dubai."' } },
+      ],
+    },
+    {
+      name: "completeTheLook",
+      label: "Complete your look",
+      type: "relationship",
+      relationTo: "designs",
+      hasMany: true,
+      maxRows: 4,
+      filterOptions: ({ id }) => (id ? { id: { not_equals: id } } : true),
+      admin: { description: "Up to four pieces shown under this one. Empty: other pieces from the collection." },
+    },
+    {
       name: "images",
       type: "upload",
       relationTo: "media",

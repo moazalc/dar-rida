@@ -163,12 +163,16 @@ export interface Order {
           | boolean
           | null;
         measurements: {
+          /**
+           * The unit the customer entered these in. The numbers are exactly as entered.
+           */
+          unit: 'in' | 'cm' | 'legacy';
+          height: number;
           length: number;
-          bust: number;
           shoulder: number;
+          bust: number;
           sleeve: number;
           hips: number;
-          height: number;
         };
         notes?: string | null;
         id?: string | null;
@@ -231,6 +235,22 @@ export interface Design {
    */
   leadTime?: string | null;
   /**
+   * e.g. "100% Japanese crepe, 220 g/m². Lining: viscose satin."
+   */
+  composition?: string | null;
+  /**
+   * e.g. "Dry clean, or hand wash cold."
+   */
+  care?: string | null;
+  /**
+   * e.g. "Cut and sewn to your measurements in our atelier in Dubai."
+   */
+  origin?: string | null;
+  /**
+   * Up to four pieces shown under this one. Empty: other pieces from the collection.
+   */
+  completeTheLook?: (number | Design)[] | null;
+  /**
    * Photos. Without any, the line drawing is shown.
    */
   images?: (number | Media)[] | null;
@@ -272,6 +292,10 @@ export interface Media {
 export interface User {
   id: number;
   name?: string | null;
+  /**
+   * How orders show measurements to you. The customer's own numbers are always kept and labelled.
+   */
+  measurementUnit: 'entered' | 'in' | 'cm';
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -313,12 +337,16 @@ export interface Cart {
           | boolean
           | null;
         measurements: {
+          /**
+           * The unit the customer entered these in. The numbers are exactly as entered.
+           */
+          unit: 'in' | 'cm' | 'legacy';
+          height: number;
           length: number;
-          bust: number;
           shoulder: number;
+          bust: number;
           sleeve: number;
           hips: number;
-          height: number;
         };
         notes?: string | null;
         quantity: number;
@@ -443,12 +471,13 @@ export interface OrdersSelect<T extends boolean = true> {
         measurements?:
           | T
           | {
+              unit?: T;
+              height?: T;
               length?: T;
-              bust?: T;
               shoulder?: T;
+              bust?: T;
               sleeve?: T;
               hips?: T;
-              height?: T;
             };
         notes?: T;
         id?: T;
@@ -493,6 +522,10 @@ export interface DesignsSelect<T extends boolean = true> {
   cut?: T;
   price?: T;
   leadTime?: T;
+  composition?: T;
+  care?: T;
+  origin?: T;
+  completeTheLook?: T;
   images?: T;
   drawing?: T;
   active?: T;
@@ -524,6 +557,7 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
+  measurementUnit?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -557,12 +591,13 @@ export interface CartsSelect<T extends boolean = true> {
         measurements?:
           | T
           | {
+              unit?: T;
+              height?: T;
               length?: T;
-              bust?: T;
               shoulder?: T;
+              bust?: T;
               sleeve?: T;
               hips?: T;
-              height?: T;
             };
         notes?: T;
         quantity?: T;

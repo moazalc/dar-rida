@@ -2,6 +2,7 @@
 
 import { useSyncExternalStore } from "react";
 import Link from "next/link";
+import { ComingSoon } from "@/components/coming-soon";
 import { usePathname } from "next/navigation";
 import { Menu, Search, ShoppingBag, X } from "lucide-react";
 import { Logo } from "@/components/logo";
@@ -42,7 +43,7 @@ export function SiteHeader({ cartCount }: { cartCount: number }) {
 
   const links = [
     { href: "/collection", label: dict.nav.collection },
-    { href: "/design", label: dict.nav.designYourAbaya },
+    { href: "/design", label: dict.nav.designYourAbaya, soon: true },
     { href: "/size-guide", label: dict.nav.sizeGuide },
   ];
 
@@ -70,12 +71,16 @@ export function SiteHeader({ cartCount }: { cartCount: number }) {
       <div className="mx-auto grid h-16 max-w-7xl grid-cols-[1fr_auto_1fr] items-center px-4 md:h-20 md:px-10">
         {/* Start: desktop links / mobile menu */}
         <div className="flex items-center">
-          <nav className="hidden items-center gap-9 text-base tracking-wide lg:flex">
-            {links.map((l) => (
-              <Link key={l.href} href={l.href} className="transition-opacity hover:opacity-70">
-                {l.label}
-              </Link>
-            ))}
+          <nav className="hidden items-center gap-6 text-base tracking-wide whitespace-nowrap lg:flex xl:gap-9">
+            {links.map((l) =>
+              l.soon ? (
+                <ComingSoon key={l.href} label={l.label} soon={dict.common.soon} />
+              ) : (
+                <Link key={l.href} href={l.href} className="transition-opacity hover:opacity-70">
+                  {l.label}
+                </Link>
+              ),
+            )}
           </nav>
 
           <Sheet>
@@ -98,11 +103,15 @@ export function SiteHeader({ cartCount }: { cartCount: number }) {
                 </SheetClose>
               </div>
               <nav className="mt-10 flex flex-col gap-7 font-heading text-4xl">
-                {links.map((l) => (
-                  <SheetClose key={l.href} render={<Link href={l.href} />} nativeButton={false}>
-                    {l.label}
-                  </SheetClose>
-                ))}
+                {links.map((l) =>
+                  l.soon ? (
+                    <ComingSoon key={l.href} label={l.label} soon={dict.common.comingSoon} />
+                  ) : (
+                    <SheetClose key={l.href} render={<Link href={l.href} />} nativeButton={false}>
+                      {l.label}
+                    </SheetClose>
+                  ),
+                )}
               </nav>
               <div className="mt-auto border-t pt-4">
                 <LanguageToggle />

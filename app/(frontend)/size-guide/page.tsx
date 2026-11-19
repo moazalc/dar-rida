@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PageIntro, pageFrame } from "@/components/page-intro";
+import { PageIntro } from "@/components/page-intro";
+import { LengthHelper } from "@/components/size-guide/length-helper";
+import { GuideUnitSwitch, MeasureGuide } from "@/components/size-guide/measure-guide";
 import { statusAction } from "@/components/status-page";
-import { lengthByHeight } from "@/lib/measurements";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getLocale } from "@/lib/i18n/locale";
 
@@ -11,116 +12,81 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t.metaTitle, description: t.intro };
 }
 
-/** The measurements, in the diagram's numbering (height has no marker). */
-const steps = ["length", "bust", "shoulder", "sleeve", "hips", "height"] as const;
+const frame = "mx-auto max-w-[90rem] px-4 md:px-10 xl:px-18";
 
-const th = "py-3 pe-4 text-start text-xs font-normal tracking-[0.16em] text-muted-foreground uppercase";
-const td = "py-3.5 pe-4 tabular-nums";
+/** Line icons for "what you need": a tape measure, two people, a fitted top. */
+const needIcons = [
+  <svg key="tape" viewBox="0 0 34 34" aria-hidden className="size-9 shrink-0 fill-none stroke-gold" strokeWidth="1.2">
+    <circle cx="15" cy="17" r="11" />
+    <circle cx="15" cy="17" r="4" />
+    <path d="M15 28 H32 M20 28 V25 M24 28 V26 M28 28 V25" />
+  </svg>,
+  <svg key="help" viewBox="0 0 34 34" aria-hidden className="size-9 shrink-0 fill-none stroke-gold" strokeWidth="1.2">
+    <circle cx="11" cy="9" r="4" />
+    <circle cx="23" cy="9" r="4" />
+    <path d="M4 30 C4 20 18 20 18 30 M16 30 C16 20 30 20 30 30" />
+  </svg>,
+  <svg key="clothes" viewBox="0 0 34 34" aria-hidden className="size-9 shrink-0 fill-none stroke-gold" strokeWidth="1.2" strokeLinejoin="round">
+    <path d="M12 4 L17 9 L22 4 L29 8 L26 15 L23 14 V30 H11 V14 L8 15 L5 8 Z" />
+  </svg>,
+];
 
 export default async function SizeGuidePage() {
-  const locale = await getLocale();
-  const dict = await getDictionary(locale);
-  const t = dict.sizeGuide;
-  const fields = dict.design.sizing.fields;
-  const num = (n: number) => n.toLocaleString(locale);
+  const t = (await getDictionary(await getLocale())).sizeGuide;
 
   return (
-    <div className={pageFrame}>
-      <PageIntro eyebrow={t.eyebrow} title={t.title} intro={t.intro} />
-
-      <section className="mt-16 grid items-start gap-12 border-t border-border/60 pt-14 md:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:gap-24">
-        <MeasureDiagram label={t.diagramLabel} num={num} />
-        <div>
-          <h2 className="font-heading text-3xl md:text-4xl">{t.measureTitle}</h2>
-          <p className="mt-3 max-w-lg text-muted-foreground">{t.measureIntro}</p>
-          <ol className="mt-8 flex flex-col gap-6">
-            {steps.map((m, i) => (
-              <li key={m} className="grid grid-cols-[2rem_minmax(0,1fr)] gap-4">
-                <span className="flex size-8 items-center justify-center rounded-full bg-champagne/40 text-sm">
-                  {num(i + 1)}
-                </span>
-                <div>
-                  <p className="font-heading text-2xl">{fields[m].label}</p>
-                  <p className="mt-1 text-muted-foreground">{fields[m].hint}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
-
-      <div className="mt-20 max-w-xl border-t border-border/60 pt-14">
-        <section>
-          <h2 className="font-heading text-3xl md:text-4xl">{t.lengthTitle}</h2>
-          <p className="mt-2 max-w-md text-sm text-muted-foreground">{t.lengthIntro}</p>
-          <table className="mt-6 w-full border-collapse">
-            <thead className="border-b border-border/70">
-              <tr>
-                <th className={th}>
-                  {t.lengthColumns.height} ({dict.design.sizing.units.cm})
-                </th>
-                <th className={th}>
-                  {t.lengthColumns.length} ({dict.design.sizing.units.in})
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/50">
-              {lengthByHeight.map((row) => (
-                <tr key={row.height}>
-                  <td className={td} dir="ltr">{row.height}</td>
-                  <td className={td} dir="ltr">{row.length}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
+    <div className="pb-20 md:pb-28">
+      <div className={`${frame} flex flex-col gap-8 pt-12 pb-8 md:flex-row md:items-end md:justify-between md:pt-16`}>
+        <PageIntro eyebrow={t.eyebrow} title={t.title} intro={t.intro} />
+        <GuideUnitSwitch />
       </div>
 
-      <section className="mt-20 flex flex-col items-start gap-6 bg-linen p-8 md:flex-row md:items-center md:justify-between md:p-12">
-        <div className="max-w-xl">
-          <h2 className="font-heading text-3xl md:text-4xl">{t.customTitle}</h2>
-          <p className="mt-3 text-muted-foreground">{t.customBody}</p>
+      <div className={frame}>
+        <ul className="grid border-y border-border/60 md:grid-cols-3">
+          {t.need.map((n, i) => (
+            <li
+              key={n.title}
+              className="flex items-center gap-4 py-4 not-first:border-t not-first:border-border/60 md:py-5 md:not-first:border-t-0 md:not-first:border-s md:not-first:ps-6"
+            >
+              {needIcons[i]}
+              <p className="flex flex-col">
+                <span className="font-medium">{n.title}</span>
+                <span className="text-sm text-muted-foreground">{n.body}</span>
+              </p>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <section aria-label={t.title} className={`${frame} py-10 md:py-14`}>
+        <MeasureGuide />
+      </section>
+
+      <section className="bg-linen">
+        <div className={`${frame} grid grid-cols-[minmax(0,1fr)] items-center gap-8 py-12 md:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] md:gap-16 md:py-16`}>
+          <div>
+            <p className="text-xs tracking-[0.24em] text-muted-foreground uppercase">{t.lengthEyebrow}</p>
+            <h2 className="mt-3 font-heading text-4xl leading-tight md:text-5xl">{t.lengthTitle}</h2>
+            <p className="mt-3 max-w-md text-muted-foreground">{t.lengthIntro}</p>
+          </div>
+          <LengthHelper />
         </div>
-        <Link href="/collection" className={statusAction.primary}>
-          {t.cta}
-        </Link>
+      </section>
+
+      <section className={`${frame} flex flex-col items-start gap-6 pt-12 md:flex-row md:items-center md:justify-between md:pt-16`}>
+        <div>
+          <h2 className="font-heading text-3xl md:text-4xl">{t.helpTitle}</h2>
+          <p className="mt-2 max-w-xl text-muted-foreground">{t.helpBody}</p>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <Link href="/contact" className={statusAction.secondary}>
+            {t.helpCta}
+          </Link>
+          <Link href="/collection" className={statusAction.primary}>
+            {t.cta}
+          </Link>
+        </div>
       </section>
     </div>
-  );
-}
-
-/** A quiet line drawing of a figure with the five measurements numbered. */
-function MeasureDiagram({ label, num }: { label: string; num: (n: number) => string }) {
-  const marker = (n: number, x: number, y: number) => (
-    <g key={n}>
-      <circle cx={x} cy={y} r="9" className="fill-champagne" />
-      <text x={x} y={y + 3.5} textAnchor="middle" className="fill-foreground text-[10px]">
-        {num(n)}
-      </text>
-    </g>
-  );
-  return (
-    <svg role="img" aria-label={label} viewBox="0 0 240 420" className="mx-auto w-full max-w-xs text-foreground/70">
-      {/* Figure */}
-      <g fill="none" stroke="currentColor" strokeWidth="1.1" strokeLinejoin="round">
-        <circle cx="120" cy="38" r="20" />
-        <path d="M112 57 V68 M128 57 V68" />
-        <path d="M120 66 C104 66 96 72 84 82 L92 140 C96 165 98 180 98 190 C94 205 90 218 90 230 L72 400 H168 L150 230 C150 218 146 205 142 190 C142 180 144 165 148 140 L156 82 C144 72 136 66 120 66 Z" />
-        <path d="M84 84 C74 100 68 150 64 228 M156 84 C166 100 172 150 176 228" />
-      </g>
-      {/* Measurements */}
-      <g className="stroke-champagne" strokeWidth="1.2" fill="none">
-        <path d="M40 82 V400 M34 82 H46 M34 400 H46" />
-        <path d="M90 130 H150" strokeDasharray="3 3" />
-        <path d="M84 72 H156 M84 67 V77 M156 67 V77" />
-        <path d="M184 84 L194 228" />
-        <path d="M89 232 H151" strokeDasharray="3 3" />
-      </g>
-      {marker(1, 40, 240)}
-      {marker(2, 120, 130)}
-      {marker(3, 120, 72)}
-      {marker(4, 190, 156)}
-      {marker(5, 120, 232)}
-    </svg>
   );
 }

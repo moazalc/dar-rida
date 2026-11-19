@@ -116,7 +116,7 @@ export const Orders: CollectionConfig = {
         },
         // The builder's raw choices, kept so emails can name them in the customer's language.
         { name: "config", type: "json", admin: { hidden: true } },
-        measurementsField(true),
+        ...measurementsField(true),
         { name: "notes", type: "textarea" },
       ],
     },

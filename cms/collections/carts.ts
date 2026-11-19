@@ -29,7 +29,7 @@ export const Carts: CollectionConfig = {
         },
         { name: "design", type: "relationship", relationTo: "designs" },
         { name: "config", type: "json" },
-        measurementsField(),
+        ...measurementsField(),
         { name: "notes", type: "textarea" },
         { name: "quantity", type: "number", required: true, min: 1, max: 10, defaultValue: 1 },
       ],

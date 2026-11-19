@@ -7,7 +7,7 @@ import { describeConfig } from "@/lib/configurator/describe";
 import type { Config } from "@/lib/configurator/options";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
-import type { Measurements } from "@/lib/measurements";
+import type { Measurements, StoredMeasurements } from "@/lib/measurements";
 import { mediaPath } from "@/lib/media";
 import { payloadClient } from "@/lib/payload";
 import { unitPrice, type PricedDesign } from "./pricing";
@@ -120,7 +120,7 @@ export type BagLine = {
   image: { url: string; alt: string; width: number; height: number } | null;
   config: Config | null;
   choices: { label: string; value: string }[];
-  measurements: Measurements;
+  measurements: StoredMeasurements;
   notes: string;
   quantity: number;
   /** Cents, or null when it can no longer be bought. */
@@ -181,7 +181,7 @@ export async function priceCart(cart: Cart, locale: Locale, dict: Dictionary, di
       const choices = describeConfig(l.config, dict);
       return {
         ...base,
-        href: "/design",
+        href: "/collection",
         code: null,
         name: dict.cart.customName,
         nameEn: (dictEn ?? dict).cart.customName,

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ComingSoon } from "@/components/coming-soon";
 import { LanguageToggle } from "@/components/language-toggle";
 import { NewsletterForm } from "@/components/newsletter-form";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
@@ -15,7 +16,7 @@ export function SiteFooter({ dict }: { dict: Dictionary }) {
       title: dict.footer.shop,
       links: [
         { href: "/collection", label: l.collection },
-        { href: "/design", label: l.designYourAbaya },
+        { href: "/design", label: l.designYourAbaya, soon: true },
         { href: "/size-guide", label: l.sizeGuide },
         { href: "/fabrics", label: l.fabricLibrary },
       ],
@@ -51,9 +52,13 @@ export function SiteFooter({ dict }: { dict: Dictionary }) {
             <ul className="flex flex-col gap-3.5 text-base text-foreground/80">
               {col.links.map((link) => (
                 <li key={link.href}>
-                  <Link href={link.href} className="transition-colors hover:text-foreground">
-                    {link.label}
-                  </Link>
+                  {"soon" in link && link.soon ? (
+                    <ComingSoon label={link.label} soon={dict.common.comingSoon} />
+                  ) : (
+                    <Link href={link.href} className="transition-colors hover:text-foreground">
+                      {link.label}
+                    </Link>
+                  )}
                 </li>
               ))}
               {i === columns.length - 1 && (

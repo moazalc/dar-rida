@@ -108,9 +108,6 @@ export function RidaCarousel({ t }: { t: Copy }) {
                   <Link href="/collection" className={statusAction.primary}>
                     {t.view}
                   </Link>
-                  <Link href="/design" className={statusAction.secondary}>
-                    {t.custom}
-                  </Link>
                 </div>
                 <p className="mt-5 text-sm text-foreground/65">{t.note}</p>
               </div>

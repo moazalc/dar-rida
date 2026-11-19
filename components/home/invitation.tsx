@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { BuilderPreview } from "@/components/drawings/builder-preview";
+import { ComingSoon } from "@/components/coming-soon";
 import { LeafPattern } from "@/components/drawings/leaf-pattern";
 import { statusAction } from "@/components/status-page";
 import { section } from "@/components/home/section";
@@ -26,9 +26,7 @@ export function Invitation({ dict }: { dict: Dictionary }) {
             {t.title} <span className="italic">{t.titleEmphasis}</span>
           </h2>
           <p className={`mt-6 max-w-md ${section.body}`}>{t.body}</p>
-          <Link href="/design" className={`mt-10 ${statusAction.primary}`}>
-            {t.cta}
-          </Link>
+          <ComingSoon label={t.cta} soon={dict.common.comingSoon} className={`mt-10 ${statusAction.secondary}`} />
         </div>
         <BuilderPreview label={t.previewLabel} chips={t.chips} />
       </div>

@@ -8,7 +8,7 @@ import { statusAction } from "@/components/status-page";
 import { loadBag, type BagLine } from "@/lib/cart";
 import { getDictionary, type Dictionary } from "@/lib/i18n/dictionaries";
 import { getLocale } from "@/lib/i18n/locale";
-import { measurementKeys, measurementSpec } from "@/lib/measurements";
+import { formatMeasurement, measurementRows } from "@/lib/measurements";
 import { formatUsd } from "@/lib/money";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -43,9 +43,6 @@ export default async function CartPage() {
           <div className="flex flex-wrap gap-3.5">
             <Link href="/collection" className={statusAction.primary}>
               {t.toCollection}
-            </Link>
-            <Link href="/design" className={statusAction.secondary}>
-              {t.design}
             </Link>
           </div>
         </div>
@@ -82,8 +79,7 @@ export default async function CartPage() {
 
 function Line({ line, dict, locale }: { line: BagLine; dict: Dictionary; locale: string }) {
   const t = dict.cart;
-  const units = dict.design.sizing.units;
-  const fields = dict.design.sizing.fields;
+  const fields = dict.measure.fields;
   const unavailable = line.unitPrice === null;
 
   return (
@@ -141,11 +137,11 @@ function Line({ line, dict, locale }: { line: BagLine; dict: Dictionary; locale:
             {t.measurements} <span className="inline-block transition-transform group-open:rotate-180">⌄</span>
           </summary>
           <dl className="mt-3 grid grid-cols-2 gap-x-6 gap-y-1 sm:grid-cols-3">
-            {measurementKeys.map((m) => (
-              <div key={m} className="flex justify-between gap-3 border-b border-border/40 py-1">
-                <dt className="text-muted-foreground">{fields[m].label}</dt>
+            {measurementRows(line.measurements).map((r) => (
+              <div key={r.key} className="flex justify-between gap-3 border-b border-border/40 py-1">
+                <dt className="text-muted-foreground">{fields[r.key].label}</dt>
                 <dd className="tabular-nums">
-                  {line.measurements[m].toLocaleString(locale)} {units[measurementSpec[m].unit]}
+                  <bdi>{formatMeasurement(r.key, r.value, r.unit, locale, dict.measure.units)}</bdi>
                 </dd>
               </div>
             ))}

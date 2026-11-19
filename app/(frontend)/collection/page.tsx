@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { ProductCard } from "@/components/collection/product-card";
-import { statusAction } from "@/components/status-page";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getLocale } from "@/lib/i18n/locale";
 import { listDesigns } from "@/lib/designs";
@@ -36,9 +34,6 @@ export default async function CollectionPage() {
       {count === 0 ? (
         <div className="flex flex-col items-start gap-8 py-20">
           <p className="max-w-xl text-lg text-muted-foreground">{t.empty}</p>
-          <Link href="/design" className={statusAction.primary}>
-            {t.designYourOwn}
-          </Link>
         </div>
       ) : (
         <ul className="mt-12 grid grid-cols-2 gap-x-4 gap-y-14 md:mt-16 md:gap-x-8 lg:grid-cols-3 lg:gap-y-20">
@@ -48,15 +43,15 @@ export default async function CollectionPage() {
             </li>
           ))}
           <li>
-            <Link
-              href="/design"
-              className="group relative flex aspect-[4/5] flex-col justify-end overflow-hidden bg-espresso p-5 text-primary-foreground md:p-8"
+            <div
+              aria-disabled="true"
+              className="relative flex aspect-[4/5] flex-col justify-end overflow-hidden bg-espresso/80 p-5 text-primary-foreground md:p-8"
             >
               <svg
                 aria-hidden
                 viewBox="0 0 200 300"
                 preserveAspectRatio="xMidYMax meet"
-                className="absolute inset-x-0 bottom-0 mx-auto h-4/5 w-auto text-champagne/40 transition-transform duration-700 group-hover:scale-[1.03]"
+                className="absolute inset-x-0 bottom-0 mx-auto h-4/5 w-auto text-champagne/30"
               >
                 <path d="M30 300 V120 A70 70 0 0 1 170 120 V300" fill="none" stroke="currentColor" strokeWidth="0.75" />
               </svg>
@@ -65,10 +60,10 @@ export default async function CollectionPage() {
               <span className="relative mt-3 hidden max-w-xs text-primary-foreground/75 md:block">
                 {t.customCard.body}
               </span>
-              <span className="relative mt-6 text-sm tracking-[0.16em] uppercase underline-offset-8 group-hover:underline">
-                {t.customCard.cta}
+              <span className="relative mt-6 self-start border border-champagne/60 px-2 py-0.5 text-xs tracking-[0.2em] text-champagne uppercase">
+                {dict.common.comingSoon}
               </span>
-            </Link>
+            </div>
           </li>
         </ul>
       )}

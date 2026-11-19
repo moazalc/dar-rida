@@ -11,24 +11,24 @@ import type { Dictionary } from "@/lib/i18n/dictionaries";
 export function Paths({ dict }: { dict: Dictionary }) {
   const t = dict.home.paths;
   const paths = [
-    { href: "/collection", ...t.collection, src: "/media/collection-rail.jpg", objectPosition: "50% 30%" },
-    { href: "/design", ...t.design, src: "/media/design-stand.jpg", objectPosition: "50% 60%" },
+    { href: "/collection", ...t.collection, src: "/media/collection-rail.jpg", objectPosition: "50% 30%", soon: false },
+    // Design your own is not ready: shown, dimmed and marked, but goes nowhere.
+    { href: null, ...t.design, src: "/media/design-stand.jpg", objectPosition: "50% 60%", soon: true },
   ];
+  const half =
+    "group relative flex h-[68svh] min-h-[26rem] overflow-hidden text-primary-foreground outline-none md:h-auto md:flex-1 md:transition-[flex-grow] md:duration-700 md:ease-out";
 
   return (
     <section className="group/split flex flex-col gap-3 p-3 md:h-[86svh] md:max-h-[58rem] md:min-h-[36rem] md:flex-row md:gap-4 md:p-4">
-      {paths.map((p) => (
-        <Link
-          key={p.href}
-          href={p.href}
-          className="group relative flex h-[68svh] min-h-[26rem] overflow-hidden text-primary-foreground outline-none md:h-auto md:flex-1 md:transition-[flex-grow] md:duration-700 md:ease-out md:hover:grow-[1.35] md:focus-visible:grow-[1.35]"
-        >
+      {paths.map((p) => {
+        const content = (
+          <>
           <Placeholder
             label=""
             src={p.src}
             objectPosition={p.objectPosition}
             sizes="(min-width: 768px) 60vw, 100vw"
-            className="absolute inset-0 transition-transform duration-1000 ease-out group-hover:scale-[1.04] group-focus-visible:scale-[1.04]"
+            className={`absolute inset-0 transition-transform duration-1000 ease-out ${p.soon ? "" : "group-hover:scale-[1.04] group-focus-visible:scale-[1.04]"}`}
           />
           {/* Shade: even at rest, deeper on the half you are not pointing at. */}
           <div className="absolute inset-0 bg-espresso/25 transition-colors duration-700 md:group-hover/split:bg-espresso/50 md:group-hover:bg-espresso/10! md:group-focus-visible:bg-espresso/10!" />
@@ -41,6 +41,11 @@ export function Paths({ dict }: { dict: Dictionary }) {
             </p>
             <h2 className="mt-2 font-heading text-5xl leading-none font-light md:text-6xl xl:text-7xl">{p.title}</h2>
             <p className="mt-4 max-w-sm text-base leading-relaxed text-primary-foreground/85 md:text-lg">{p.body}</p>
+            {p.soon ? (
+              <span className="mt-7 border border-primary-foreground/70 px-2.5 py-1 text-sm tracking-[0.16em] uppercase">
+                {dict.common.comingSoon}
+              </span>
+            ) : (
             <span className="mt-7 border-b border-primary-foreground pb-1.5 text-sm tracking-[0.16em] uppercase">
               {p.cta}{" "}
               <span
@@ -50,9 +55,20 @@ export function Paths({ dict }: { dict: Dictionary }) {
                 →
               </span>
             </span>
+            )}
           </div>
-        </Link>
-      ))}
+          </>
+        );
+        return p.href ? (
+          <Link key={p.title} href={p.href} className={`${half} md:hover:grow-[1.35] md:focus-visible:grow-[1.35]`}>
+            {content}
+          </Link>
+        ) : (
+          <div key={p.title} aria-disabled="true" className={`${half} grayscale-[0.6]`}>
+            {content}
+          </div>
+        );
+      })}
     </section>
   );
 }

@@ -3,9 +3,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { DesignForm } from "@/components/collection/design-form";
+import { ProductCard } from "@/components/collection/product-card";
+import { ProductDetails } from "@/components/collection/product-details";
 import { DesignTile } from "@/components/collection/design-tile";
 import { ProductGallery } from "@/components/collection/product-gallery";
-import { getDesign } from "@/lib/designs";
+import { getDesign, getLook } from "@/lib/designs";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getLocale } from "@/lib/i18n/locale";
 import { formatUsd } from "@/lib/money";
@@ -31,8 +33,11 @@ export default async function DesignPage({ params }: Props) {
   const [dict, design] = await Promise.all([getDictionary(locale), getDesign(slug, locale)]);
   if (!design) notFound();
   const t = dict.product;
-  const leadTime =
-    design.leadTime ?? (await (await payloadClient()).findGlobal({ slug: "store-settings", locale })).defaultLeadTime;
+  const [settings, look] = await Promise.all([
+    design.leadTime ? null : (await payloadClient()).findGlobal({ slug: "store-settings", locale }),
+    getLook(design, locale),
+  ]);
+  const leadTime = design.leadTime ?? settings?.defaultLeadTime;
 
   // Product structured data, so search results can show the price and photo.
   const jsonLd = {
@@ -98,15 +103,30 @@ export default async function DesignPage({ params }: Props) {
 
           <DesignForm slug={design.slug} />
 
-          <Link
-            href="/design"
-            className="group flex flex-col gap-2 border border-border/70 p-5 transition-colors hover:border-foreground/60"
-          >
-            <span className="font-heading text-2xl">{t.makeItYours}</span>
-            <span className="text-sm text-muted-foreground">{t.makeItYoursBody}</span>
-          </Link>
+          <ProductDetails
+            items={[
+              { title: t.composition, body: design.composition },
+              { title: t.care, body: design.care },
+              { title: t.origin, body: design.origin },
+            ]}
+          />
         </div>
       </div>
+
+      {look.length > 0 && (
+        <section aria-labelledby="look-title" className="mt-20 border-t border-border/60 px-4 pt-12 md:mt-28 md:px-0 md:pt-16">
+          <h2 id="look-title" className="font-heading text-4xl font-light md:text-5xl">
+            {t.completeTheLook}
+          </h2>
+          <ul className="mt-8 grid grid-cols-2 gap-x-4 gap-y-10 md:mt-10 md:gap-x-8 lg:grid-cols-4">
+            {look.map((d) => (
+              <li key={d.id}>
+                <ProductCard design={d} dict={dict} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
   );
 }

@@ -23,7 +23,7 @@ const password = process.env.SEED_ADMIN_PASSWORD;
 if (email && password) {
   const { totalDocs } = await payload.count({ collection: "users", where: { email: { equals: email } } });
   if (!totalDocs) {
-    await payload.create({ collection: "users", data: { email, password, name: "Admin" } });
+    await payload.create({ collection: "users", data: { email, password, name: "Admin", measurementUnit: "entered" } });
     payload.logger.info(`Created admin ${email}`);
   }
 }
