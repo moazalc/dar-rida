@@ -2,6 +2,12 @@ import { withPayload } from "@payloadcms/next/withPayload";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // A self-contained server in .next/standalone, for the Docker image (Dockerfile).
+  output: "standalone",
+  // fast-geoip reads its data files at runtime, which the file tracer can't see.
+  outputFileTracingIncludes: {
+    "/**": ["./node_modules/fast-geoip/data/**", "./node_modules/.pnpm/fast-geoip@*/node_modules/fast-geoip/data/**"],
+  },
   images: {
     // Photos uploaded in the admin are served by Payload.
     localPatterns: [{ pathname: "/api/media/file/**" }, { pathname: "/media/**" }],
