@@ -443,6 +443,122 @@ const en = {
         },
       ],
     },
+    privacy: {
+      metaTitle: "Privacy policy — Dar Rida",
+      eyebrow: "The house",
+      title: "Privacy policy",
+      intro: "What we keep about you, why we keep it, and who else sees it. Last updated 20 November 2026.",
+      sections: [
+        {
+          title: "Who we are",
+          body: [
+            "Dar Rida makes abayas to order and sells them at darrida.net. When this policy says “we”, it means Dar Rida. Write to info@darrida.net with any question about your information.",
+          ],
+        },
+        {
+          title: "What we collect",
+          body: [
+            "Your account: your email address, and your name and profile picture if you sign in with Google. We never see your Google password.",
+            "Your orders: the pieces you choose, your measurements, your delivery address and phone number, and the messages you send us.",
+            "Your payment is handled by Stripe. We see whether it went through and the last four digits of the card, never the full card number.",
+          ],
+        },
+        {
+          title: "Why we use it",
+          body: [
+            "To make and deliver your abaya, to send you sign-in codes and emails about your order, and to answer you when you write to us.",
+            "We do not sell your information, and we do not send you marketing unless you ask for it.",
+          ],
+        },
+        {
+          title: "Who else sees it",
+          body: [
+            "Only the services that help us run the shop: Stripe for payments, Google if you choose to sign in with it, Resend to deliver our emails, Hetzner, which hosts our servers in Germany, and the courier that delivers your order. Each sees only what it needs for its part.",
+          ],
+        },
+        {
+          title: "Cookies and visits",
+          body: [
+            "We use a few small cookies to keep you signed in, remember your bag, and remember your language and country. We use no advertising cookies.",
+            "We count visits with Umami, which we run on our own server. It sets no cookies and does not identify you.",
+          ],
+        },
+        {
+          title: "How long we keep it",
+          body: [
+            "We keep your account until you ask us to close it. We keep order records for as long as the law requires for accounts and tax.",
+          ],
+        },
+        {
+          title: "Your choices",
+          body: [
+            "You can see and change your details, measurements and addresses in your account at any time. To get a copy of your information, or to have it deleted, write to info@darrida.net and we will reply within 30 days.",
+          ],
+        },
+        {
+          title: "Changes",
+          body: ["If we change this policy, we will update it here and change the date at the top."],
+        },
+      ],
+    },
+    terms: {
+      metaTitle: "Terms & conditions — Dar Rida",
+      eyebrow: "The house",
+      title: "Terms & conditions",
+      intro: "The agreement between you and Dar Rida when you use this site or place an order. Last updated 20 November 2026.",
+      sections: [
+        {
+          title: "About these terms",
+          body: [
+            "By using darrida.net or placing an order, you agree to these terms. Our shipping, returns and privacy pages are part of them too.",
+          ],
+        },
+        {
+          title: "Your account",
+          body: [
+            "You sign in with a code sent to your email, or with Google. Keep access to your email safe, as anyone who can read it can sign in as you. Tell us at once if you think someone else has used your account.",
+          ],
+        },
+        {
+          title: "Orders and prices",
+          body: [
+            "Prices are shown in your chosen currency at checkout. Your order is confirmed when payment goes through and we send you a confirmation email.",
+            "If we cannot make your order, for example because a fabric has run out, we will tell you and refund you in full.",
+          ],
+        },
+        {
+          title: "Made to order",
+          body: [
+            "Each abaya is cut and sewn for you after you order, using the measurements you give us. Please check them carefully. If they turn out to be wrong, we will alter the piece as our returns page describes.",
+            "Hand finishing means small differences between pieces, and colours can look slightly different on screen.",
+          ],
+        },
+        {
+          title: "Delivery",
+          body: ["Making and delivery times are estimates, shown before you pay. Our shipping page explains where we ship and what it costs."],
+        },
+        {
+          title: "Changes, cancellations and returns",
+          body: ["Our returns page explains when you can change or cancel an order, and how alterations and repairs work."],
+        },
+        {
+          title: "Our designs",
+          body: ["The designs, photographs and text on this site belong to Dar Rida. Please do not copy them without our permission."],
+        },
+        {
+          title: "Responsibility",
+          body: [
+            "We are responsible for making your order with care and delivering what you paid for. We are not responsible for delays caused by events outside our control. Nothing in these terms limits rights you have by law.",
+          ],
+        },
+        {
+          title: "Law and contact",
+          body: [
+            "These terms are governed by the laws of the United Arab Emirates. If something goes wrong, write to info@darrida.net first. Most problems are sorted out quickly that way.",
+          ],
+        },
+      ],
+    },
     faq: {
       metaTitle: "Questions — Dar Rida",
       eyebrow: "Help",
