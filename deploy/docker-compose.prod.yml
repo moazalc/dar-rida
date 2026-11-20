@@ -44,6 +44,25 @@ services:
     depends_on:
       db: { condition: service_healthy }
 
+  # Visitor analytics. Its own `umami` database on the same Postgres (created once:
+  #   docker exec dar-rida-db createdb -U darrida umami
+  # ). nginx exposes only /stats/script.js and /stats/api/send. The Umami screens
+  # stay on the VPS: `ssh -L 3041:127.0.0.1:3041 hetzner`, then http://localhost:3041.
+  umami:
+    image: umamisoftware/umami:3.4.1
+    container_name: dar-rida-umami
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3041:3000"
+    environment:
+      DATABASE_URL: postgres://darrida:${POSTGRES_PASSWORD}@db:5432/umami
+      APP_SECRET: ${UMAMI_APP_SECRET:?set UMAMI_APP_SECRET in deploy/.env}
+      DISABLE_TELEMETRY: 1
+      # nginx sets X-Real-IP to the visitor's address (hashed into a daily id, never stored).
+      CLIENT_IP_HEADER: x-real-ip
+    depends_on:
+      db: { condition: service_healthy }
+
   # One-off: `docker compose -f docker-compose.prod.yml run --rm seed`
   seed:
     build:
@@ -52,6 +71,7 @@ services:
       args:
         NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
     image: dar-rida-tools:latest
+    pull_policy: build
     env_file: .env
     environment:
       DATABASE_URL: postgres://darrida:${POSTGRES_PASSWORD}@db:5432/darrida

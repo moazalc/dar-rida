@@ -38,6 +38,8 @@ export default async function RootLayout({
   // Visitor counts for the admin dashboard, only once Umami is set up (UMAMI_URL, UMAMI_WEBSITE_ID).
   const umamiUrl = process.env.UMAMI_URL?.replace(/\/$/, "");
   const umamiSite = process.env.UMAMI_WEBSITE_ID;
+  // In production the browser loads it through nginx (/stats/script.js) while the server talks to Umami directly.
+  const umamiScript = process.env.UMAMI_SCRIPT_URL || `${umamiUrl}/script.js`;
 
   return (
     <html lang={locale} dir={dir} style={fontVars} className="h-full antialiased">
@@ -53,7 +55,7 @@ export default async function RootLayout({
             </UnitProvider>
           </I18nProvider>
         </DirectionProvider>
-        {umamiUrl && umamiSite ? <Script src={`${umamiUrl}/script.js`} data-website-id={umamiSite} strategy="afterInteractive" /> : null}
+        {umamiUrl && umamiSite ? <Script src={umamiScript} data-website-id={umamiSite} strategy="afterInteractive" /> : null}
       </body>
     </html>
   );
