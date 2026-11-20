@@ -1,15 +1,47 @@
+import { timingSafeEqual } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { adminRoute } from "@/lib/admin-route";
 
 /**
- * Serves the admin at its own path (ADMIN_PATH, see lib/admin-route.ts) while
- * the code stays in app/(payload)/admin, and makes "/admin" itself a plain
- * "page not found", so scanners never see a login page there.
+ * Before launch, the whole site sits behind the browser's own login box when
+ * SITE_USERNAME and SITE_PASSWORD are both set (deploy/.env). Leave either one
+ * empty to open the site. Stripe's webhook is the one path left open, because
+ * Stripe cannot type a password.
+ */
+function passwordGate(request: NextRequest): NextResponse | null {
+  const user = process.env.SITE_USERNAME;
+  const pass = process.env.SITE_PASSWORD;
+  if (!user || !pass) return null;
+
+  const header = request.headers.get("authorization") ?? "";
+  if (header.startsWith("Basic ")) {
+    const given = Buffer.from(header.slice(6), "base64").toString();
+    const expected = `${user}:${pass}`;
+    const a = Buffer.from(given);
+    const b = Buffer.from(expected);
+    if (a.length === b.length && timingSafeEqual(a, b)) return null;
+  }
+  return new NextResponse("Dar Rida is not open yet.", {
+    status: 401,
+    headers: { "WWW-Authenticate": 'Basic realm="Dar Rida", charset="UTF-8"', "Cache-Control": "no-store" },
+  });
+}
+
+/**
+ * Also serves the admin at its own path (ADMIN_PATH, see lib/admin-route.ts)
+ * while the code stays in app/(payload)/admin, and makes "/admin" itself a
+ * plain "page not found", so scanners never see a login page there.
  */
 export function proxy(request: NextRequest) {
+  const locked = passwordGate(request);
+  if (locked) return locked;
+
+  const { pathname } = request.nextUrl;
+  // The API is gated above but never rewritten.
+  if (pathname.startsWith("/api/")) return NextResponse.next();
+
   const admin = adminRoute();
   if (admin === "/admin") return NextResponse.next();
-  const { pathname } = request.nextUrl;
   const under = (base: string) => pathname === base || pathname.startsWith(`${base}/`);
 
   if (under(admin)) {
@@ -26,6 +58,6 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Pages only: never the API, Next's own files or uploaded photos.
-  matcher: ["/((?!api/|_next/|media/|favicon.ico).*)"],
+  // Everything but Next's own build files and Stripe's webhook.
+  matcher: ["/((?!_next/|favicon.ico|api/stripe/webhook).*)"],
 };
