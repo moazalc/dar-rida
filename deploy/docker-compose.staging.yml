@@ -1,0 +1,80 @@
+# Staging copy of the shop (staging.darrida.net) on the same VPS. Everything is
+# its own: image, containers, database, photos and port (127.0.0.1:3050), so it
+# never touches production. It lives in a separate clone of the repo:
+#
+#   ~/projects/dar-rida-staging/deploy, with its own deploy/.env (Stripe TEST keys,
+#   NEXT_PUBLIC_SITE_URL=https://staging.darrida.net, SITE_USERNAME/SITE_PASSWORD on)
+#
+#   docker compose -f docker-compose.staging.yml up -d --build    # build and start / update
+#
+# Copy production's data into it (overwrites staging's database and photos):
+#   docker exec dar-rida-db pg_dump -U darrida -Fc darrida > /tmp/darrida.dump
+#   docker exec -i dar-rida-staging-db pg_restore -U darrida -d darrida --clean --if-exists --no-owner < /tmp/darrida.dump
+#   docker run --rm -v dar-rida_media:/from -v dar-rida-staging_media:/to alpine cp -a /from/. /to/
+#
+# Build staging and production one at a time: the VPS has little spare memory.
+# No Umami here, so test visits never show up in the real visitor counts.
+
+name: dar-rida-staging
+
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: dar-rida-staging-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: darrida
+      POSTGRES_USER: darrida
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in deploy/.env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U darrida -d darrida"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: ..
+      target: runner
+      args:
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:?set NEXT_PUBLIC_SITE_URL in deploy/.env}
+    image: dar-rida-staging:latest
+    container_name: dar-rida-staging
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://darrida:${POSTGRES_PASSWORD}@db:5432/darrida
+      MEDIA_DIR: /app/media
+    volumes:
+      - media:/app/media
+    ports:
+      - "127.0.0.1:3050:3000"
+    depends_on:
+      db: { condition: service_healthy }
+
+  # One-off: `docker compose -f docker-compose.staging.yml run --rm seed`
+  seed:
+    build:
+      context: ..
+      target: build
+      args:
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+    image: dar-rida-staging-tools:latest
+    pull_policy: build
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://darrida:${POSTGRES_PASSWORD}@db:5432/darrida
+      NODE_ENV: production
+      MEDIA_DIR: /app/media
+    volumes:
+      - media:/app/media
+    command: ["pnpm", "seed"]
+    depends_on:
+      db: { condition: service_healthy }
+    profiles: [tools]
+
+volumes:
+  pgdata:
+  media:

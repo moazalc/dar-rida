@@ -41,18 +41,24 @@ export function proxy(request: NextRequest) {
   if (pathname.startsWith("/api/")) return NextResponse.next();
 
   const admin = adminRoute();
-  if (admin === "/admin") return NextResponse.next();
   const under = (base: string) => pathname === base || pathname.startsWith(`${base}/`);
 
-  if (under(admin)) {
+  if (admin !== "/admin" && under(admin)) {
     const url = request.nextUrl.clone();
     url.pathname = `/admin${pathname.slice(admin.length)}`;
     return NextResponse.rewrite(url);
   }
-  if (under("/admin")) {
+  if (admin !== "/admin" && under("/admin")) {
     const url = request.nextUrl.clone();
     url.pathname = "/__not-found";
     return NextResponse.rewrite(url, { status: 404 });
+  }
+  // COMING_SOON=1 (deploy/.env): every shop page shows the coming-soon picture.
+  // The admin, the API and /media keep working, so products can still be added.
+  if (process.env.COMING_SOON === "1" && !under(admin) && pathname !== "/coming-soon") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/coming-soon";
+    return NextResponse.rewrite(url, { headers: { "Cache-Control": "no-store" } });
   }
   return NextResponse.next();
 }
