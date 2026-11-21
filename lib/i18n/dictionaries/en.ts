@@ -64,7 +64,7 @@ const en = {
       badge: "Made to measure",
       view: "View this design",
       custom: "Make it yours",
-      note: "Cut and sewn to your measurements · Ships in [X] weeks",
+      note: "Cut and sewn to your measurements · Ships in 2 weeks",
       previous: "Previous design",
       next: "Next design",
       goTo: "Show {code}",
@@ -202,7 +202,7 @@ const en = {
     checkout: "Checkout",
     checkingOut: "Taking you to checkout…",
     checkoutError: "We could not start checkout. Please try again in a moment.",
-    madeToOrder: "Every piece is cut and sewn after you order · Ships in [X] weeks",
+    madeToOrder: "Every piece is cut and sewn after you order · Ships in 2 weeks",
     continue: "Continue shopping",
   },
   checkout: {
@@ -394,13 +394,13 @@ const en = {
         {
           title: "Making time",
           body: [
-            "Most pieces are cut, sewn and finished in [X] weeks. Designs with embroidery or crystals can take up to [X] weeks.",
+            "Most pieces are cut, sewn and finished in about 2 weeks. Designs with embroidery or crystals can take a little longer.",
             "We write to you when your abaya leaves the workshop, with tracking.",
           ],
         },
         {
           title: "Where we ship",
-          body: ["We ship from [city] to [countries]. If yours is not listed, write to us — we can often arrange it."],
+          body: ["We ship worldwide. If you can’t choose your country at checkout, write to us — we can often arrange it."],
         },
         {
           title: "Duties and taxes",
@@ -409,11 +409,12 @@ const en = {
       ],
       tableTitle: "Delivery after making",
       columns: { region: "Where", time: "Time", cost: "Cost" },
-      rows: [
-        { region: "United Arab Emirates", time: "[1–2] working days", cost: "[Free]" },
-        { region: "GCC", time: "[3–5] working days", cost: "[AED X]" },
-        { region: "Rest of the world", time: "[5–10] working days", cost: "[AED X]" },
-      ],
+      // The rows come from the Shipping settings in the admin.
+      uae: "United Arab Emirates",
+      restOfWorld: "Rest of the world",
+      days: "About {n} working days",
+      free: "Free",
+      freeOver: "{fee}, free over {amount}",
     },
     returns: {
       metaTitle: "Returns & alterations — Dar Rida",
@@ -424,7 +425,7 @@ const en = {
         {
           title: "If the fit isn’t right",
           body: [
-            "Write to us within [X] days of delivery and we will alter it free of charge. Send it back to us, or visit the atelier in [city].",
+            "Write to us within [X] days of delivery and we will alter it free of charge. Send it back to us and we will return it to you altered.",
           ],
         },
         {
@@ -568,7 +569,7 @@ const en = {
       items: [
         {
           q: "How long does my abaya take?",
-          a: "Most pieces take [X] weeks to make, then a few days to reach you. Embroidery and crystals add a little time. You will see the estimate before you pay.",
+          a: "Most pieces take about 2 weeks to make, then a few days to reach you. Embroidery and crystals add a little time. You will see the estimate before you pay.",
         },
         {
           q: "Can I change my order after placing it?",
@@ -588,7 +589,7 @@ const en = {
         },
         {
           q: "Do you ship outside the UAE?",
-          a: "We ship to [countries]. Times and costs are on the Shipping page.",
+          a: "Yes, we ship worldwide. Times and costs are on the Shipping page.",
         },
         {
           q: "How do I care for my abaya?",
@@ -683,13 +684,6 @@ const en = {
     shop: "Shop",
     help: "Help",
     house: "The House",
-    newsletter: {
-      title: "Hear when a new chapter begins.",
-      label: "Email address",
-      placeholder: "Email address",
-      submit: "Join",
-      soon: "Sign-ups open soon — thank you for your interest.",
-    },
     links: {
       collection: "Collection",
       designYourAbaya: "Design Your Abaya",
@@ -699,7 +693,6 @@ const en = {
       returns: "Returns & Alterations",
       faq: "FAQ",
       contact: "Contact",
-      story: "Our Story",
       terms: "Terms & Conditions",
       privacy: "Privacy Policy",
     },

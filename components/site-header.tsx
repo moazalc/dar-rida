@@ -113,6 +113,20 @@ export function SiteHeader({ cartCount, signedIn }: { cartCount: number; signedI
                   ),
                 )}
               </nav>
+              {/* The rest of the site, quieter: on a phone the footer is a long scroll away. */}
+              <nav aria-label={dict.footer.help} className="mt-12 flex flex-col gap-4 text-base text-foreground/80">
+                {[
+                  { href: "/fabrics", label: dict.footer.links.fabricLibrary },
+                  { href: "/shipping", label: dict.footer.links.shipping },
+                  { href: "/returns", label: dict.footer.links.returns },
+                  { href: "/faq", label: dict.footer.links.faq },
+                  { href: "/contact", label: dict.footer.links.contact },
+                ].map((l) => (
+                  <SheetClose key={l.href} render={<Link href={l.href} />} nativeButton={false} className="text-start">
+                    {l.label}
+                  </SheetClose>
+                ))}
+              </nav>
               <div className="mt-auto border-t pt-4">
                 <LanguageToggle />
               </div>

@@ -2,12 +2,11 @@ import Link from "next/link";
 import { ComingSoon } from "@/components/coming-soon";
 import { CountrySwitcher } from "@/components/country-switcher";
 import { LanguageToggle } from "@/components/language-toggle";
-import { NewsletterForm } from "@/components/newsletter-form";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Country } from "@/lib/markets";
 
 /**
- * Warm sand (linen) ground: the sign-up and three quiet link columns up top; underneath,
+ * Warm sand (linen) ground: three quiet link columns up top; underneath,
  * DAR RIDA set edge to edge in light Cormorant, tone on tone, and cut off by
  * the page bottom.
  */
@@ -35,7 +34,6 @@ export function SiteFooter({ dict, country }: { dict: Dictionary; country: Count
     {
       title: dict.footer.house,
       links: [
-        { href: "/our-story", label: l.story },
         { href: "/terms", label: l.terms },
         { href: "/privacy", label: l.privacy },
       ],
@@ -44,10 +42,7 @@ export function SiteFooter({ dict, country }: { dict: Dictionary; country: Count
 
   return (
     <footer className="overflow-hidden bg-linen text-foreground">
-      <div className="mx-auto grid max-w-[90rem] grid-cols-2 gap-x-6 gap-y-12 px-4 pt-20 sm:grid-cols-3 md:px-10 md:pt-24 lg:grid-cols-[2fr_1fr_1fr_1fr] xl:px-18">
-        <div className="col-span-2 sm:col-span-3 lg:col-span-1 lg:max-w-md">
-          <NewsletterForm />
-        </div>
+      <div className="mx-auto grid max-w-[90rem] grid-cols-2 gap-x-6 gap-y-12 px-4 pt-20 sm:grid-cols-3 md:px-10 md:pt-24 xl:px-18">
         {/* No visible headings in this design; each column is still a named nav. */}
         {columns.map((col, i) => (
           <nav key={col.title} aria-label={col.title}>
