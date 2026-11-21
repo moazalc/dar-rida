@@ -5,8 +5,8 @@ import { adminRoute } from "@/lib/admin-route";
 /**
  * Before launch, the whole site sits behind the browser's own login box when
  * SITE_USERNAME and SITE_PASSWORD are both set (deploy/.env). Leave either one
- * empty to open the site. Stripe's webhook is the one path left open, because
- * Stripe cannot type a password.
+ * empty to open the site. Stripe's webhook stays open because Stripe cannot type
+ * a password, and so do the photo/video files in /media (see the matcher).
  */
 function passwordGate(request: NextRequest): NextResponse | null {
   const user = process.env.SITE_USERNAME;
@@ -58,6 +58,9 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Everything but Next's own build files and Stripe's webhook.
-  matcher: ["/((?!_next/|favicon.ico|api/stripe/webhook).*)"],
+  // Everything but Next's own build files, Stripe's webhook and /media. Media
+  // stays open because Next's image optimizer fetches /media itself without the
+  // visitor's password, and Safari's video player never sends it, so a gated
+  // /media meant broken photos and the login box popping up again and again.
+  matcher: ["/((?!_next/|favicon.ico|api/stripe/webhook|media/).*)"],
 };
