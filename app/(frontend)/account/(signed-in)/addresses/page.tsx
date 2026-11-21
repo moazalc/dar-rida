@@ -6,8 +6,9 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getLocale } from "@/lib/i18n/locale";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = (await getDictionary(await getLocale())).account.addresses;
-  return { title: `${t.title} — Dar Rida`, robots: { index: false } };
+  const dict = await getDictionary(await getLocale());
+  const t = dict.account.addresses;
+  return { title: `${t.title} — ${dict.common.brandName}`, robots: { index: false } };
 }
 
 export default async function AddressesPage() {

@@ -33,6 +33,8 @@ export default async function CartPage() {
   const lines = bag?.lines ?? [];
   const addresses = customer ? addressList(customer) : [];
   const shipTo = pickAddress(addresses, bag?.country ?? null, chosen);
+  // Totals mean nothing while a piece can't be bought here: show a dash, not "AED 0".
+  const priced = lines.length > 0 && lines.every((l) => l.unitPrice !== null);
 
   return (
     <div className="mx-auto max-w-[90rem] px-4 pt-14 pb-24 md:px-10 md:pt-20 md:pb-36 xl:px-18">
@@ -74,11 +76,9 @@ export default async function CartPage() {
             <dl className="mt-5 flex flex-col gap-2 border-t border-border/60 pt-5">
               <div className="flex items-baseline justify-between gap-4">
                 <dt>{t.subtotal}</dt>
-                <dd>
-                  <bdi>{formatMoney(bag.subtotal, bag.currency)}</bdi>
-                </dd>
+                <dd>{priced ? <bdi>{formatMoney(bag.subtotal, bag.currency)}</bdi> : "—"}</dd>
               </div>
-              {bag.shipping && (
+              {priced && bag.shipping && (
                 <div className="flex items-baseline justify-between gap-4">
                   <dt>{t.shipping}</dt>
                   <dd>{bag.shipping.free ? t.shippingFree : <bdi>{formatMoney(bag.shipping.fee, bag.currency)}</bdi>}</dd>
@@ -86,9 +86,7 @@ export default async function CartPage() {
               )}
               <div className="mt-2 flex items-baseline justify-between gap-4 border-t border-border/60 pt-4">
                 <dt>{t.total}</dt>
-                <dd className="font-heading text-3xl">
-                  <bdi>{formatMoney(bag.total, bag.currency)}</bdi>
-                </dd>
+                <dd className="font-heading text-3xl">{priced ? <bdi>{formatMoney(bag.total, bag.currency)}</bdi> : "—"}</dd>
               </div>
             </dl>
             <p className="mt-3 text-sm text-muted-foreground">
@@ -135,7 +133,7 @@ function Line({
 
   return (
     <div className="grid grid-cols-[6.5rem_minmax(0,1fr)] gap-5 py-8 md:grid-cols-[9rem_minmax(0,1fr)] md:gap-8">
-      <Link href={line.href} className="relative aspect-[4/5] overflow-hidden bg-muted">
+      <Link href={line.href} aria-label={line.name} className="relative aspect-[4/5] overflow-hidden bg-muted">
         {line.image ? (
           <Image src={line.image.url} alt={line.image.alt} fill sizes="9rem" className="object-cover" />
         ) : line.drawing ? (

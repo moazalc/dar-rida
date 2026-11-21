@@ -13,7 +13,8 @@ export const Media: CollectionConfig = {
   access: { read: () => true, create: isAdmin, update: isAdmin, delete: isAdmin },
   upload: {
     staticDir: process.env.MEDIA_DIR || path.resolve(process.cwd(), "media"),
-    mimeTypes: ["image/*"],
+    // Photos only. No SVG: it can carry script and next/image can't resize it.
+    mimeTypes: ["image/jpeg", "image/png", "image/webp", "image/avif"],
   },
   fields: [{ name: "alt", label: "Alt text", type: "text", required: true, localized: true }],
 };

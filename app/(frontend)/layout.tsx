@@ -14,11 +14,20 @@ import { cartCount as readCartCount } from "@/lib/cart";
 import { getUnitPreference } from "@/lib/unit-preference";
 import { getCountry } from "@/lib/country";
 import { getSessionUser } from "@/lib/customers";
+import { siteUrl } from "@/lib/stripe";
 
-export const metadata: Metadata = {
-  title: "Dar Rida",
-  description: "Made-to-order abayas, crafted by hand",
-};
+// In the visitor's language. Pages set their own titles (which already end in
+// the brand name), so this default only shows on the homepage and on pages
+// without one. metadataBase makes Open Graph image paths absolute.
+export async function generateMetadata(): Promise<Metadata> {
+  const dict = await getDictionary(await getLocale());
+  return {
+    metadataBase: new URL(siteUrl()),
+    title: dict.common.brandName,
+    description: dict.common.siteDescription,
+    openGraph: { siteName: dict.common.brandName, title: dict.common.brandName, description: dict.common.siteDescription },
+  };
+}
 
 export default async function RootLayout({
   children,

@@ -217,7 +217,19 @@ export function MeasurementsPanel({
         </Link>
       </section>
 
-      <Sheet open={open} onOpenChange={setOpen}>
+      <Sheet
+        open={open}
+        onOpenChange={(next) => {
+          setOpen(next);
+          // Closed without saving: drop the unsaved edits (a unit conversion
+          // included), so the summary, the switch and the bag agree again.
+          if (!next && value) {
+            setDraft({ ...value });
+            setUnit(value.unit);
+            setPendingUnit(null);
+          }
+        }}
+      >
         <SheetContent
           side={dir === "rtl" ? "left" : "right"}
           showCloseButton={false}

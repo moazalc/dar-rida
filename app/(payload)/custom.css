@@ -457,6 +457,16 @@ h3,
   margin: 0;
   color: var(--theme-elevation-600);
 }
+.dr-dash__warning {
+  margin: 0 0 16px;
+  border-color: var(--dr-alert);
+  color: var(--dr-alert);
+  font-weight: 600;
+}
+.dr-dash__warning .dr-dash__link {
+  color: inherit;
+  text-decoration: underline;
+}
 .dr-dash__alert {
   color: var(--dr-alert);
   font-weight: 600;

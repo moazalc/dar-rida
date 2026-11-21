@@ -9,8 +9,9 @@ import { getLocale } from "@/lib/i18n/locale";
 import { formatMoney, type Currency } from "@/lib/markets";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = (await getDictionary(await getLocale())).account;
-  return { title: `${t.orders.title} — Dar Rida`, robots: { index: false } };
+  const dict = await getDictionary(await getLocale());
+  const t = dict.account;
+  return { title: `${t.orders.title} — ${dict.common.brandName}`, robots: { index: false } };
 }
 
 export default async function OrdersPage() {

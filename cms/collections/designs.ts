@@ -66,6 +66,8 @@ export const Designs: CollectionConfig = {
       name: "makingDays",
       label: "Making time (days)",
       type: "number",
+      // Team only: kept out of the public API (the shop reads it on the server).
+      access: { read: ({ req }) => Boolean(req.user) },
       min: 1,
       max: 120,
       admin: {

@@ -4,6 +4,7 @@ import type { Dictionary } from "./en";
 // in sync with the English source of truth.
 const ar: Dictionary = {
   common: {
+    siteDescription: "عبايات تُصنع حسب الطلب، يدويًا.",
     brandName: "دار رِدا",
     language: "اللغة",
     switchLanguage: "التبديل إلى {language}",

@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!design) return {};
   const image = design.images[0];
   return {
-    title: `${design.code} · ${design.name} — Dar Rida`,
+    title: `${design.code} · ${design.name} — ${(await getDictionary(locale)).common.brandName}`,
     description: design.description.slice(0, 160),
     openGraph: image ? { images: [{ url: image.url, width: image.width, height: image.height }] } : undefined,
   };

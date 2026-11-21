@@ -4,6 +4,7 @@
 
 const en = {
   common: {
+    siteDescription: "Made-to-order abayas, crafted by hand.",
     brandName: "Dar Rida",
     language: "Language",
     switchLanguage: "Switch to {language}",

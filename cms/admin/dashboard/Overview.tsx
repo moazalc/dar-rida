@@ -207,7 +207,14 @@ export async function Overview({ req }: WidgetServerProps) {
   const adminRoute = req.payload.config.routes.admin;
   const lang = adminLang(req.i18n);
   const now = new Date();
-  const [d, a] = await Promise.all([loadShopDashboard(req, now), loadAnalytics(now)]);
+  const [d, a, settings] = await Promise.all([
+    loadShopDashboard(req, now),
+    loadAnalytics(now),
+    req.payload.findGlobal({ slug: "store-settings", depth: 0, req }),
+  ]);
+  // Without anyone to tell, a paid order arrives silently: say so until it's set.
+  const noRecipients = !(settings.orderNotificationEmails ?? []).some((r) => r.email);
+  const settingsHref = formatAdminURL({ adminRoute, path: "/globals/store-settings" });
   const orders = formatAdminURL({ adminRoute, path: "/collections/orders" });
   const tab = (status: string) => `${orders}?where[status][equals]=${status}`;
   const sellerWidths = barWidths(d.bestSellers.map((b) => b.pieces));
@@ -229,6 +236,15 @@ export async function Overview({ req }: WidgetServerProps) {
           </a>
         </div>
       </header>
+
+      {noRecipients ? (
+        <p className="dr-dash__card dr-dash__warning" role="alert">
+          {t("Nobody gets an email when a new order is paid.", "لا أحد يتلقى بريدًا عند دفع طلب جديد.")[lang]}{" "}
+          <a className="dr-dash__link" href={settingsHref}>
+            {t("Add addresses in Store settings", "أضف العناوين في إعدادات المتجر")[lang]}
+          </a>
+        </p>
+      ) : null}
 
       <section className="dr-dash__kpis" aria-label={t("Orders to act on", "طلبات تحتاج إجراء")[lang]}>
         <a className="dr-dash__card dr-dash__kpi" href={tab("paid")}>
