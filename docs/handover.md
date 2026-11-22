@@ -5,8 +5,8 @@ with every finding and its status, is in [qa-checklist.md](qa-checklist.md).
 
 ## The plan
 
-1. **QA first** (backend and frontend: UX, validation, security, gaps). Mostly done; see below.
-2. **Admin panel work**: order export (next step).
+1. **QA first** (code and UI/UX only; anything the owner types into the admin is deferred). Mostly done; see below.
+2. **Admin panel work**: order export and order screen done (on staging); image sizes next.
 3. **Redesign the website** for a luxury feel (hero video, single-colour pages,
    every page). Not started. Keyboard, focus and contrast checks belong to this pass.
 
@@ -41,13 +41,9 @@ Local checks before a commit: `pnpm lint`, `pnpm exec vitest run`, `pnpm exec ts
 If tsc complains about a missing `/design` page, delete the stale `.next/types` folder.
 
 ### Testing staging in a browser
-The browser prompt for the site password doesn't stick in the Claude browser pane.
-What worked: an ssh tunnel to the staging port (`ssh -N -L 4051:127.0.0.1:3050 hetzner`)
-and a small local Node proxy on port 4050 that adds the `Authorization` header (built
-from `SITE_USERNAME`/`SITE_PASSWORD` read from the staging container, never typed).
-For `/api/` requests the proxy must also rewrite `Origin` to `https://staging.darrida.net`,
-or Payload's CSRF check rejects admin actions with "Not allowed". The proxy script was
-a throwaway in a temp folder, so write it again if needed.
+Use the site password directly (the owner shares it in chat when needed; never commit it).
+If the browser prompt doesn't stick in the Claude browser pane, a headless browser with
+HTTP credentials set works.
 
 ## Done (all on staging and production as of commit becc1d5)
 
@@ -92,21 +88,28 @@ sudo nginx -t && sudo systemctl reload nginx
 
 Also: the admin password was shared in a chat, so it should be changed.
 
-## Next step: admin work
+## Admin work
 
-1. **Order export**
-   - A PDF tailor sheet for a single order: one page per piece, with the design code and
-     drawing, measurements in both cm and inches, quantity, notes and the ready-by date.
-   - A CSV/Excel export of the order list that follows the current tab or filter.
-2. **Order screen tidy-ups (F-25)**: show prices as money (it shows "40000" for $400),
-   remove the Save button that does nothing, add an internal team notes field.
-3. **Uploads (F-04)**: set image sizes so uploads are resized.
+Done (5e93ab6, on staging):
+- **F-16 order export**: *Print tailor sheet* on each order (`/print/orders/:id`, app/(print),
+  admins only, in the admin's language, A4) and *Export CSV* above the orders list
+  (`GET /api/orders/export`, follows the list's tab, filters, search and sort, one row per piece).
+- **F-25 order screen**: amounts shown as money, a *Team notes* field (migration
+  `20261122_071203_team_notes`, printed as Workshop notes), never-paid checkouts hidden
+  from the list and the export. Save stays (Ready by and Team notes are editable).
+
+Next: **Uploads (F-04)**: set image sizes so uploads are resized.
+
+Note for testing: Payload only accepts the admin cookie on a request that a browser marks
+same-origin, so `curl` against the admin API needs `-H "Sec-Fetch-Site: same-origin"`.
+The tailor sheet opens the print dialog by itself, which freezes the Claude browser pane;
+check it in a headless browser with `window.print` stubbed instead.
 
 Undecided, for later: hreflang/language URLs (the language is a cookie today), a real
 server-side contact form instead of mailto.
 
 ## Test data on staging
 
-- Order **DR-QA1** (id 1), inserted with psql, status Shipped. Kept for building the
+- Order **DR-QA1** (id 1), inserted with psql, status Shipped, with a test team note. Used to test the
   order export. It adds $800 to the dashboard's sales figures. Delete it when done.
 - A test bag with one RIDA 01 line.
