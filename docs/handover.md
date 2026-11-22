@@ -98,6 +98,15 @@ Done (5e93ab6, on staging):
   `20261122_071203_team_notes`, printed as Workshop notes), never-paid checkouts hidden
   from the list and the export. Save stays (Ready by and Team notes are editable).
 
+From the tailor's review (ca66ce1, on staging):
+- **Height removed everywhere; waist (دوران الخصر) added**: 61–117 cm / 24–46 in, taken as
+  length, shoulder, bust, waist, hips, sleeve. Migration `20261122_074311_waist_replaces_height`
+  drops the height columns. Old orders show no waist; bags saved before ask the customer to
+  measure again before checkout; saved measurement sets without a waist no longer appear.
+- **Libya measures in cm only** (`METRIC_ONLY_COUNTRIES` in lib/measurements.ts): no unit switch
+  on the product page, the panel or the size guide. The tailor (in Dubai) keeps cm + inches on the sheet.
+- **Print tailor sheet** moved to the order's top bar, beside Save.
+
 Next: **Uploads (F-04)**: set image sizes so uploads are resized.
 
 Note for testing: Payload only accepts the admin cookie on a request that a browser marks

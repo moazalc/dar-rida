@@ -187,6 +187,13 @@ Severity: **High** blocks buying or exposes data · **Medium** a broken journey 
 | F-24 | Low | Navigation | The mobile menu has only Collection, Design your abaya (soon) and How to measure. Account, Contact, FAQ and Shipping are reachable only from the footer. | 375px → ☰ | Fixed: the menu now also lists Fabric library, Shipping, Returns, FAQ and Contact (Account is the header icon) |
 | F-25 | Low | Admin UX | On an order: a Save button although every field is read-only; unit prices shown in minor units ("40000" for $400); no internal team notes field; the "Tracking number" label is not tied to its input. | Admin → any order | Fixed: amounts show as money ("AED 2,900.00") without changing the stored numbers; a **Team notes** field (admin only, printed as Workshop notes). Save stays: Ready by and Team notes are editable. Never-paid checkouts no longer appear in the list. The tracking label was a test-tool artefact (5e93ab6) · ✅ verified on staging |
 
+## Changes from the tailor's review (ca66ce1)
+| Change | Status |
+|---|---|
+| Height removed from the panel, size guide, emails, admin, export and sheet; waist (دوران الخصر) added | ✅ verified on staging |
+| Libya (shipping country LY): centimetres only, no unit switch on the product page, panel or size guide | ✅ verified on staging (UAE still has the switch) |
+| Print tailor sheet in the order's top bar, beside Save | ✅ verified on staging |
+
 ## Test data left on staging
 - DR-QA1 counts in the admin dashboard's sales figures ($800) until it's deleted.
 - Order **DR-QA1** (id 1), inserted straight into the staging database with psql (not through checkout or the admin), for "QA Test Customer <qa-test@example.com>", now marked Shipped. Kept to build and test the order export. Delete it from the admin when it's no longer needed.
