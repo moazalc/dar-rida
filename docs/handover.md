@@ -1,4 +1,4 @@
-# Dar Rida — where things stand (21 Nov 2026)
+# Dar Rida — where things stand (22 Nov 2026)
 
 Read this first when picking the work up on another machine. The full QA record,
 with every finding and its status, is in [qa-checklist.md](qa-checklist.md).
@@ -8,7 +8,7 @@ with every finding and its status, is in [qa-checklist.md](qa-checklist.md).
 1. **QA first** (code and UI/UX only; anything the owner types into the admin is deferred). Mostly done; see below.
 2. **Admin panel work**: order export and order screen done (on staging); image sizes next.
 3. **Redesign the website** for a luxury feel (hero video, single-colour pages,
-   every page). Not started. Keyboard, focus and contrast checks belong to this pass.
+   every page). Next: starting with ideas. Keyboard, focus and contrast checks belong to this pass.
 
 Email OTP, Google sign-in and Stripe were left out of the QA on purpose.
 
@@ -45,7 +45,7 @@ Use the site password directly (the owner shares it in chat when needed; never c
 If the browser prompt doesn't stick in the Claude browser pane, a headless browser with
 HTTP credentials set works.
 
-## Done (all on staging and production as of commit becc1d5)
+## Done (all on staging and production as of commit e4e6f2a, deployed 22 Nov 2026)
 
 - **Security**: HSTS, X-Frame-Options, CSP `frame-ancestors`, nosniff, Referrer-Policy and
   Permissions-Policy on every page; no `X-Powered-By`. Uploads limited to JPEG, PNG, WebP
@@ -90,7 +90,7 @@ Also: the admin password was shared in a chat, so it should be changed.
 
 ## Admin work
 
-Done (5e93ab6, on staging):
+Done (5e93ab6, on staging and production):
 - **F-16 order export**: *Print tailor sheet* on each order (`/print/orders/:id`, app/(print),
   admins only, in the admin's language, A4) and *Export CSV* above the orders list
   (`GET /api/orders/export`, follows the list's tab, filters, search and sort, one row per piece).
@@ -98,7 +98,7 @@ Done (5e93ab6, on staging):
   `20261122_071203_team_notes`, printed as Workshop notes), never-paid checkouts hidden
   from the list and the export. Save stays (Ready by and Team notes are editable).
 
-From the tailor's review (ca66ce1, on staging):
+From the tailor's review (ca66ce1 and e4e6f2a, on staging and production):
 - **Height removed everywhere; waist (دوران الخصر) added**: 61–117 cm / 24–46 in, taken as
   length, shoulder, bust, waist, hips, sleeve. Migration `20261122_074311_waist_replaces_height`
   drops the height columns. Old orders show no waist; bags saved before ask the customer to
@@ -106,6 +106,11 @@ From the tailor's review (ca66ce1, on staging):
 - **Libya measures in cm only** (`METRIC_ONLY_COUNTRIES` in lib/measurements.ts): no unit switch
   on the product page, the panel or the size guide. The tailor (in Dubai) keeps cm + inches on the sheet.
 - **Print tailor sheet** moved to the order's top bar, beside Save.
+- **Accuracy note** on the product page, the measuring panel and the size guide: exact body
+  measurements, nothing added for room (`measure.accuracy` in the dictionaries).
+
+Production backup taken before the waist migration: `~/backups/dar-rida-prod-20261122-0757-before-waist.sql.gz`
+on the server (production had no orders, bags or saved measurements then).
 
 Next: **Uploads (F-04)**: set image sizes so uploads are resized.
 
