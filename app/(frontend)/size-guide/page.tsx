@@ -31,7 +31,8 @@ const needIcons = [
 ];
 
 export default async function SizeGuidePage() {
-  const t = (await getDictionary(await getLocale())).sizeGuide;
+  const dict = await getDictionary(await getLocale());
+  const t = dict.sizeGuide;
 
   return (
     <div className="pb-20 md:pb-28">
@@ -55,6 +56,9 @@ export default async function SizeGuidePage() {
             </li>
           ))}
         </ul>
+        <p role="note" className="mt-6 border-s-2 border-foreground bg-muted px-4 py-3 text-sm leading-relaxed md:max-w-3xl">
+          <strong className="font-medium">{dict.measure.accuracyTitle}</strong> {dict.measure.accuracy}
+        </p>
       </div>
 
       <section aria-label={t.title} className={`${frame} py-10 md:py-14`}>

@@ -284,6 +284,8 @@ const en = {
   measure: {
     title: "Your measurements",
     intro: "Six measurements, about five minutes with a tape. We guide you through each one.",
+    accuracyTitle: "Measure your body exactly.",
+    accuracy: "Enter the real numbers from the tape. Don't add extra centimetres or inches for room, and don't round up: we cut to the measurements you give us, so anything added will spoil the fit of your abaya.",
     add: "Add measurements",
     edit: "Edit",
     close: "Close",

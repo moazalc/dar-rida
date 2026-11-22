@@ -203,6 +203,9 @@ export function MeasurementsPanel({
         ) : (
           <>
             <p className="text-sm text-muted-foreground">{t.intro}</p>
+            <p role="note" className="border-s-2 border-foreground bg-muted px-4 py-3 text-sm leading-relaxed">
+              <strong className="font-medium">{t.accuracyTitle}</strong> {t.accuracy}
+            </p>
             <button
               type="button"
               onClick={openPanel}
@@ -248,6 +251,11 @@ export function MeasurementsPanel({
           </div>
 
           <div className="flex flex-1 flex-col gap-7 overflow-y-auto px-4 pt-6 pb-8 sm:px-7">
+            {!notice && mode !== "review" && (
+              <p role="note" className="border-s-2 border-foreground bg-muted px-4 py-3 text-sm leading-relaxed">
+                <strong className="font-medium">{t.accuracyTitle}</strong> {t.accuracy}
+              </p>
+            )}
             <div>
               {notice ? (
                 notice
