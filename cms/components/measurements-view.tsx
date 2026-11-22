@@ -13,12 +13,12 @@ import {
 } from "@/lib/measurements";
 
 const labels: Record<Measurement, string> = {
-  height: "Height",
   length: "Length",
   shoulder: "Shoulder width",
   bust: "Bust",
-  sleeve: "Sleeve length",
+  waist: "Waist",
   hips: "Hips",
+  sleeve: "Sleeve length",
 };
 
 type View = "entered" | Unit;

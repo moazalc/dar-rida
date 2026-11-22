@@ -200,12 +200,12 @@ export interface Order {
            * The unit the customer entered these in. The numbers are exactly as entered.
            */
           unit: 'in' | 'cm' | 'legacy';
-          height: number;
-          length: number;
-          shoulder: number;
-          bust: number;
-          sleeve: number;
-          hips: number;
+          length?: number | null;
+          shoulder?: number | null;
+          bust?: number | null;
+          waist?: number | null;
+          hips?: number | null;
+          sleeve?: number | null;
         };
         notes?: string | null;
         id?: string | null;
@@ -357,12 +357,12 @@ export interface Customer {
            * The unit the customer entered these in. The numbers are exactly as entered.
            */
           unit: 'in' | 'cm' | 'legacy';
-          height: number;
-          length: number;
-          shoulder: number;
-          bust: number;
-          sleeve: number;
-          hips: number;
+          length?: number | null;
+          shoulder?: number | null;
+          bust?: number | null;
+          waist?: number | null;
+          hips?: number | null;
+          sleeve?: number | null;
         };
         id?: string | null;
       }[]
@@ -679,12 +679,12 @@ export interface Cart {
            * The unit the customer entered these in. The numbers are exactly as entered.
            */
           unit: 'in' | 'cm' | 'legacy';
-          height: number;
-          length: number;
-          shoulder: number;
-          bust: number;
-          sleeve: number;
-          hips: number;
+          length?: number | null;
+          shoulder?: number | null;
+          bust?: number | null;
+          waist?: number | null;
+          hips?: number | null;
+          sleeve?: number | null;
         };
         notes?: string | null;
         quantity: number;
@@ -834,12 +834,12 @@ export interface OrdersSelect<T extends boolean = true> {
           | T
           | {
               unit?: T;
-              height?: T;
               length?: T;
               shoulder?: T;
               bust?: T;
-              sleeve?: T;
+              waist?: T;
               hips?: T;
+              sleeve?: T;
             };
         notes?: T;
         id?: T;
@@ -894,12 +894,12 @@ export interface CustomersSelect<T extends boolean = true> {
           | T
           | {
               unit?: T;
-              height?: T;
               length?: T;
               shoulder?: T;
               bust?: T;
-              sleeve?: T;
+              waist?: T;
               hips?: T;
+              sleeve?: T;
             };
         id?: T;
       };
@@ -1006,12 +1006,12 @@ export interface CartsSelect<T extends boolean = true> {
           | T
           | {
               unit?: T;
-              height?: T;
               length?: T;
               shoulder?: T;
               bust?: T;
-              sleeve?: T;
+              waist?: T;
               hips?: T;
+              sleeve?: T;
             };
         notes?: T;
         quantity?: T;

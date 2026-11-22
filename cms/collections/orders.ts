@@ -42,7 +42,11 @@ export const Orders: CollectionConfig = {
     defaultColumns: ["number", "status", "customerName", "shippingCountry", "formattedTotal", "readyBy", "createdAt"],
     listSearchableFields: ["number", "customerName", "customerEmail"],
     description: "Paid orders appear here once Stripe confirms the payment.",
-    components: { beforeListTable: ["/cms/admin/order-tabs#OrderTabs"] },
+    components: {
+      beforeListTable: ["/cms/admin/order-tabs#OrderTabs"],
+      // In the top bar, beside Save, so it is the first thing seen on an order.
+      edit: { beforeDocumentControls: ["/cms/components/tailor-sheet-link#TailorSheetLink"] },
+    },
     // Checkouts that were never paid are abandoned bags, not orders: kept out of the list (and the export).
     baseFilter: () => ({ status: { not_equals: "pending_payment" } }),
   },
@@ -100,11 +104,6 @@ export const Orders: CollectionConfig = {
           ar: "يراها الفريق فقط، وتُطبع في ورقة الخيّاط تحت «ملاحظات الورشة».",
         },
       },
-    },
-    {
-      name: "tailorSheet",
-      type: "ui",
-      admin: { components: { Field: "/cms/components/tailor-sheet-link#TailorSheetLink" } },
     },
     {
       type: "collapsible",

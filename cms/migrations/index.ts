@@ -4,6 +4,7 @@ import * as migration_20261119_110608_market_prices_and_shipping from './2026111
 import * as migration_20261119_124000_customer_accounts from './20261119_124000_customer_accounts';
 import * as migration_20261119_140437_admin_fulfilment from './20261119_140437_admin_fulfilment';
 import * as migration_20261122_071203_team_notes from './20261122_071203_team_notes';
+import * as migration_20261122_074311_waist_replaces_height from './20261122_074311_waist_replaces_height';
 
 export const migrations = [
   {
@@ -34,6 +35,11 @@ export const migrations = [
   {
     up: migration_20261122_071203_team_notes.up,
     down: migration_20261122_071203_team_notes.down,
-    name: '20261122_071203_team_notes'
+    name: '20261122_071203_team_notes',
+  },
+  {
+    up: migration_20261122_074311_waist_replaces_height.up,
+    down: migration_20261122_074311_waist_replaces_height.down,
+    name: '20261122_074311_waist_replaces_height'
   },
 ];

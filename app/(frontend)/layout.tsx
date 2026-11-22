@@ -55,7 +55,7 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col">
         <DirectionProvider direction={dir}>
           <I18nProvider value={{ locale, dir, dict }}>
-            <UnitProvider initial={unit}>
+            <UnitProvider key={unit.locked ? "cm-only" : "any-unit"} initial={unit.unit} locked={unit.locked}>
               <SiteHeader cartCount={cartCount} signedIn={Boolean(user)} />
               <main id="main" className="flex-1">
                 {children}

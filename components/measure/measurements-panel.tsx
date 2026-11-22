@@ -15,7 +15,6 @@ import {
   measurementGrid,
   measurementKeys,
   otherUnit,
-  suggestedLength,
   type Measurement,
   type Measurements,
   type MeasurementsDraft,
@@ -60,7 +59,7 @@ export function MeasurementsPanel({
   const ta = dict.account.profiles;
   const [saveChecked, setSaveChecked] = useState(profiles.length === 0);
   const [saveName, setSaveName] = useState(saveAs?.defaultName ?? "");
-  const { unit: preferred, setUnit } = useUnit();
+  const { unit: preferred, setUnit, locked } = useUnit();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<MeasurementsDraft>(() => value ?? { unit: preferred });
   const [step, setStep] = useState(0);
@@ -68,6 +67,8 @@ export function MeasurementsPanel({
   const [pendingUnit, setPendingUnit] = useState<Unit | null>(null);
 
   const unit = draft.unit;
+  // Centimetre-only countries see no switch, unless an older set in inches needs converting.
+  const showSwitch = !locked || unit !== "cm";
   const entered = measurementKeys.filter((m) => draft[m] !== undefined);
   const fmt = (m: Measurement, v: number, u: Unit = unit) => formatMeasurement(m, v, u, locale, t.units);
   const labels = Object.fromEntries(entered.map((m) => [m, fmt(m, draft[m]!)]));
@@ -179,7 +180,7 @@ export function MeasurementsPanel({
             {title ?? t.title}
           </h2>
           <div className="flex items-center gap-4">
-            <UnitSwitch value={pendingUnit ?? unit} onChange={requestUnit} />
+            {showSwitch && <UnitSwitch value={pendingUnit ?? unit} onChange={requestUnit} />}
             {value && (
               <button type="button" onClick={openPanel} className={linkClass}>
                 {t.edit}
@@ -238,7 +239,7 @@ export function MeasurementsPanel({
           <div className="flex items-center justify-between gap-3 border-b border-border/60 px-4 py-3 sm:px-7">
             <SheetTitle className="text-xs font-normal tracking-[0.22em] text-muted-foreground uppercase">{t.title}</SheetTitle>
             <div className="flex items-center gap-3">
-              <UnitSwitch value={pendingUnit ?? unit} onChange={requestUnit} />
+              {showSwitch && <UnitSwitch value={pendingUnit ?? unit} onChange={requestUnit} />}
               <SheetClose className="inline-flex size-10 items-center justify-center text-2xl leading-none hover:opacity-70">
                 <span aria-hidden>×</span>
                 <span className="sr-only">{t.close}</span>
@@ -304,11 +305,6 @@ function Step({
   const m = measurementKeys[step];
   const value = draft[m];
   const last = step === measurementKeys.length - 1;
-  let suggestion: string | null = null;
-  if (m === "length" && draft.height !== undefined) {
-    const [a, b] = suggestedLength(draft.height, draft.unit);
-    suggestion = t.suggest.replace("{range}", a === b ? fmt("length", a) : `${fmt("length", a)} – ${fmt("length", b)}`);
-  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -324,7 +320,6 @@ function Step({
         <h3 className="font-heading text-4xl leading-tight">{t.fields[m].label}</h3>
         <p className="mt-1 text-muted-foreground">{t.fields[m].hint}</p>
       </div>
-      {suggestion && <p className="bg-muted px-3 py-2 text-sm">{suggestion}</p>}
       <Tape
         values={measurementGrid[draft.unit][m]}
         value={value}

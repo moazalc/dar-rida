@@ -2,18 +2,20 @@ import type { Field } from "payload";
 import { measurementKeys } from "@/lib/measurements";
 
 const labels: Record<(typeof measurementKeys)[number], string> = {
-  height: "Height",
   length: "Length",
   shoulder: "Shoulder",
   bust: "Bust",
-  sleeve: "Sleeve",
+  waist: "Waist",
   hips: "Hips",
+  sleeve: "Sleeve",
 };
 
 /**
  * The six measurements and the unit they were entered in, as one group. The
  * numbers are stored exactly as the customer confirmed them; nothing converts
- * them. On orders the raw group is hidden and `MeasurementsView` shows it with
+ * them. Not required in the database: a set is checked in full by
+ * `parseMeasurements` before it is saved, and orders from before the waist
+ * measurement existed have none. On orders the raw group is hidden and `MeasurementsView` shows it with
  * the unit and a display-only conversion.
  */
 export function measurementsField(readOnly = false): Field[] {
@@ -21,7 +23,6 @@ export function measurementsField(readOnly = false): Field[] {
     name: m,
     label: labels[m],
     type: "number",
-    required: true,
     admin: { readOnly },
   });
   const group: Field = {
@@ -37,7 +38,7 @@ export function measurementsField(readOnly = false): Field[] {
         options: [
           { label: "Inches", value: "in" },
           { label: "Centimetres", value: "cm" },
-          { label: "Inches, height in cm (before units)", value: "legacy" },
+          { label: "Inches (before units)", value: "legacy" },
         ],
         admin: { readOnly, description: "The unit the customer entered these in. The numbers are exactly as entered." },
       },

@@ -176,6 +176,15 @@ function Line({
           </p>
         )}
 
+        {line.needsMeasurements && !unavailable && (
+          <p className="text-sm text-destructive">
+            {t.remeasureNote}{" "}
+            <Link href={line.href} className="underline underline-offset-4">
+              {t.remeasureCta}
+            </Link>
+          </p>
+        )}
+
         {line.choices.length > 0 && (
           <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1 text-sm">
             {line.choices.map((c) => (

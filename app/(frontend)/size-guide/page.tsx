@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageIntro } from "@/components/page-intro";
-import { LengthHelper } from "@/components/size-guide/length-helper";
 import { GuideUnitSwitch, MeasureGuide } from "@/components/size-guide/measure-guide";
 import { statusAction } from "@/components/status-page";
 import { getDictionary } from "@/lib/i18n/dictionaries";
@@ -60,17 +59,6 @@ export default async function SizeGuidePage() {
 
       <section aria-label={t.title} className={`${frame} py-10 md:py-14`}>
         <MeasureGuide />
-      </section>
-
-      <section className="bg-linen">
-        <div className={`${frame} grid grid-cols-[minmax(0,1fr)] items-center gap-8 py-12 md:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] md:gap-16 md:py-16`}>
-          <div>
-            <p className="text-xs tracking-[0.24em] text-muted-foreground uppercase">{t.lengthEyebrow}</p>
-            <h2 className="mt-3 font-heading text-4xl leading-tight md:text-5xl">{t.lengthTitle}</h2>
-            <p className="mt-3 max-w-md text-muted-foreground">{t.lengthIntro}</p>
-          </div>
-          <LengthHelper />
-        </div>
       </section>
 
       <section className={`${frame} flex flex-col items-start gap-6 pt-12 md:flex-row md:items-center md:justify-between md:pt-16`}>

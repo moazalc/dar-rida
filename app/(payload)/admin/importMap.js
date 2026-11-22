@@ -1,9 +1,9 @@
 import { OrderProgress as OrderProgress_c765b320e7e0e7bbab58e7f17b0c0e8c } from '../../../cms/components/order-progress'
-import { TailorSheetLink as TailorSheetLink_3cd53115822e4d1c0f0bcae1e9028e8c } from '../../../cms/components/tailor-sheet-link'
 import { ResendEmails as ResendEmails_13b77e88748fe3b953b41cf71edb54b6 } from '../../../cms/components/resend-emails'
 import { MoneyField as MoneyField_4daf64fc991f23e9ee1b090f3207faed } from '../../../cms/components/money-field'
 import { MeasurementsView as MeasurementsView_210bad2de5e9a673262bca2a615ed8ce } from '../../../cms/components/measurements-view'
 import { OrderTabs as OrderTabs_695dfa810fec836255463c1a65d7bc05 } from '../../../cms/admin/order-tabs'
+import { TailorSheetLink as TailorSheetLink_3cd53115822e4d1c0f0bcae1e9028e8c } from '../../../cms/components/tailor-sheet-link'
 import { ProfileRowLabel as ProfileRowLabel_331f5291d2f4733a85dff5c26eff4c61 } from '../../../cms/components/customer-row-labels'
 import { AddressRowLabel as AddressRowLabel_331f5291d2f4733a85dff5c26eff4c61 } from '../../../cms/components/customer-row-labels'
 import { CustomerOrders as CustomerOrders_6553a8f7afa50268907bbb8e1a7dfc16 } from '../../../cms/admin/customer-orders'
@@ -18,11 +18,11 @@ import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } f
 /** @type import('payload').ImportMap */
 export const importMap = {
   "/cms/components/order-progress#OrderProgress": OrderProgress_c765b320e7e0e7bbab58e7f17b0c0e8c,
-  "/cms/components/tailor-sheet-link#TailorSheetLink": TailorSheetLink_3cd53115822e4d1c0f0bcae1e9028e8c,
   "/cms/components/resend-emails#ResendEmails": ResendEmails_13b77e88748fe3b953b41cf71edb54b6,
   "/cms/components/money-field#MoneyField": MoneyField_4daf64fc991f23e9ee1b090f3207faed,
   "/cms/components/measurements-view#MeasurementsView": MeasurementsView_210bad2de5e9a673262bca2a615ed8ce,
   "/cms/admin/order-tabs#OrderTabs": OrderTabs_695dfa810fec836255463c1a65d7bc05,
+  "/cms/components/tailor-sheet-link#TailorSheetLink": TailorSheetLink_3cd53115822e4d1c0f0bcae1e9028e8c,
   "/cms/components/customer-row-labels#ProfileRowLabel": ProfileRowLabel_331f5291d2f4733a85dff5c26eff4c61,
   "/cms/components/customer-row-labels#AddressRowLabel": AddressRowLabel_331f5291d2f4733a85dff5c26eff4c61,
   "/cms/admin/customer-orders#CustomerOrders": CustomerOrders_6553a8f7afa50268907bbb8e1a7dfc16,

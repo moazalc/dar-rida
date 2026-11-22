@@ -188,6 +188,8 @@ const en = {
     customName: "Custom abaya",
     unavailable: "No longer available",
     unavailableNote: "This piece can no longer be ordered. Remove it to check out.",
+    remeasureNote: "We now take a waist measurement. Remove this piece and add it again with your measurements to check out.",
+    remeasureCta: "Open the piece",
     measurements: "Measurements",
     notes: "Notes",
     each: "{price} each",
@@ -274,11 +276,6 @@ const en = {
       { title: "Light, fitted clothes", body: "Stand straight, barefoot, and breathe normally." },
     ],
     example: "e.g. {value}",
-    lengthEyebrow: "Not sure about length?",
-    lengthTitle: "Start from your height",
-    lengthIntro: "Most clients choose a length in this range. You can still pick your own when you order.",
-    yourHeight: "Your height",
-    suggested: "Suggested length",
     helpTitle: "Still unsure?",
     helpBody: "Write to us with your measurements and we will check them before we cut.",
     helpCta: "Contact us",
@@ -300,7 +297,6 @@ const en = {
     allAtOnceTitle: "All at once",
     guided: "Guide me step by step instead",
     choose: "Select",
-    suggest: "For your height, most clients choose {range}.",
     howToMeasure: "How to measure",
     unitSwitch: "Measuring unit",
     units: { in: "in", cm: "cm" },
@@ -312,11 +308,6 @@ const en = {
     views: { front: "Front", back: "Back" },
     figureLabel: "Front and back views, showing where each measurement is taken",
     fields: {
-      height: {
-        label: "Height",
-        hint: "Stand straight against a wall, without shoes.",
-        tips: ["Stand barefoot with your heels against a wall.", "Lay a book flat on your head and mark where it meets the wall.", "Measure from the floor to the mark."],
-      },
       length: {
         label: "Length",
         hint: "From the top of the shoulder to the floor, without shoes.",
@@ -331,6 +322,11 @@ const en = {
         label: "Bust",
         hint: "Around the fullest part of the chest, tape level.",
         tips: ["Around the fullest part of the chest.", "Keep the tape level across your back.", "Snug, not tight: one finger should slide under it."],
+      },
+      waist: {
+        label: "Waist",
+        hint: "Measure around the narrowest part of your waist, usually just above the navel. Keep the tape snug, not tight.",
+        tips: ["Around the narrowest part of the waist, usually just above the navel.", "Breathe out normally; don't pull your stomach in.", "Snug, not tight: one finger should slide under it."],
       },
       sleeve: {
         label: "Sleeve length",

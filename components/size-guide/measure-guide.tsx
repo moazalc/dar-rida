@@ -9,12 +9,13 @@ import { useUnit } from "@/components/providers/unit-provider";
 import { convertToGrid, formatMeasurement, measurementGrid, measurementKeys, type Measurement } from "@/lib/measurements";
 
 /** A typical value for each measurement (cm), shown on the figure as an example. */
-const EXAMPLES_CM: Record<Measurement, number> = { height: 162, length: 142, shoulder: 39, bust: 91, sleeve: 58, hips: 99 };
+const EXAMPLES_CM: Record<Measurement, number> = { length: 142, shoulder: 39, bust: 91, waist: 74, hips: 99, sleeve: 58 };
 
 /** The unit switch for the size guide's title row. */
 export function GuideUnitSwitch() {
   const t = useI18n().dict.sizeGuide;
-  const { unit, setUnit } = useUnit();
+  const { unit, setUnit, locked } = useUnit();
+  if (locked) return null;
   return (
     <div className="flex flex-col items-start gap-2">
       <span className="text-sm text-muted-foreground">{t.showIn}</span>
@@ -32,7 +33,7 @@ export function MeasureGuide() {
   const { dict, locale } = useI18n();
   const t = dict.measure;
   const { unit } = useUnit();
-  const [active, setActive] = useState<Measurement | null>("height");
+  const [active, setActive] = useState<Measurement | null>(measurementKeys[0]);
   const fmt = (m: Measurement, v: number) => formatMeasurement(m, v, unit, locale, t.units);
   const example = active ? fmt(active, convertToGrid(active, EXAMPLES_CM[active], "cm", unit)) : null;
 

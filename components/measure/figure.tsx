@@ -80,15 +80,15 @@ export function MeasureFigure({
 
       {front ? (
         <>
-          <path className={line("height", active, labels)} d="M16 13 V449 M10 13 H22 M10 449 H22" />
           <path className={line("length", active, labels)} d="M184 71 V441 M178 71 H190 M178 441 H190" />
           <ellipse className={line("bust", active, labels)} cx="100" cy="124" rx="22" ry="5" />
           <path className={line("sleeve", active, labels)} d="M142 75 L160 228 M137 77 L147 73 M155 230 L165 226" />
+          <ellipse className={line("waist", active, labels)} cx="100" cy="163" rx="19" ry="5" />
           <ellipse className={line("hips", active, labels)} cx="100" cy="202" rx="23" ry="6" />
-          <Label m="height" active={active} labels={labels} x="12" y="231" transform="rotate(-90 12 231)" />
           <Label m="length" active={active} labels={labels} x="188" y="256" transform="rotate(90 188 256)" />
           <Label m="bust" active={active} labels={labels} onCloth x="100" y="144" />
           <Label m="sleeve" active={active} labels={labels} x="157" y="152" transform="rotate(83 157 152)" />
+          <Label m="waist" active={active} labels={labels} onCloth x="100" y="181" />
           <Label m="hips" active={active} labels={labels} onCloth x="100" y="224" />
         </>
       ) : (

@@ -6,9 +6,9 @@ import ar from "@/lib/i18n/dictionaries/ar";
 import en from "@/lib/i18n/dictionaries/en";
 import { customerEmail, ownerEmail } from "@/lib/orders/emails";
 
-// An order from before units: lengths in inches, height in centimetres.
-const measurements = { unit: "legacy", length: 56, bust: 36, shoulder: 15.5, sleeve: 23, hips: 40, height: 165 };
-const metric = { unit: "cm", height: 165, length: 142, shoulder: 39, bust: 91, sleeve: 58, hips: 102 };
+// An order from before units (all inches) and before the waist measurement.
+const measurements = { unit: "legacy", length: 56, bust: 36, shoulder: 15.5, sleeve: 23, hips: 40 };
+const metric = { unit: "cm", length: 142, shoulder: 39, bust: 91, waist: 76, hips: 102, sleeve: 58 };
 
 const order = {
   id: 7,
@@ -40,7 +40,7 @@ describe("order emails", () => {
     const { subject, text } = ownerEmail(order, "https://example.test/admin/collections/orders/7");
     expect(subject).toBe("New order DR-1007 — 2 pieces — $750");
     expect(text).toContain("Shoulder width: 15.5 in (≈ 39.4 cm)");
-    expect(text).toContain("Height: 165 cm (≈ 5′5″)");
+    expect(text).not.toContain("Height");
     expect(text).toContain("Notes: <b>longer</b>");
   });
 
@@ -48,6 +48,7 @@ describe("order emails", () => {
     const cmOrder = { ...order, lines: [{ ...order.lines![0], measurements: metric }] } as Order;
     const { text } = ownerEmail(cmOrder, "https://example.test/admin");
     expect(text).toContain("Bust: 91 cm (≈ 35.8 in)");
+    expect(text).toContain("Waist: 76 cm (≈ 29.9 in)");
     expect(text).toContain("Shoulder width: 39 cm (≈ 15.4 in)");
   });
 

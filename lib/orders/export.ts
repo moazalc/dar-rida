@@ -27,18 +27,18 @@ export function exportWhere(where: unknown, search: unknown): Where {
 
 /** As the shop names them (lib/i18n dictionaries), so the team and the customer say the same thing. */
 export const MEASUREMENT_LABEL: Record<(typeof measurementKeys)[number], Text> = {
-  height: t("Height", "الطول الكامل"),
   length: t("Length", "الطول"),
   shoulder: t("Shoulder width", "عرض الكتفين"),
   bust: t("Bust", "الصدر"),
-  sleeve: t("Sleeve length", "طول الكُمّ"),
+  waist: t("Waist", "دوران الخصر"),
   hips: t("Hips", "الورك"),
+  sleeve: t("Sleeve length", "طول الكُمّ"),
 };
 
 export const UNIT_LABEL: Record<string, Text> = {
   in: t("in", "إنش"),
   cm: t("cm", "سم"),
-  legacy: t("in (height cm)", "إنش (الطول سم)"),
+  legacy: t("in", "إنش"),
 };
 
 const HEADERS: Text[] = [

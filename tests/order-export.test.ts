@@ -24,7 +24,7 @@ const order = (over: Partial<Order> = {}): Order =>
         quantity: 2,
         unitPrice: 150000,
         design: { id: 3, code: "RIDA 01" } as never,
-        measurements: { unit: "cm", height: 165, length: 140, shoulder: 40, bust: 92, sleeve: 58, hips: 100 },
+        measurements: { unit: "cm", length: 140, shoulder: 40, bust: 92, waist: 76, hips: 100, sleeve: 58 },
         notes: "Slightly wider sleeves",
       },
       {
@@ -33,7 +33,7 @@ const order = (over: Partial<Order> = {}): Order =>
         quantity: 1,
         unitPrice: 0,
         design: 4,
-        measurements: { unit: "in", height: 65, length: 55, shoulder: 15.5, bust: 36, sleeve: 23, hips: 40 },
+        measurements: { unit: "in", length: 55, shoulder: 15.5, bust: 36, waist: 30, hips: 40, sleeve: 23 },
       },
     ],
     createdAt: "2026-11-19T21:00:00.000Z",
@@ -58,10 +58,10 @@ describe("orderExportRows", () => {
       "RIDA 01 · The Classic",
       "2",
     ]);
-    expect(first.slice(11)).toEqual(["165", "140", "40", "92", "58", "100", "cm", "Slightly wider sleeves", "3000.00", "3000.00", "AED"]);
+    expect(first.slice(11)).toEqual(["140", "40", "92", "76", "100", "58", "cm", "Slightly wider sleeves", "3000.00", "3000.00", "AED"]);
     expect(second[0]).toBe("DR-1001");
     expect(second[8]).toBe(""); // design not loaded: no code, the name still carries it
-    expect(second.slice(11, 18)).toEqual(["65", "55", "15.5", "36", "23", "40", "in"]);
+    expect(second.slice(11, 18)).toEqual(["55", "15.5", "36", "30", "40", "23", "in"]);
     expect(head).toHaveLength(first.length);
   });
 

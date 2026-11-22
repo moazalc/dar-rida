@@ -8,7 +8,7 @@ import { describeConfig } from "@/lib/configurator/describe";
 import type { Config } from "@/lib/configurator/options";
 import type { Locale } from "@/lib/i18n/config";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
-import type { Measurements, StoredMeasurements } from "@/lib/measurements";
+import { parseMeasurements, type Measurements, type StoredMeasurements } from "@/lib/measurements";
 import { mediaPath } from "@/lib/media";
 import { getCountry } from "@/lib/country";
 import { marketFor, type Country, type Currency, type Market } from "@/lib/markets";
@@ -187,6 +187,8 @@ export type BagLine = {
   unitPrice: number | null;
   /** The design is on sale, just not priced in this market yet. */
   unavailableHere: boolean;
+  /** Saved before the measurements changed (waist replaced height): measure again before checkout. */
+  needsMeasurements: boolean;
   designId: number | null;
 };
 
@@ -204,7 +206,7 @@ export type Bag = {
   shipping: ShippingQuote | null;
   /** Subtotal plus shipping, minor units. */
   total: number;
-  /** Every line can be bought and the country is known. */
+  /** Every line can be bought, has today's measurements, and the country is known. */
   ready: boolean;
 };
 
@@ -256,6 +258,7 @@ export async function priceCart(cart: Cart, locale: Locale, dict: Dictionary, di
       quantity: l.quantity,
       unitPrice: price,
       unavailableHere: price === null && onSale,
+      needsMeasurements: parseMeasurements(l.measurements) === null,
     };
     if (l.kind === "custom") {
       const choices = describeConfig(l.config, dict);
@@ -305,7 +308,7 @@ export async function priceCart(cart: Cart, locale: Locale, dict: Dictionary, di
     subtotal,
     shipping,
     total: subtotal + (shipping?.fee ?? 0),
-    ready: lines.length > 0 && shipping !== null && lines.every((l) => l.unitPrice !== null),
+    ready: lines.length > 0 && shipping !== null && lines.every((l) => l.unitPrice !== null && !l.needsMeasurements),
   };
 }
 

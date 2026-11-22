@@ -44,7 +44,7 @@ function measurementsTable(line: NonNullable<Order["lines"]>[number], dict: Dict
     .join("");
 }
 
-const ownerLabels = { height: "Height", length: "Length", shoulder: "Shoulder width", bust: "Bust", sleeve: "Sleeve length", hips: "Hips" };
+const ownerLabels = { length: "Length", shoulder: "Shoulder width", bust: "Bust", waist: "Waist", hips: "Hips", sleeve: "Sleeve length" };
 
 /** For the workshop: the value as entered, with the other unit alongside for reference only. */
 function ownerMeasurements(set: StoredMeasurements) {

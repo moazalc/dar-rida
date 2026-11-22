@@ -7,20 +7,20 @@ import {
   NOTES_MAX,
   otherUnit,
   parseMeasurements,
-  suggestedLength,
+  measurementRows,
   unitOf,
 } from "@/lib/measurements";
 
-const inches = { unit: "in", height: "65", length: "56", shoulder: "15.5", bust: "36", sleeve: "23", hips: "40" };
-const cms = { unit: "cm", height: "165", length: "142", shoulder: "39", bust: "91", sleeve: "58", hips: "102" };
+const inches = { unit: "in", length: "56", shoulder: "15.5", bust: "36", waist: "30", hips: "40", sleeve: "23" };
+const cms = { unit: "cm", length: "142", shoulder: "39", bust: "91", waist: "76", hips: "102", sleeve: "58" };
 
 describe("parseMeasurements", () => {
   it("accepts a full set in inches and keeps the unit", () => {
-    expect(parseMeasurements(inches)).toEqual({ unit: "in", height: 65, length: 56, shoulder: 15.5, bust: 36, sleeve: 23, hips: 40 });
+    expect(parseMeasurements(inches)).toEqual({ unit: "in", length: 56, shoulder: 15.5, bust: 36, waist: 30, hips: 40, sleeve: 23 });
   });
 
   it("accepts a full set in centimetres, stored exactly as entered", () => {
-    expect(parseMeasurements(cms)).toEqual({ unit: "cm", height: 165, length: 142, shoulder: 39, bust: 91, sleeve: 58, hips: 102 });
+    expect(parseMeasurements(cms)).toEqual({ unit: "cm", length: 142, shoulder: 39, bust: 91, waist: 76, hips: 102, sleeve: 58 });
   });
 
   it("checks each value against its own unit's list", () => {
@@ -37,6 +37,8 @@ describe("parseMeasurements", () => {
 
   it("rejects a missing measurement or a value outside the list", () => {
     expect(parseMeasurements({ ...inches, hips: undefined })).toBeNull();
+    expect(parseMeasurements({ ...inches, waist: undefined })).toBeNull();
+    expect(parseMeasurements({ ...inches, waist: "23" })).toBeNull();
     expect(parseMeasurements({ ...inches, shoulder: "15.25" })).toBeNull();
     expect(parseMeasurements({ ...inches, bust: "" })).toBeNull();
     expect(parseMeasurements({ ...inches, bust: "36; drop table" })).toBeNull();
@@ -56,8 +58,8 @@ describe("unitOf", () => {
     }
   });
 
-  it("reads orders from before units existed as inches with height in centimetres", () => {
-    expect(unitOf("height", "legacy")).toBe("cm");
+  it("reads orders from before units existed as inches", () => {
+    expect(unitOf("length", "legacy")).toBe("in");
     expect(unitOf("bust", "legacy")).toBe("in");
   });
 });
@@ -69,10 +71,6 @@ describe("formatMeasurement", () => {
     expect(formatMeasurement("bust", 91, "cm", "en")).toBe("91 cm");
   });
 
-  it("writes a height in inches as feet and inches", () => {
-    expect(formatMeasurement("height", 65, "in", "en")).toBe("5′5″");
-    expect(formatMeasurement("height", 60, "in", "en")).toBe("5′0″");
-  });
 });
 
 describe("otherUnit", () => {
@@ -81,17 +79,13 @@ describe("otherUnit", () => {
     expect(otherUnit("bust", 91, "cm", "en")).toBe("≈ 35.8 in");
   });
 
-  it("gives heights as whole centimetres or feet and inches", () => {
-    expect(otherUnit("height", 65, "in", "en")).toBe("≈ 165 cm");
-    expect(otherUnit("height", 165, "cm", "en")).toBe("≈ 5′5″");
-  });
 });
 
 describe("convertToGrid", () => {
   it("moves a value to the nearest allowed value in the other unit", () => {
     expect(convertToGrid("bust", 36, "in", "cm")).toBe(91);
     expect(convertToGrid("shoulder", 39, "cm", "in")).toBe(15.5);
-    expect(convertToGrid("height", 165, "cm", "in")).toBe(65);
+    expect(convertToGrid("waist", 76, "cm", "in")).toBe(30);
   });
 
   it("stays inside the allowed range", () => {
@@ -106,11 +100,17 @@ describe("convertToGrid", () => {
   });
 });
 
-describe("suggestedLength", () => {
-  it("suggests a length range from height, in the same unit", () => {
-    expect(suggestedLength(162, "cm")).toEqual([142, 145]);
-    expect(suggestedLength(64, "in")).toEqual([56, 57]);
-    expect(suggestedLength(180, "cm")).toEqual([157, 157]);
+describe("measurement list", () => {
+  it("takes waist instead of height, top to bottom with sleeve last", () => {
+    expect([...measurementKeys]).toEqual(["length", "shoulder", "bust", "waist", "hips", "sleeve"]);
+  });
+});
+
+describe("measurementRows", () => {
+  it("skips values an old order doesn't have (no waist before it replaced height)", () => {
+    const rows = measurementRows({ unit: "legacy", length: 56, shoulder: 15, bust: 36, hips: 40, sleeve: 23 });
+    expect(rows.map((r) => r.key)).toEqual(["length", "shoulder", "bust", "hips", "sleeve"]);
+    expect(rows.every((r) => r.unit === "in")).toBe(true);
   });
 });
 
