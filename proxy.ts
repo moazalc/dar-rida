@@ -54,8 +54,9 @@ export function proxy(request: NextRequest) {
     return NextResponse.rewrite(url, { status: 404 });
   }
   // COMING_SOON=1 (deploy/.env): every shop page shows the coming-soon picture.
-  // The admin, the API and /media keep working, so products can still be added.
-  if (process.env.COMING_SOON === "1" && !under(admin) && pathname !== "/coming-soon") {
+  // The admin, the API, /media and the admin's print pages (/print, app/(print)) keep working,
+  // so products can still be added and orders printed.
+  if (process.env.COMING_SOON === "1" && !under(admin) && !under("/print") && pathname !== "/coming-soon") {
     const url = request.nextUrl.clone();
     url.pathname = "/coming-soon";
     return NextResponse.rewrite(url, { headers: { "Cache-Control": "no-store" } });

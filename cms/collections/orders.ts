@@ -2,6 +2,7 @@ import type { CollectionConfig } from "payload";
 import { isAdmin, nobody } from "../access";
 import { resendEmailsEndpoint } from "../endpoints/resend-emails";
 import { advanceOrderEndpoint } from "../endpoints/advance-order";
+import { exportOrdersEndpoint } from "../endpoints/export-orders";
 import { formatOrderMoney, measurementsField } from "../fields";
 import { carrierOptions } from "@/lib/orders/fulfilment";
 
@@ -23,6 +24,10 @@ export function orderNumber(id: number): string {
 
 const readOnly = { readOnly: true } as const;
 
+/** A minor-units amount shown as money in the order's currency (cms/components/money-field). */
+const money = (currencyPath = "currency") =>
+  ({ readOnly: true, components: { Field: { path: "/cms/components/money-field#MoneyField", clientProps: { currencyPath } } } }) as const;
+
 /**
  * Orders. Each is a snapshot taken at checkout: names, choices, measurements
  * and prices exactly as bought, so later edits to a design never change an
@@ -38,9 +43,11 @@ export const Orders: CollectionConfig = {
     listSearchableFields: ["number", "customerName", "customerEmail"],
     description: "Paid orders appear here once Stripe confirms the payment.",
     components: { beforeListTable: ["/cms/admin/order-tabs#OrderTabs"] },
+    // Checkouts that were never paid are abandoned bags, not orders: kept out of the list (and the export).
+    baseFilter: () => ({ status: { not_equals: "pending_payment" } }),
   },
   defaultSort: "-createdAt",
-  endpoints: [resendEmailsEndpoint, advanceOrderEndpoint],
+  endpoints: [exportOrdersEndpoint, resendEmailsEndpoint, advanceOrderEndpoint],
   access: { read: isAdmin, create: nobody, update: isAdmin, delete: isAdmin },
   hooks: {
     afterChange: [
@@ -81,6 +88,23 @@ export const Orders: CollectionConfig = {
       name: "progress",
       type: "ui",
       admin: { components: { Field: "/cms/components/order-progress#OrderProgress" } },
+    },
+    {
+      name: "teamNotes",
+      label: { en: "Team notes", ar: "ملاحظات الفريق" },
+      type: "textarea",
+      access: { read: ({ req }) => Boolean(req.user), update: ({ req }) => Boolean(req.user) },
+      admin: {
+        description: {
+          en: "Only the team sees these. They print on the tailor sheet as Workshop notes.",
+          ar: "يراها الفريق فقط، وتُطبع في ورقة الخيّاط تحت «ملاحظات الورشة».",
+        },
+      },
+    },
+    {
+      name: "tailorSheet",
+      type: "ui",
+      admin: { components: { Field: "/cms/components/tailor-sheet-link#TailorSheetLink" } },
     },
     {
       type: "collapsible",
@@ -168,7 +192,7 @@ export const Orders: CollectionConfig = {
             { name: "name", type: "text", required: true },
             { name: "nameAr", label: "Name (Arabic)", type: "text" },
             { name: "quantity", type: "number", required: true },
-            { name: "unitPrice", label: "Unit price (minor units)", type: "number", required: true },
+            { name: "unitPrice", label: "Unit price", type: "number", required: true, admin: money() },
           ],
         },
         { name: "design", type: "relationship", relationTo: "designs" },
@@ -217,11 +241,11 @@ export const Orders: CollectionConfig = {
           label: "Subtotal",
           type: "number",
           required: true,
-          admin: { ...readOnly, description: "Minor units of the order's currency (cents or fils): 150000 is 1,500.00." },
+          admin: money(),
         },
-        { name: "shipping", label: "Shipping", type: "number", defaultValue: 0, admin: readOnly },
+        { name: "shipping", label: "Shipping", type: "number", defaultValue: 0, admin: money() },
         { name: "shippingZone", label: "Shipping zone", type: "text", admin: readOnly },
-        { name: "total", label: "Total", type: "number", required: true, admin: readOnly },
+        { name: "total", label: "Total", type: "number", required: true, admin: money() },
       ],
     },
     {
@@ -229,9 +253,9 @@ export const Orders: CollectionConfig = {
       fields: [
         {
           name: "presentmentAmount",
-          label: "Paid in customer's currency (minor units)",
+          label: "Paid in customer's currency",
           type: "number",
-          admin: readOnly,
+          admin: money("presentmentCurrency"),
         },
         { name: "presentmentCurrency", label: "Customer's currency", type: "text", admin: readOnly },
       ],

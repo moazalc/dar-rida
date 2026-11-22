@@ -3,6 +3,7 @@ import * as migration_20261119_101833_measurement_units_and_details from './2026
 import * as migration_20261119_110608_market_prices_and_shipping from './20261119_110608_market_prices_and_shipping';
 import * as migration_20261119_124000_customer_accounts from './20261119_124000_customer_accounts';
 import * as migration_20261119_140437_admin_fulfilment from './20261119_140437_admin_fulfilment';
+import * as migration_20261122_071203_team_notes from './20261122_071203_team_notes';
 
 export const migrations = [
   {
@@ -28,6 +29,11 @@ export const migrations = [
   {
     up: migration_20261119_140437_admin_fulfilment.up,
     down: migration_20261119_140437_admin_fulfilment.down,
-    name: '20261119_140437_admin_fulfilment'
+    name: '20261119_140437_admin_fulfilment',
+  },
+  {
+    up: migration_20261122_071203_team_notes.up,
+    down: migration_20261122_071203_team_notes.down,
+    name: '20261122_071203_team_notes'
   },
 ];

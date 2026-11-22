@@ -4,8 +4,14 @@ import { useSearchParams } from "next/navigation";
 
 type Tab = { status: string | null; label: string; href: string; count: number | null };
 
-export function OrderTabLinks({ tabs, label }: { tabs: Tab[]; label: string }) {
-  const active = useSearchParams()?.get("where[status][equals]") ?? null;
+/**
+ * The step tabs, and an Export link that downloads exactly what the list shows:
+ * the list's own query (tab, filters, search, sort) is passed on to the export.
+ */
+export function OrderTabLinks({ tabs, label, exportHref, exportLabel }: { tabs: Tab[]; label: string; exportHref: string; exportLabel: string }) {
+  const params = useSearchParams();
+  const active = params?.get("where[status][equals]") ?? null;
+  const query = params?.toString();
   return (
     <nav className="dr-tabs" aria-label={label}>
       {tabs.map((tab) => {
@@ -17,6 +23,9 @@ export function OrderTabLinks({ tabs, label }: { tabs: Tab[]; label: string }) {
           </a>
         );
       })}
+      <a className="dr-tabs__export" href={query ? `${exportHref}?${query}` : exportHref} download>
+        {exportLabel}
+      </a>
     </nav>
   );
 }

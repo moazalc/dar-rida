@@ -312,6 +312,19 @@ h3,
   color: var(--theme-text);
   font-weight: 600;
 }
+.dr-tabs__export {
+  margin-inline-start: auto;
+  align-self: center;
+  padding: 6px 14px;
+  border: 1px solid var(--theme-elevation-250);
+  border-radius: var(--style-radius-s, 3px);
+  color: var(--theme-text);
+  font-size: 13px;
+  text-decoration: none;
+}
+.dr-tabs__export:hover {
+  border-color: var(--theme-elevation-500);
+}
 .dr-tabs__count {
   padding: 0 7px;
   border-radius: 999px;

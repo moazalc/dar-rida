@@ -144,6 +144,10 @@ export interface Order {
   status: 'pending_payment' | 'paid' | 'in_production' | 'shipped' | 'completed' | 'cancelled';
   formattedTotal?: string | null;
   /**
+   * Only the team sees these. They print on the tailor sheet as Workshop notes.
+   */
+  teamNotes?: string | null;
+  /**
    * Set from the slowest piece when production starts. Change it for this order if needed.
    */
   readyBy?: string | null;
@@ -213,9 +217,6 @@ export interface Order {
    * Checkout only accepted an address in this country.
    */
   shippingCountry?: string | null;
-  /**
-   * Minor units of the order's currency (cents or fils): 150000 is 1,500.00.
-   */
   subtotal: number;
   shipping?: number | null;
   shippingZone?: string | null;
@@ -793,6 +794,7 @@ export interface OrdersSelect<T extends boolean = true> {
   number?: T;
   status?: T;
   formattedTotal?: T;
+  teamNotes?: T;
   readyBy?: T;
   productionStartedAt?: T;
   carrier?: T;

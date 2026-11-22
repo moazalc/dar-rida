@@ -22,6 +22,8 @@ export async function OrderTabs({ i18n, payload, req }: Partial<ServerProps> & {
   return (
     <OrderTabLinks
       label={t("Orders by step", "الطلبات حسب المرحلة")[lang]}
+      exportHref={`${payload.config.routes.api}/orders/export`}
+      exportLabel={t("Export CSV", "تصدير CSV")[lang]}
       tabs={[
         ...TABS.map((tab, i) => ({
           status: tab.status as string | null,
