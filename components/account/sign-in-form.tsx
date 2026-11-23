@@ -68,7 +68,6 @@ export function SignInForm({ next, google, initialError }: { next: string; googl
       return setError(errorFor(error));
     }
     // A full page load: /account/welcome is a route handler that sets cookies and redirects.
-    // eslint-disable-next-line @next/next/no-location-assign-relative-destination
     window.location.assign(welcome);
   }
 
