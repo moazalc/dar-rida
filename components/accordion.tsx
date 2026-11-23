@@ -34,7 +34,7 @@ export function AccordionItem({
           aria-controls={`${id}-panel`}
           onClick={onToggle}
           className={cn(
-            "flex w-full items-center justify-between gap-4 py-4 text-start text-xs tracking-[0.18em] uppercase",
+            "flex w-full items-center justify-between gap-4 min-h-11 py-4 text-start text-caption tracking-[0.18em] uppercase",
             buttonClassName,
           )}
         >
