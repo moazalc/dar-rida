@@ -7,7 +7,8 @@ import { I18nProvider } from "@/components/providers/i18n-provider";
 import { UnitProvider } from "@/components/providers/unit-provider";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { getLocale } from "@/lib/i18n/locale";
+import { getLocale, getPathname } from "@/lib/i18n/locale";
+import { alternatesFor } from "@/lib/i18n/seo";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getDirection } from "@/lib/i18n/config";
 import { cartCount as readCartCount } from "@/lib/cart";
@@ -20,9 +21,12 @@ import { siteUrl } from "@/lib/stripe";
 // the brand name), so this default only shows on the homepage and on pages
 // without one. metadataBase makes Open Graph image paths absolute.
 export async function generateMetadata(): Promise<Metadata> {
-  const dict = await getDictionary(await getLocale());
+  const locale = await getLocale();
+  const dict = await getDictionary(locale);
   return {
     metadataBase: new URL(siteUrl()),
+    // This page in each language (hreflang) and its own address in this one.
+    alternates: alternatesFor(await getPathname(), locale, siteUrl()),
     title: dict.common.brandName,
     description: dict.common.siteDescription,
     openGraph: { siteName: dict.common.brandName, title: dict.common.brandName, description: dict.common.siteDescription },
