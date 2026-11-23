@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/locale-link";
 import { usePathname } from "next/navigation";
 import { useTransition } from "react";
 import { signOut } from "@/app/(frontend)/account/actions";

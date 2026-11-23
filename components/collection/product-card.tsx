@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/locale-link";
 import { DesignTile } from "@/components/collection/design-tile";
 import type { ShopDesign } from "@/lib/designs";
 import type { Dictionary } from "@/lib/i18n/dictionaries";

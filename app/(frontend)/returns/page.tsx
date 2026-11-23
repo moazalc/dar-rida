@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/locale-link";
 import { InfoSections } from "@/components/info-sections";
 import { PageIntro, pageFrame } from "@/components/page-intro";
 import { statusAction } from "@/components/status-page";

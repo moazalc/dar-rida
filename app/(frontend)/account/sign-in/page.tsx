@@ -5,6 +5,7 @@ import { safeNext } from "@/lib/account";
 import { googleEnabled } from "@/lib/auth";
 import { getSessionUser } from "@/lib/customers";
 import { getDictionary } from "@/lib/i18n/dictionaries";
+import { localePath } from "@/lib/i18n/config";
 import { getLocale } from "@/lib/i18n/locale";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -15,7 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function SignInPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const params = await searchParams;
   const next = safeNext(params.next);
-  if (await getSessionUser()) redirect(next);
+  if (await getSessionUser()) redirect(localePath(await getLocale(), next));
   const t = (await getDictionary(await getLocale())).account.signIn;
 
   return (

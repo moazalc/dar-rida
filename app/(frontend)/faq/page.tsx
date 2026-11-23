@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/locale-link";
 import { Plus } from "lucide-react";
 import { PageIntro, pageFrame } from "@/components/page-intro";
 import { statusAction } from "@/components/status-page";

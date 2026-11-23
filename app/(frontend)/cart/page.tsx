@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/locale-link";
 import { cookies } from "next/headers";
 import { CheckoutButton } from "@/components/cart/checkout-button";
 import { ShipTo } from "@/components/cart/ship-to";

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/locale-link";
 import { StatusBadge } from "@/components/account/status-badge";
 import { statusAction } from "@/components/status-page";
 import { customerStatus } from "@/lib/account";

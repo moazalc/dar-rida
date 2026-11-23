@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/locale-link";
 import { PageIntro } from "@/components/page-intro";
 import { GuideUnitSwitch, MeasureGuide } from "@/components/size-guide/measure-guide";
 import { statusAction } from "@/components/status-page";

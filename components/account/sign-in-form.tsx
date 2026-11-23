@@ -3,6 +3,7 @@
 import { useEffect, useId, useState } from "react";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { authClient } from "@/lib/auth/client";
+import { localePath } from "@/lib/i18n/config";
 
 const RESEND_SECONDS = 30;
 const input = "h-12 w-full border border-border bg-card px-3 text-base outline-none focus:border-foreground";
@@ -25,7 +26,7 @@ function errorFor(error: { code?: string; status?: number } | null | undefined):
  * /account/welcome, which joins her bag to her account and sends her on.
  */
 export function SignInForm({ next, google, initialError }: { next: string; google: boolean; initialError?: ErrorKey }) {
-  const { dict } = useI18n();
+  const { dict, locale } = useI18n();
   const t = dict.account.signIn;
   const ids = { email: useId(), code: useId() };
   const [step, setStep] = useState<"email" | "code">("email");
@@ -34,7 +35,7 @@ export function SignInForm({ next, google, initialError }: { next: string; googl
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<ErrorKey | null>(initialError ?? null);
   const [wait, setWait] = useState(0);
-  const welcome = `/account/welcome?next=${encodeURIComponent(next)}`;
+  const welcome = localePath(locale, `/account/welcome?next=${encodeURIComponent(next)}`);
 
   useEffect(() => {
     if (wait <= 0) return;

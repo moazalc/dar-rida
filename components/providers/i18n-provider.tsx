@@ -39,3 +39,8 @@ export function useI18n(): I18nContextValue {
 export function useDict(): Dictionary {
   return useI18n().dict;
 }
+
+/** The locale when inside an <I18nProvider>, else null (pages outside the shop layout). */
+export function useOptionalLocale(): Locale | null {
+  return useContext(I18nContext)?.locale ?? null;
+}

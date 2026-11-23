@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/locale-link";
 import { StatusPage, statusAction } from "@/components/status-page";
 import { getSessionUser } from "@/lib/customers";
 import { getDictionary } from "@/lib/i18n/dictionaries";

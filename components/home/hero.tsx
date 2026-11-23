@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/locale-link";
 import { ComingSoon } from "@/components/coming-soon";
 import { HeroVideo } from "@/components/home/hero-video";
 import type { Dictionary } from "@/lib/i18n/dictionaries";

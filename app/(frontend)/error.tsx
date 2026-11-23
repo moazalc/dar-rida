@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import Link from "next/link";
+import Link from "@/components/locale-link";
 import { useDict } from "@/components/providers/i18n-provider";
 import { StatusPage, statusAction } from "@/components/status-page";
 

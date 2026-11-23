@@ -8,6 +8,8 @@ import { ADDRESS_COOKIE, cleanProfileName, cleanText, MAX_PROFILES, parseAddress
 import { getAuth } from "@/lib/auth";
 import { forgetBag } from "@/lib/cart";
 import { getCustomer } from "@/lib/customers";
+import { localePath } from "@/lib/i18n/config";
+import { getLocale } from "@/lib/i18n/locale";
 import { COUNTRY_COOKIE } from "@/lib/markets";
 import { parseMeasurements } from "@/lib/measurements";
 import { payloadClient } from "@/lib/payload";
@@ -55,7 +57,7 @@ export async function signOut(everywhere = false) {
   await forgetBag();
   (await cookies()).delete(ADDRESS_COOKIE);
   revalidatePath("/", "layout");
-  redirect("/");
+  redirect(localePath(await getLocale(), "/"));
 }
 
 // --- Measurement profiles -----------------------------------------------------

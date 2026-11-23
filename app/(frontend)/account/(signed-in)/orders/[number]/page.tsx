@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/locale-link";
 import { notFound } from "next/navigation";
 import { SaveProfileFromOrder } from "@/components/account/save-profile-from-order";
 import { StatusBadge } from "@/components/account/status-badge";

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/locale-link";
 import { Search } from "lucide-react";
 import { ProductCard } from "@/components/collection/product-card";
 import { pageFrame } from "@/components/page-intro";

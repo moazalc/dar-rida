@@ -12,6 +12,7 @@ import { handlePaidSession } from "@/lib/orders/paid";
 import { snapshotLine, type OrderLine } from "@/lib/orders/snapshot";
 import { payloadClient } from "@/lib/payload";
 import { siteUrl, stripeClient } from "@/lib/stripe";
+import { checkoutReturnUrls } from "@/lib/checkout-urls";
 
 export type CheckoutResult = { status: "redirect"; url: string } | { status: "not-ready" } | { status: "error" };
 
@@ -169,10 +170,10 @@ async function createSession(
       // Dollar prices are shown in the customer's own currency; dirham prices are already local.
       adaptive_pricing: { enabled: bag.currency === "usd" },
       // Stripe Checkout has no Arabic; "auto" follows the browser, falling back to English.
-      locale: locale === "ar" ? "auto" : "en",
+      // It does speak the other six languages.
+      locale: locale === "ar" ? "auto" : locale,
       expires_at: Math.floor(Date.now() / 1000) + 60 * 60 * 2,
-      success_url: `${siteUrl()}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${siteUrl()}/cart`,
+      ...checkoutReturnUrls(siteUrl(), locale),
     },
     { idempotencyKey: `order-${order.id}` },
   );

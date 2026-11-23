@@ -4,6 +4,8 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 import type { Customer } from "@/cms/payload-types";
+import { localePath } from "@/lib/i18n/config";
+import { getLocale } from "@/lib/i18n/locale";
 import { parseMeasurements, type Measurements } from "@/lib/measurements";
 import { payloadClient } from "@/lib/payload";
 
@@ -57,7 +59,7 @@ export const getCustomer = cache(async (): Promise<Customer | null> => {
 /** For account pages: the signed-in customer, or off to sign in and back to `path`. */
 export async function requireCustomer(path: string): Promise<Customer> {
   const customer = await getCustomer();
-  if (!customer) redirect(`/account/sign-in?next=${encodeURIComponent(path)}`);
+  if (!customer) redirect(localePath(await getLocale(), `/account/sign-in?next=${encodeURIComponent(path)}`));
   return customer;
 }
 

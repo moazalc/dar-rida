@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/locale-link";
 import { RidaCarousel } from "@/components/home/rida-carousel";
 import { section } from "@/components/home/section";
 import type { Dictionary } from "@/lib/i18n/dictionaries";

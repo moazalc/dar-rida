@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/locale-link";
 import { ComingSoon } from "@/components/coming-soon";
 import { CountrySwitcher } from "@/components/country-switcher";
 import { LanguageToggle } from "@/components/language-toggle";

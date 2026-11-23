@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/locale-link";
 import { useId, useState } from "react";
 import { MeasureFigures } from "@/components/measure/figure";
 import { Tape } from "@/components/measure/tape";

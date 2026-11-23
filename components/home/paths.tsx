@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/locale-link";
 import { Placeholder } from "@/components/placeholder";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 
