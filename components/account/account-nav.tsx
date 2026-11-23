@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "@/components/locale-link";
-import { usePathname } from "next/navigation";
+import { useShopPathname } from "@/components/use-shop-pathname";
 import { useTransition } from "react";
 import { signOut } from "@/app/(frontend)/account/actions";
 import { useI18n } from "@/components/providers/i18n-provider";
@@ -18,7 +18,7 @@ const links = [
 export function AccountNav({ email }: { email: string }) {
   const { dict } = useI18n();
   const t = dict.account.nav;
-  const path = usePathname();
+  const path = useShopPathname();
   const [pending, startTransition] = useTransition();
   const active = (href: string) => (href === "/account" ? path === "/account" || path.startsWith("/account/orders") : path.startsWith(href));
 

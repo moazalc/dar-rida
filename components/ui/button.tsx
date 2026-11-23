@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 // Heights are minimums with vertical padding, never fixed, so a long German or
 // Russian label wraps to a second line instead of being cut off.
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 rounded-lg text-center text-small font-medium tracking-[0.04em] transition-colors duration-fast ease-soft select-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "inline-flex max-w-full items-center justify-center gap-2 [overflow-wrap:anywhere] rounded-lg text-center text-small font-medium tracking-[0.04em] transition-colors duration-fast ease-soft select-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {

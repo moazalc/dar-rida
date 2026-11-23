@@ -3,7 +3,7 @@
 import { useSyncExternalStore } from "react";
 import Link from "@/components/locale-link";
 import { ComingSoon } from "@/components/coming-soon";
-import { usePathname } from "next/navigation";
+import { useShopPathname } from "@/components/use-shop-pathname";
 import { Menu, Search, ShoppingBag, UserRound, X } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { LanguageToggle } from "@/components/language-toggle";
@@ -37,7 +37,7 @@ function usePastHero() {
 
 export function SiteHeader({ cartCount, signedIn }: { cartCount: number; signedIn: boolean }) {
   const { dict, dir, locale } = useI18n();
-  const overlay = OVERLAY_PATHS.has(usePathname());
+  const overlay = OVERLAY_PATHS.has(useShopPathname());
   const pastHero = usePastHero();
   const solid = !overlay || pastHero;
 

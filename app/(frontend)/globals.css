@@ -119,12 +119,16 @@
     line-height: 1.76;
   }
   /* One focus ring everywhere: charcoal on light grounds, ivory on dark ones. */
+  /* The ivory halo fills the offset gap, so the ring shows on dark grounds too. */
   :focus-visible {
     outline: 2px solid var(--charcoal);
     outline-offset: 2px;
+    box-shadow: 0 0 0 2px var(--ivory);
   }
+  [data-ground="dark"]:focus-visible,
   [data-ground="dark"] :focus-visible {
     outline-color: var(--ivory);
+    box-shadow: 0 0 0 2px var(--espresso);
   }
 }
 

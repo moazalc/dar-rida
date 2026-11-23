@@ -17,6 +17,12 @@ export function routeLocale(request: NextRequest): NextResponse | null {
   const restPath = `/${rest.join("/")}`.replace(/\/+$/, "") || "/";
 
   if (isLocale(first)) {
+    // /en/admin, /ar/api/… and the like must not reach what the proxy hides or skips.
+    if (restPath === "/admin" || restPath.startsWith("/admin/") || (restPath !== "/" && isUnlocalizedPath(restPath))) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/__not-found";
+      return NextResponse.rewrite(url, { status: 404 });
+    }
     if (!isRoutableLocale(first)) {
       const url = request.nextUrl.clone();
       url.pathname = restPath === "/" ? `/${defaultLocale}` : `/${defaultLocale}${restPath}`;

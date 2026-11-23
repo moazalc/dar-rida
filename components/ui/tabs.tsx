@@ -15,7 +15,7 @@ export function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
   return (
     <TabsPrimitive.Tab
       className={cn(
-        "-mb-px min-h-11 border-b-2 border-transparent text-small tracking-[0.08em] text-muted-foreground uppercase transition-colors duration-fast data-[selected]:border-foreground data-[selected]:text-foreground",
+        "-mb-px min-h-11 border-b-2 border-transparent text-small tracking-[0.08em] text-muted-foreground uppercase transition-colors duration-fast data-active:border-foreground data-active:text-foreground",
         className,
       )}
       {...props}

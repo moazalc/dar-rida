@@ -103,3 +103,10 @@ export function switchLocalePath(pathname: string, to: Locale): string {
   const clean = rest.replace(/\/+$/, "") || "/";
   return clean === "/" ? `/${to}` : `/${to}${clean}`;
 }
+
+/** The path without its language prefix: "/ar/account" → "/account", "/en" → "/". */
+export function stripLocale(pathname: string): string {
+  const parts = pathname.split("/");
+  if (!isLocale(parts[1])) return pathname;
+  return `/${parts.slice(2).join("/")}`.replace(/\/+$/, "") || "/";
+}
