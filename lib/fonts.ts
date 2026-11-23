@@ -1,24 +1,25 @@
 import { Almarai, Cormorant_Garamond, El_Messiri, Jost } from "next/font/google";
 import type { CSSProperties } from "react";
 
-// Latin: Cormorant Garamond (display) + Jost (body).
+// Latin and Cyrillic: Cormorant Garamond (display) + Jost (body), with Latin
+// Extended for Turkish, German, French and Spanish letters.
 // Arabic: El Messiri (display) + Almarai (body).
-const cormorant = Cormorant_Garamond({
-  subsets: ["latin"],
+export const cormorant = Cormorant_Garamond({
+  subsets: ["latin", "latin-ext", "cyrillic"],
   weight: ["300", "400", "500", "600"],
 });
 
-const jost = Jost({
-  subsets: ["latin"],
+export const jost = Jost({
+  subsets: ["latin", "latin-ext", "cyrillic"],
   weight: ["400", "500"],
 });
 
-const messiri = El_Messiri({
+export const messiri = El_Messiri({
   subsets: ["arabic"],
   weight: ["400", "500", "600"],
 });
 
-const almarai = Almarai({
+export const almarai = Almarai({
   subsets: ["arabic"],
   weight: ["400", "700"],
 });
@@ -31,7 +32,7 @@ const almarai = Almarai({
  * would catch Arabic text first. `adjustFontFallback: false` would avoid that
  * too, but Turbopack ignores it.
  */
-function fontStack(...fonts: { style: { fontFamily: string } }[]): string {
+export function fontStack(...fonts: { style: { fontFamily: string } }[]): string {
   const families = fonts.map((f) => f.style.fontFamily.split(",").map((s) => s.trim()));
   return [...families.map((f) => f[0]), ...families.flatMap((f) => f.slice(1))].join(", ");
 }
