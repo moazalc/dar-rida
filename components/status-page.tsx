@@ -3,8 +3,8 @@ import { buttonVariants } from "@/components/ui/button";
 
 /** Shared CTA styling for the status pages' actions. */
 export const statusAction = {
-  primary: cn(buttonVariants(), "h-14 rounded-none px-10 text-base tracking-wide"),
-  secondary: cn(buttonVariants({ variant: "outline" }), "h-14 rounded-none px-10 text-base tracking-wide"),
+  primary: buttonVariants({ size: "lg" }),
+  secondary: buttonVariants({ variant: "secondary", size: "lg" }),
 };
 
 /**

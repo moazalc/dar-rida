@@ -4,6 +4,7 @@ import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Languages } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { setLocale } from "@/lib/i18n/actions";
 import { localeLabels, localeShortLabels } from "@/lib/i18n/config";
 import { useI18n } from "@/components/providers/i18n-provider";
@@ -34,12 +35,12 @@ export function LanguageToggle({ className }: { className?: string }) {
 
   return (
     <Button
-      variant="ghost"
-      size="sm"
+      variant="quiet"
+      size="md"
       disabled={pending}
       onClick={switchLocale}
       title={action}
-      className={className}
+      className={cn("no-underline", className)}
     >
       <Languages className="size-4" />
       {localeShortLabels[locale]}
