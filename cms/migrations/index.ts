@@ -5,6 +5,7 @@ import * as migration_20261119_124000_customer_accounts from './20261119_124000_
 import * as migration_20261119_140437_admin_fulfilment from './20261119_140437_admin_fulfilment';
 import * as migration_20261122_071203_team_notes from './20261122_071203_team_notes';
 import * as migration_20261122_074311_waist_replaces_height from './20261122_074311_waist_replaces_height';
+import * as migration_20261123_080316_seven_locales from './20261123_080316_seven_locales';
 
 export const migrations = [
   {
@@ -40,6 +41,11 @@ export const migrations = [
   {
     up: migration_20261122_074311_waist_replaces_height.up,
     down: migration_20261122_074311_waist_replaces_height.down,
-    name: '20261122_074311_waist_replaces_height'
+    name: '20261122_074311_waist_replaces_height',
+  },
+  {
+    up: migration_20261123_080316_seven_locales.up,
+    down: migration_20261123_080316_seven_locales.down,
+    name: '20261123_080316_seven_locales'
   },
 ];
