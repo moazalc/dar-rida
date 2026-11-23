@@ -35,3 +35,10 @@ describe("design tokens", () => {
     expect(css).toMatch(/prefers-reduced-motion:\s*reduce[\s\S]*transition-duration/);
   });
 });
+
+describe("palette data", () => {
+  it("matches globals.css", async () => {
+    const { palette } = await import("@/lib/tokens");
+    for (const swatch of palette) expect(c[swatch.name], swatch.name).toBe(swatch.hex);
+  });
+});
