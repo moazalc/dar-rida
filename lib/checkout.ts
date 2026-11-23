@@ -70,7 +70,8 @@ export async function startCheckout(locale: Locale): Promise<CheckoutResult> {
         shipping: bag.shipping!.fee,
         shippingZone: bag.shipping!.zone,
         total: bag.total,
-        locale,
+        // Order emails exist in English and Arabic only; the other languages get English until they are translated.
+        locale: locale === "ar" ? "ar" : "en",
         cartToken: cart.token,
         customer: customer?.id,
       },

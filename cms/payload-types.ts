@@ -94,7 +94,12 @@ export interface Config {
   db: {
     defaultIDType: number;
   };
-  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'ar') | ('en' | 'ar')[];
+  fallbackLocale:
+    | ('false' | 'none' | 'null')
+    | false
+    | null
+    | ('en' | 'ar' | 'fr' | 'ru' | 'tr' | 'de' | 'es')
+    | ('en' | 'ar' | 'fr' | 'ru' | 'tr' | 'de' | 'es')[];
   globals: {
     'store-settings': StoreSetting;
     shipping: Shipping;
@@ -103,7 +108,7 @@ export interface Config {
     'store-settings': StoreSettingsSelect<false> | StoreSettingsSelect<true>;
     shipping: ShippingSelect<false> | ShippingSelect<true>;
   };
-  locale: 'en' | 'ar';
+  locale: 'en' | 'ar' | 'fr' | 'ru' | 'tr' | 'de' | 'es';
   widgets: {
     overview: OverviewWidget;
     collections: CollectionsWidget;

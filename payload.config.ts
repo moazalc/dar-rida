@@ -17,6 +17,7 @@ import { StoreSettings } from "./cms/globals/store-settings";
 import { migrations } from "./cms/migrations";
 import { t } from "./cms/admin/i18n";
 import { adminRoute } from "./lib/admin-route";
+import { getDirection, localeLabels, locales } from "./lib/i18n/config";
 import { authTables } from "./lib/auth/schema";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -68,10 +69,8 @@ export default buildConfig({
   collections: [Orders, Customers, Designs, Media, Users, Carts],
   globals: [StoreSettings, Shipping],
   localization: {
-    locales: [
-      { label: "English", code: "en" },
-      { label: "العربية", code: "ar", rtl: true },
-    ],
+    // The shop's languages (lib/i18n/config.ts), so content and site never drift apart.
+    locales: locales.map((code) => ({ code, label: localeLabels[code], rtl: getDirection(code) === "rtl" })),
     defaultLocale: "en",
     fallback: true,
   },
