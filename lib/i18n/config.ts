@@ -68,3 +68,7 @@ export function getDirection(locale: Locale): Direction {
 export function isRtl(locale: Locale): boolean {
   return getDirection(locale) === "rtl";
 }
+
+/** Set by the proxy on rewritten requests: the language from the address, and the path without it. */
+export const LOCALE_HEADER = "x-dr-locale";
+export const PATH_HEADER = "x-dr-path";

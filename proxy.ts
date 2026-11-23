@@ -1,6 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { adminRoute } from "@/lib/admin-route";
+import { routeLocale } from "@/lib/i18n/routing";
 
 /**
  * Before launch, the whole site sits behind the browser's own login box when
@@ -61,7 +62,8 @@ export function proxy(request: NextRequest) {
     url.pathname = "/coming-soon";
     return NextResponse.rewrite(url, { headers: { "Cache-Control": "no-store" } });
   }
-  return NextResponse.next();
+  // Shop pages: the language comes from the address (/en/…, /ar/…); see lib/i18n/routing.ts.
+  return routeLocale(request) ?? NextResponse.next();
 }
 
 export const config = {
