@@ -232,6 +232,22 @@ const ar: Dictionary = {
     notHereNote: "لا يمكن طلب هذه القطعة إلى {country} بعد. احذفيها، أو اختاري بلدًا آخر.",
     unknown: "اختاري البلد الذي نشحن إليه لتظهر تكلفة الشحن وتتمّي الطلب.",
     lockNote: "لا تقبل صفحة الدفع إلا عنوانًا في {country}.",
+    question: "الشحن إلى {country}؟",
+    change: "تغيير",
+    dismiss: "نعم، متابعة",
+  },
+  price: {
+    included: "شامل كل شيء",
+    includedGlobal: "شامل الشحن والرسوم والضرائب",
+    unavailable: "غير متوفر في بلدكِ",
+    tabby: "أو 4 دفعات بقيمة {amount}",
+  },
+  trust: {
+    madeInDubai: "تُفصَّل على مقاسكِ في دبي",
+    everythingIncluded: "شامل كل شيء",
+    deliveredWorldwide: "توصيل لكل العالم، شامل الرسوم",
+    bookFitting: "احجزي موعد قياس",
+    whatsappHelp: "مساعدة عبر واتساب",
   },
   orderEmail: {
     subject: "طلبكِ من دار رِدا {number}",

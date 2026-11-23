@@ -232,6 +232,22 @@ const en = {
     notHereNote: "This piece can't be ordered to {country} yet. Remove it, or choose another country.",
     unknown: "Choose the country we ship to, to see shipping and check out.",
     lockNote: "Checkout only accepts {country} addresses.",
+    question: "Shipping to {country}?",
+    change: "Change",
+    dismiss: "Yes, continue",
+  },
+  price: {
+    included: "Everything included",
+    includedGlobal: "Shipping, duties and taxes included",
+    unavailable: "Not available in your country",
+    tabby: "or 4 payments of {amount}",
+  },
+  trust: {
+    madeInDubai: "Made to measure in Dubai",
+    everythingIncluded: "Everything included",
+    deliveredWorldwide: "Delivered worldwide, duties included",
+    bookFitting: "Book a fitting",
+    whatsappHelp: "Help on WhatsApp",
   },
   orderEmail: {
     subject: "Your Dar Rida order {number}",
