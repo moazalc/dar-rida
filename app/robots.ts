@@ -12,7 +12,7 @@ export default function robots(): MetadataRoute.Robots {
   const closed = Boolean(process.env.SITE_USERNAME && process.env.SITE_PASSWORD) || process.env.COMING_SOON === "1";
   if (closed) return { rules: { userAgent: "*", disallow: "/" } };
   return {
-    rules: { userAgent: "*", allow: "/", disallow: ["/account", "/cart", "/checkout", "/search", "/api/"] },
+    rules: { userAgent: "*", allow: "/", disallow: ["/account", "/cart", "/checkout", "/search", "/styleguide", "/api/"] },
     sitemap: `${siteUrl()}/sitemap.xml`,
   };
 }

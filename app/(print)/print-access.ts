@@ -3,6 +3,7 @@ import "server-only";
 import { cookies, headers } from "next/headers";
 import { getRequestLanguage } from "payload";
 import type { AdminLang } from "@/cms/admin/i18n";
+import { adminUser } from "@/lib/admin-session";
 import { payloadClient } from "@/lib/payload";
 
 /**
@@ -14,6 +15,5 @@ export async function printContext(): Promise<{ user: { id: number | string } | 
   const payload = await payloadClient();
   const [h, c] = await Promise.all([headers(), cookies()]);
   const lang = getRequestLanguage({ config: payload.config, cookies: c, headers: h }) === "ar" ? "ar" : "en";
-  const { user } = await payload.auth({ headers: h }).catch(() => ({ user: null }));
-  return { user: user && user.collection === "users" ? user : null, lang };
+  return { user: await adminUser(), lang };
 }
