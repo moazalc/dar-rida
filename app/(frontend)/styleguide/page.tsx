@@ -7,7 +7,12 @@ import { cn } from "@/lib/utils";
 import { fontPairings } from "./candidate-fonts";
 import { ComponentSections } from "./sections";
 
-export const metadata: Metadata = { title: "Style guide", robots: { index: false, follow: false } };
+// The title only goes to the admin: anyone else gets the "not found" page, and a
+// "Style guide" tab title would give away that something is here.
+export async function generateMetadata(): Promise<Metadata> {
+  const robots = { index: false, follow: false };
+  return (await adminUser()) ? { title: "Style guide", robots } : { robots };
+}
 
 // Only for people signed in to the admin: it's a working tool, not a shop page.
 export default async function StyleGuidePage() {
