@@ -26,6 +26,7 @@
   --color-espresso: var(--espresso);
   --color-gold: var(--gold);
   --color-gold-soft: var(--gold-soft);
+  --color-line-strong: var(--line-strong);
   --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
   --font-heading: var(--font-display), ui-serif, Georgia, serif;
   --radius-sm: calc(var(--radius) * 0.6);
@@ -34,8 +35,24 @@
   --radius-xl: calc(var(--radius) * 1.4);
 }
 
-/* Opacity only: SVG text rotated with a transform attribute must not be animated with CSS transforms. */
+/* Type scale (fluid, mobile → desktop) and motion. The fade is opacity only: SVG
+   text rotated with a transform attribute must not be animated with CSS transforms. */
 @theme {
+  --text-display: clamp(2.5rem, 1.75rem + 3.2vw, 4.5rem);
+  --text-display--line-height: 1.02;
+  --text-h1: clamp(2rem, 1.6rem + 1.6vw, 3rem);
+  --text-h1--line-height: 1.08;
+  --text-h2: clamp(1.625rem, 1.35rem + 1.1vw, 2.25rem);
+  --text-h2--line-height: 1.15;
+  --text-h3: clamp(1.25rem, 1.15rem + 0.4vw, 1.5rem);
+  --text-h3--line-height: 1.25;
+  --text-body: clamp(1rem, 0.97rem + 0.1vw, 1.0625rem);
+  --text-body--line-height: 1.6;
+  --text-small: 0.875rem;
+  --text-small--line-height: 1.5;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1.4;
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
   --animate-fade: fade 0.4s ease-out;
   @keyframes fade {
     from {
@@ -56,7 +73,8 @@
 
   --ivory: #f7f2e9;
   --charcoal: #24211f;
-  --taupe: #766f67;
+  /* Was #766f67: 4.44:1 on ivory, under the 4.5:1 small-text minimum. */
+  --taupe: #6b645c;
   --champagne: #c7b49a;
   /* Section grounds, so the page moves between rooms instead of one long ivory. */
   --linen: #e6dccb;
@@ -64,6 +82,8 @@
   /* Measuring lines on the size figure: gold on ivory, a softer gold on the black abaya. */
   --gold: #9a7f57;
   --gold-soft: #dcc69d;
+  /* Input borders and other edges that must reach 3:1 (champagne is 1.8:1: decoration only). */
+  --line-strong: #857a6e;
 
   --background: var(--ivory);
   --foreground: var(--charcoal);
@@ -81,8 +101,8 @@
   --accent-foreground: var(--charcoal);
   --destructive: #9b2c2c;
   --border: var(--champagne);
-  --input: var(--champagne);
-  --ring: var(--taupe);
+  --input: var(--line-strong);
+  --ring: var(--charcoal);
   --radius: 0.375rem;
 }
 
@@ -94,6 +114,36 @@
     @apply bg-background text-foreground font-sans;
     /* Cormorant defaults to old-style figures ("Rida 01" reads as "o1"). */
     font-variant-numeric: lining-nums;
+  }
+  body:lang(ar) {
+    line-height: 1.76;
+  }
+  /* One focus ring everywhere: charcoal on light grounds, ivory on dark ones. */
+  :focus-visible {
+    outline: 2px solid var(--charcoal);
+    outline-offset: 2px;
+  }
+  [data-ground="dark"] :focus-visible {
+    outline-color: var(--ivory);
+  }
+}
+
+@utility duration-fast {
+  transition-duration: 200ms;
+}
+@utility duration-slow {
+  transition-duration: 600ms;
+}
+
+/* Visitors who ask their device for less motion get none. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
